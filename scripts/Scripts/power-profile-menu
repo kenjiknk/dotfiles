@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Switch the active power profile (power-profiles-daemon) through a fuzzel menu.
+# The profile currently in use is marked with a dot.
+
+set -euo pipefail
+
+current=$(powerprofilesctl get)
+
+choice=$(
+    powerprofilesctl list |
+        sed -n 's/^[ *] *\([a-z-]\+\):$/\1/p' |
+        awk -v cur="$current" '{ printf "%s %s\n", ($1 == cur ? "●" : " "), $1 }' |
+        fuzzel --dmenu --prompt="profile: "
+) || exit 0
+
+profile=${choice##* }
+[ -z "$profile" ] && exit 0
+
+powerprofilesctl set "$profile"
+
+# Refresh the waybar indicator immediately instead of waiting for its interval.
+pkill -RTMIN+9 waybar 2>/dev/null || true
+
+# Optional feedback; libnotify is not required for the script to work.
+command -v notify-send >/dev/null && notify-send -a "power" "Power profile" "$profile"

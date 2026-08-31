@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Session power menu for Sway, driven by fuzzel.
+
+set -euo pipefail
+
+choice=$(printf '%s\n' Lock Suspend Logout Reboot Shutdown |
+    fuzzel --dmenu --prompt="power: ") || exit 0
+
+case "$choice" in
+    Lock)     swaylock -f ;;
+    Suspend)  systemctl suspend ;;
+    Logout)   swaymsg exit ;;
+    Reboot)   systemctl reboot ;;
+    Shutdown) systemctl poweroff ;;
+    "")       exit 0 ;;
+    *)        printf 'unknown choice: %s\n' "$choice" >&2; exit 1 ;;
+esac

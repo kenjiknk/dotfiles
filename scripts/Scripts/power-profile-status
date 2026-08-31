@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Waybar custom module: the power profile currently in use.
+# Emits JSON: text = short label, class = profile name for CSS.
+
+set -euo pipefail
+
+if ! command -v powerprofilesctl >/dev/null; then
+    printf '{"text":"pwr ?","tooltip":"power-profiles-daemon not installed","class":""}\n'
+    exit 0
+fi
+
+if ! profile=$(powerprofilesctl get 2>/dev/null); then
+    printf '{"text":"pwr ?","tooltip":"power-profiles-daemon not running","class":""}\n'
+    exit 0
+fi
+
+case "$profile" in
+    power-saver) label="eco"  ;;
+    balanced)    label="bal"  ;;
+    performance) label="perf" ;;
+    *)           label="$profile" ;;
+esac
+
+printf '{"text":"pwr %s","tooltip":"Power profile: %s","class":"%s"}\n' \
+    "$label" "$profile" "$profile"

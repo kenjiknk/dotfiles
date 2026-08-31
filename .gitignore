@@ -1,0 +1,33 @@
+# --- nunca versionar --------------------------------------------------------
+# segredos
+.credentials.json
+*.pem
+*.key
+id_*
+*cookie*
+
+# histórico de shell (costuma conter segredos digitados por engano)
+.zsh_history
+.bash_history
+.zcompdump*
+
+# estado e cache
+.cache/
+.local/state/
+*.log
+*.bak
+*.tmp
+*~
+.DS_Store
+
+# perfis de navegador (cookies, sessões, senhas salvas)
+mozilla/
+zen/
+
+# específico de máquina — gerado pelo nwg-displays em cada PC
+**/sway/outputs
+**/sway/workspaces
+
+# clones de terceiros, reinstalados pelo install.sh
+.oh-my-zsh/
+powerlevel10k/
