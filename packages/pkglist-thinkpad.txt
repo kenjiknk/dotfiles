@@ -1,9 +1,0 @@
-amd-ucode
-btrfs-assistant
-btrfs-progs
-cryptsetup
-linux-firmware-amdgpu
-linux-lts
-snap-pac
-snapper
-vulkan-radeon

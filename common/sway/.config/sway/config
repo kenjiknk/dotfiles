@@ -102,22 +102,6 @@ exec_always autotiling
 # You can also configure each device individually.
 # Read `man 5 sway-input` for more information about this section.
 
-input type:keyboard {
-    # Two layouts; index 0 is the default. Toggle with the waybar module,
-    # which runs: swaymsg input type:keyboard xkb_switch_layout next
-    xkb_layout "br,us"
-    xkb_variant "thinkpad,intl"
-}
-
-input type:touchpad {
-    tap enabled
-    natural_scroll enabled
-    dwt enabled                 # Disable touchpad while typing
-    scroll_method two_finger
-    middle_emulation enabled
-    click_method clickfinger
-}
-
 input * {
     repeat_delay 200
     repeat_rate 60
@@ -151,9 +135,6 @@ input * {
 
     # Session menu: lock, suspend, logout, reboot, shutdown
     bindsym $mod+Shift+e exec ~/Scripts/powermenu
-
-    # Power profile: power-saver / balanced / performance
-    bindsym $mod+Shift+b exec ~/Scripts/power-profile-menu
 #
 # Moving around:
 #
@@ -308,3 +289,7 @@ bindsym $mod+r mode "resize"
 #}
 
 include /etc/sway/config.d/*
+
+# Machine-specific settings: keyboard layout, touchpad, power-profile binding.
+# Deployed from hosts/<hostname>/sway/ — absent on machines that have none.
+include ~/.config/sway/local

@@ -1,127 +1,99 @@
 #!/usr/bin/env bash
 #
-# Instala esta configuração numa máquina Arch com Sway.
-# Seguro para reexecutar: nada é duplicado, nada é sobrescrito sem backup.
+# Deploys this configuration into $HOME as symlinks.
+#
+#   common/            configs that work on any machine
+#   hosts/<hostname>/  configs tied to one specific machine
+#
+# Both are stowed; the host layer is skipped when there is no directory for
+# this machine. This script installs no packages and needs no root — the
+# programs these configs belong to must already be present (see the README).
+#
+# Safe to re-run: nothing is duplicated, nothing is overwritten without a backup.
 #
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
-
-# packages/pkglist.txt is portable across machines.
-# packages/pkglist-thinkpad.txt is tied to THIS laptop: AMD microcode and
-# graphics, and the LUKS + btrfs subvolume layout that snapper depends on.
-# Installing it elsewhere gives you the wrong microcode and snapshot tooling
-# with nothing to snapshot, so it is opt-in.
-THIS_MACHINE=0
-for arg in "$@"; do
-    case "$arg" in
-        --this-machine) THIS_MACHINE=1 ;;
-        -h|--help)
-            echo "usage: $0 [--this-machine]"
-            echo "  --this-machine  also install packages/pkglist-thinkpad.txt"
-            echo "                  (AMD microcode/graphics, btrfs snapshot tooling,"
-            echo "                   linux-lts; only for a ThinkPad E14 Gen 6 on"
-            echo "                   LUKS + btrfs)"
-            exit 0 ;;
-        *) echo "unknown option: $arg" >&2; exit 2 ;;
-    esac
-done
-
-PACKAGES=(sway waybar kitty foot mako fuzzel swayidle swaylock xdg
-          nwg-displays yazi zathura gtk zsh bash claude scripts)
+# `hostname` vem do inetutils, que nem toda instalação tem; uname -n é coreutils
+HOST="$(hostnamectl --static 2>/dev/null || cat /etc/hostname 2>/dev/null || uname -n)"
 
 log()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m!!\033[0m %s\n' "$*" >&2; }
 
-command -v pacman >/dev/null || { warn "Isto só roda em Arch e derivados."; exit 1; }
+command -v stow >/dev/null || { warn "stow não encontrado. Instale-o e rode de novo."; exit 1; }
 
-# --- 1. pacotes dos repositórios oficiais -----------------------------------
-log "Instalando pacotes oficiais (pkglist.txt)"
-sudo pacman -S --needed --noconfirm stow < /dev/null
-sudo pacman -S --needed --noconfirm - < "$DOTFILES/packages/pkglist.txt"
-
-if (( THIS_MACHINE )); then
-    log "Instalando pacotes específicos desta máquina (pkglist-thinkpad.txt)"
-    sudo pacman -S --needed --noconfirm - < "$DOTFILES/packages/pkglist-thinkpad.txt"
-else
-    warn "Pulando pkglist-thinkpad.txt (microcode AMD, btrfs/snapper, linux-lts)."
-    warn "Use --this-machine se o destino for um ThinkPad E14 Gen 6 em LUKS + btrfs."
-fi
-
-# --- 2. yay + pacotes do AUR ------------------------------------------------
-if ! command -v yay >/dev/null; then
-    log "yay não encontrado, compilando yay-bin"
-    sudo pacman -S --needed --noconfirm git base-devel < /dev/null
-    tmp="$(mktemp -d)"
-    git clone --depth=1 https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin"
-    (cd "$tmp/yay-bin" && makepkg -si --noconfirm)
-    rm -rf "$tmp"
-fi
-
-aur=$(grep -vx 'yay-bin' "$DOTFILES/packages/aurlist.txt" | tr '\n' ' ')
-if [[ -n "${aur// }" ]]; then
-    log "Instalando pacotes do AUR: $aur"
-    # shellcheck disable=SC2086
-    yay -S --needed --noconfirm $aur
-fi
-
-# --- 3. oh-my-zsh e powerlevel10k -------------------------------------------
-# clonados à mão de propósito: o instalador oficial sobrescreve o ~/.zshrc
-if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
+# --- pré-requisitos do zsh --------------------------------------------------
+# Clonados à mão de propósito: o instalador oficial do oh-my-zsh sobrescreve o
+# ~/.zshrc, que é justamente o arquivo que este repositório entrega.
+[[ -d "$HOME/.oh-my-zsh" ]] || {
     log "Clonando oh-my-zsh"
     git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$HOME/.oh-my-zsh"
-fi
-
+}
 p10k="$HOME/.oh-my-zsh/custom/themes/powerlevel10k"
-if [[ ! -d "$p10k" ]]; then
+[[ -d "$p10k" ]] || {
     log "Clonando powerlevel10k"
     git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$p10k"
-fi
+}
 
-# plugins vêm do pacman; symlink em vez de clone para o pacman seguir atualizando
+# plugins vêm do gerenciador de pacotes; symlink em vez de clone, para que ele
+# siga cuidando das atualizações
 log "Ligando plugins do zsh ao oh-my-zsh"
 mkdir -p "$HOME/.oh-my-zsh/custom/plugins"
 for plug in zsh-autosuggestions zsh-syntax-highlighting; do
-    [[ -d "/usr/share/zsh/plugins/$plug" ]] &&
+    if [[ -d "/usr/share/zsh/plugins/$plug" ]]; then
         ln -sfn "/usr/share/zsh/plugins/$plug" "$HOME/.oh-my-zsh/custom/plugins/$plug"
+    else
+        warn "$plug não instalado; o .zshrc vai ignorá-lo silenciosamente"
+    fi
 done
 
-# --- 4. backup de qualquer arquivo que o stow fosse sobrescrever ------------
+# --- o que será instalado ---------------------------------------------------
+layers=("$DOTFILES/common")
+if [[ -d "$DOTFILES/hosts/$HOST" ]]; then
+    layers+=("$DOTFILES/hosts/$HOST")
+    log "Camada específica encontrada: hosts/$HOST"
+else
+    warn "Sem hosts/$HOST — instalando apenas common/."
+    warn "Configurações de hardware (teclado, touchpad, bateria) ficarão de fora."
+fi
+
+# --- backup de qualquer arquivo que o stow fosse sobrescrever ---------------
 log "Procurando conflitos"
 conflitos=0
-for pkg in "${PACKAGES[@]}"; do
-    [[ -d "$DOTFILES/$pkg" ]] || continue
-    while IFS= read -r -d '' src; do
-        rel="${src#"$DOTFILES/$pkg/"}"
-        dst="$HOME/$rel"
-        if [[ -e "$dst" && ! -L "$dst" ]]; then
-            mkdir -p "$(dirname "$BACKUP/$rel")"
-            mv "$dst" "$BACKUP/$rel"
-            conflitos=$((conflitos + 1))
-        fi
-    done < <(find "$DOTFILES/$pkg" -type f -print0)
+for layer in "${layers[@]}"; do
+    for pkg in "$layer"/*/; do
+        [[ -d "$pkg" ]] || continue
+        while IFS= read -r -d '' src; do
+            rel="${src#"$pkg"}"
+            dst="$HOME/$rel"
+            if [[ -e "$dst" && ! -L "$dst" ]]; then
+                mkdir -p "$(dirname "$BACKUP/$rel")"
+                mv "$dst" "$BACKUP/$rel"
+                conflitos=$((conflitos + 1))
+            fi
+        done < <(find "$pkg" -type f -print0)
+    done
 done
 (( conflitos > 0 )) && log "$conflitos arquivo(s) movidos para $BACKUP"
 
-# --- 5. symlinks ------------------------------------------------------------
-log "Criando symlinks com stow"
-cd "$DOTFILES"
-stow --restow --target="$HOME" "${PACKAGES[@]}"
+# --- symlinks ---------------------------------------------------------------
+for layer in "${layers[@]}"; do
+    mapfile -t pkgs < <(cd "$layer" && ls -d */ | tr -d /)
+    log "stow ${layer#"$DOTFILES"/}: ${pkgs[*]}"
+    stow --dir="$layer" --target="$HOME" --restow "${pkgs[@]}"
+done
 
-# --- 6. índice do pkgfile (command-not-found) -------------------------------
-if command -v pkgfile >/dev/null && [[ ! -f /var/cache/pkgfile/core.files ]]; then
-    log "Baixando índice do pkgfile"
-    sudo pkgfile --update
-    sudo systemctl enable --now pkgfile-update.timer
-fi
-
-# --- 7. shell padrão --------------------------------------------------------
+# --- shell padrão -----------------------------------------------------------
+# sem isso o ~/.zshrc entregue aqui nunca é carregado
 if [[ "$SHELL" != */zsh ]]; then
-    log "Mudando o shell de login para zsh (vai pedir sua senha)"
-    chsh -s /usr/bin/zsh || warn "chsh falhou; rode manualmente: chsh -s /usr/bin/zsh"
+    if command -v zsh >/dev/null; then
+        log "Mudando o shell de login para zsh (pede a SUA senha, não root)"
+        chsh -s "$(command -v zsh)" || warn "chsh falhou; rode manualmente"
+    else
+        warn "zsh não instalado; shell de login não alterado"
+    fi
 fi
 
 echo
-log "Pronto. Faça logout e login de novo para o zsh e o Sway assumirem."
-echo "   Monitores:  nwg-displays  (veja a nota sobre 'include' no README)"
+log "Pronto. Faça logout e login de novo."

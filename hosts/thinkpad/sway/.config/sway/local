@@ -1,0 +1,22 @@
+# ThinkPad E14 Gen 6 — hardware-specific sway settings.
+# Included from the end of ~/.config/sway/config.
+
+input type:keyboard {
+    # Two layouts; index 0 is the default. Toggle with the waybar module,
+    # which runs: swaymsg input type:keyboard xkb_switch_layout next
+    xkb_layout "br,us"
+    xkb_variant "thinkpad,intl"
+}
+
+input type:touchpad {
+    tap enabled
+    natural_scroll enabled
+    dwt enabled                 # Disable touchpad while typing
+    scroll_method two_finger
+    middle_emulation enabled
+    click_method clickfinger
+}
+
+# Power profile: power-saver / balanced / performance
+# Needs power-profiles-daemon and hosts/thinkpad/scripts.
+bindsym $mod+Shift+b exec ~/Scripts/power-profile-menu
