@@ -17,6 +17,9 @@ cd ~/dotfiles
 ./install.sh
 ```
 
+On the ThinkPad E14 Gen 6 this repo was built on — AMD, LUKS + btrfs — add
+`--this-machine` to also install the hardware- and storage-specific packages.
+
 Then log out and back in.
 
 The script is idempotent — safe to re-run. Any real file it would overwrite is
@@ -25,7 +28,8 @@ moved to `~/.dotfiles-backup-<timestamp>/` first, never deleted.
 What it does:
 
 1. Installs `packages/pkglist.txt` via pacman and `packages/aurlist.txt` via yay
-   (bootstrapping yay from source if missing)
+   (bootstrapping yay from source if missing). `packages/pkglist-thinkpad.txt`
+   is skipped unless `--this-machine` is given
 2. Clones oh-my-zsh and powerlevel10k, and symlinks the pacman-installed zsh
    plugins into `~/.oh-my-zsh/custom/plugins`
 3. Backs up conflicting files, then deploys every package with GNU Stow
@@ -58,6 +62,18 @@ scripts/       helper scripts, deployed to ~/Scripts
 packages/      pacman and AUR package lists
 ```
 
+### Package lists
+
+| File | Contents |
+|---|---|
+| `pkglist.txt` | Portable — safe on any Arch machine |
+| `pkglist-thinkpad.txt` | AMD microcode and graphics, LUKS/btrfs tooling, snapper, `linux-lts`. Opt-in via `--this-machine` |
+| `aurlist.txt` | AUR packages, installed with yay |
+
+The split matters: `amd-ucode` is the wrong microcode on an Intel machine,
+snapper without a btrfs subvolume layout has nothing to snapshot, and
+`linux-lts` costs ~275 MiB of ESP that a smaller `/boot` may not have.
+
 Deploy a single package with `stow <name>`, remove it with `stow -D <name>`.
 
 ## Per-machine notes
@@ -80,6 +96,14 @@ Nothing in these configs hardcodes an output name, a network interface or a
   the packaged entry, which is `Terminal=true`. Sway registers no terminal for
   xdg-open to resolve, so it calls `kitty -e nvim` explicitly. Change the
   terminal there if you switch away from kitty.
+- **Symlinks that programs may replace.** Stow deploys files as symlinks, but a
+  program that saves by writing a temp file and renaming it over the target
+  destroys the link — silently, since the repo copy stays untouched and
+  `git status` shows nothing. Known candidates here: `nwg-displays` (rewrites
+  its own config on close), `p10k configure` (rewrites `~/.p10k.zsh`), and
+  Claude Code (rewrites `~/.claude/settings.json` when settings change). After
+  using any of them, run `stow --restow <package>` to relink. `find ~ -maxdepth
+  4 -path "*/.config/*" -type f -newer README.md` helps spot them.
 - **`last-updated.sh`** reads `/var/log/pacman.log`, so it is Arch-specific.
 - **`pkglist.txt`** includes hardware packages for AMD (`amd-ucode`,
   `vulkan-radeon`, `linux-firmware-amdgpu`). Swap them for the Intel or NVIDIA

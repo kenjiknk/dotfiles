@@ -8,6 +8,26 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
+# packages/pkglist.txt is portable across machines.
+# packages/pkglist-thinkpad.txt is tied to THIS laptop: AMD microcode and
+# graphics, and the LUKS + btrfs subvolume layout that snapper depends on.
+# Installing it elsewhere gives you the wrong microcode and snapshot tooling
+# with nothing to snapshot, so it is opt-in.
+THIS_MACHINE=0
+for arg in "$@"; do
+    case "$arg" in
+        --this-machine) THIS_MACHINE=1 ;;
+        -h|--help)
+            echo "usage: $0 [--this-machine]"
+            echo "  --this-machine  also install packages/pkglist-thinkpad.txt"
+            echo "                  (AMD microcode/graphics, btrfs snapshot tooling,"
+            echo "                   linux-lts; only for a ThinkPad E14 Gen 6 on"
+            echo "                   LUKS + btrfs)"
+            exit 0 ;;
+        *) echo "unknown option: $arg" >&2; exit 2 ;;
+    esac
+done
+
 PACKAGES=(sway waybar kitty foot mako fuzzel swayidle swaylock xdg
           nwg-displays yazi zathura gtk zsh bash claude scripts)
 
@@ -20,6 +40,14 @@ command -v pacman >/dev/null || { warn "Isto só roda em Arch e derivados."; exi
 log "Instalando pacotes oficiais (pkglist.txt)"
 sudo pacman -S --needed --noconfirm stow < /dev/null
 sudo pacman -S --needed --noconfirm - < "$DOTFILES/packages/pkglist.txt"
+
+if (( THIS_MACHINE )); then
+    log "Instalando pacotes específicos desta máquina (pkglist-thinkpad.txt)"
+    sudo pacman -S --needed --noconfirm - < "$DOTFILES/packages/pkglist-thinkpad.txt"
+else
+    warn "Pulando pkglist-thinkpad.txt (microcode AMD, btrfs/snapper, linux-lts)."
+    warn "Use --this-machine se o destino for um ThinkPad E14 Gen 6 em LUKS + btrfs."
+fi
 
 # --- 2. yay + pacotes do AUR ------------------------------------------------
 if ! command -v yay >/dev/null; then

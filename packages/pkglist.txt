@@ -1,12 +1,9 @@
-amd-ucode
 autotiling
 base
 base-devel
 bat
 brightnessctl
 btop
-btrfs-progs
-cryptsetup
 duf
 eza
 firefox
@@ -14,6 +11,7 @@ flameshot
 foot
 fuzzel
 git
+github-cli
 grim
 gvfs
 inter-font
@@ -21,7 +19,6 @@ kitty
 libva-utils
 linux
 linux-firmware
-linux-firmware-amdgpu
 ly
 mako
 man-db
@@ -35,8 +32,10 @@ networkmanager
 ninja
 noto-fonts
 noto-fonts-emoji
+nvme-cli
 nwg-displays
 openssh
+pacman-contrib
 pamixer
 pavucontrol
 pipewire
@@ -48,6 +47,8 @@ power-profiles-daemon
 python-gobject
 scdoc
 slurp
+smartmontools
+stow
 sudo
 sway
 swaybg
@@ -59,7 +60,6 @@ ttf-dejavu
 ttf-jetbrains-mono-nerd
 udisks2
 vim
-vulkan-radeon
 waybar
 wireplumber
 wl-clipboard
