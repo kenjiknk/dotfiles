@@ -12,6 +12,7 @@ export ZSH="$HOME/.oh-my-zsh"
 export PATH="$HOME/.local/bin:$PATH"
 export EDITOR=nvim
 export VISUAL=nvim
+export BROWSER=zen-browser
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 

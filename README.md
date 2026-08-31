@@ -50,6 +50,7 @@ nwg-displays/  monitor layout GUI
 yazi/          file manager theme
 zathura/       PDF reader
 gtk/           dark mode for GTK 3 and 4
+xdg/           default applications (Zen browser, Neovim, zathura)
 zsh/           zsh + oh-my-zsh + powerlevel10k
 bash/          bash fallback, same aliases
 claude/        Claude Code settings and custom statusline
@@ -75,6 +76,10 @@ Nothing in these configs hardcodes an output name, a network interface or a
 - **Keyboard.** Layout is `br` with the `thinkpad` variant: on Brazilian
   ThinkPads the `/ ?` key sits where right Ctrl normally is. Change this in
   `sway/.config/sway/config` if your keyboard differs.
+- **Default editor.** `xdg/.local/share/applications/nvim.desktop` overrides
+  the packaged entry, which is `Terminal=true`. Sway registers no terminal for
+  xdg-open to resolve, so it calls `kitty -e nvim` explicitly. Change the
+  terminal there if you switch away from kitty.
 - **`last-updated.sh`** reads `/var/log/pacman.log`, so it is Arch-specific.
 - **`pkglist.txt`** includes hardware packages for AMD (`amd-ucode`,
   `vulkan-radeon`, `linux-firmware-amdgpu`). Swap them for the Intel or NVIDIA

@@ -8,7 +8,7 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
 
-PACKAGES=(sway waybar kitty foot mako fuzzel swayidle swaylock
+PACKAGES=(sway waybar kitty foot mako fuzzel swayidle swaylock xdg
           nwg-displays yazi zathura gtk zsh bash claude scripts)
 
 log()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }

@@ -8,6 +8,9 @@
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 export PATH="$HOME/.local/bin:$PATH"
+export EDITOR=nvim
+export VISUAL=nvim
+export BROWSER=zen-browser
 
 # --- bat / eza ---------------------------------------------------------------
 if command -v bat >/dev/null 2>&1; then
