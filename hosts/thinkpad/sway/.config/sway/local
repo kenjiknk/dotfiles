@@ -9,6 +9,11 @@ input type:keyboard {
 }
 
 input type:touchpad {
+    # Off at login, and off again after every config reload or hotplug, since
+    # sway re-applies this block each time. ~/Scripts/touchpad turns it back on;
+    # the palm of a hand resting on it while typing is why it starts this way.
+    events disabled
+
     tap enabled
     natural_scroll enabled
     dwt enabled                 # Disable touchpad while typing
@@ -17,6 +22,31 @@ input type:touchpad {
     click_method clickfinger
 }
 
+# Touchpad on/off/on again. Needs hosts/thinkpad/scripts.
+# XF86TouchpadToggle is bound too, in case some keyboard attached to this
+# machine emits it; $mod+Shift+t is the one meant for daily use.
+bindsym $mod+Shift+t exec ~/Scripts/touchpad
+bindsym --locked XF86TouchpadToggle exec ~/Scripts/touchpad
+
 # Power profile: power-saver / balanced / performance
 # Needs power-profiles-daemon and hosts/thinkpad/scripts.
 bindsym $mod+Shift+b exec ~/Scripts/power-profile-menu
+
+# Monitor layout for the USB dock: three external screens in a fixed
+# arrangement, laptop panel off while docked. Applied at login and re-applied on
+# every hotplug. Needs hosts/thinkpad/scripts.
+exec_always ~/Scripts/dock-monitors --watch
+
+# SwayFX effects. Kept here rather than in the common config because plain
+# sway rejects these commands and would refuse to load the file.
+#
+# Blur only shows behind translucent surfaces (e.g. kitty's background_opacity).
+blur enable
+blur_xray disable
+blur_passes 2
+blur_radius 5
+
+# Darken unfocused windows so the focused one stands out.
+default_dim_inactive 0.15
+dim_inactive_colors.unfocused #000000FF
+dim_inactive_colors.urgent #900000FF

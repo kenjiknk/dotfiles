@@ -1,6 +1,7 @@
-# Default config for sway
+# Portable sway configuration: appearance, keybindings, autostart.
 #
-# Copy this to ~/.config/sway/config and edit it to your liking.
+# Anything tied to one machine — keyboard layout, touchpad, outputs, SwayFX
+# effects — is in ~/.config/sway/local, included at the end of this file.
 #
 # Read `man 5 sway` for a complete reference.
 
@@ -29,13 +30,21 @@ exec_always gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 default_border pixel 2
 default_floating_border pixel 2
 
-# border  background  text  indicator  child_border
-client.focused #718096 #404552 #f7fafc #718096 #718096
+#               border  background  text     indicator child_border
+client.focused          #0080ff #404552 #f7fafc #0080ff #0080ff
+client.focused_inactive #3a3a3a #1e1e1e #a0a0a0 #3a3a3a #3a3a3a
+client.unfocused        #1a1a1a #121212 #505050 #1a1a1a #1a1a1a
+client.urgent           #6b3a3a #6b3a3a #d0d0d0 #6b3a3a #6b3a3a
+# Greys taken from the waybar stylesheet, so borders match the bar.
+# client.focused_tab_title is left out on purpose: sway falls back to
+# focused_inactive for it, which is what we want anyway.
 
 gaps inner 5
 smart_gaps on
 
-# Only used for titlebar text, which `default_border pixel` turns off.
+# Title text. `default_border pixel` hides titlebars in the normal split
+# layout, but tabbed and stacking containers ($mod+w, $mod+s) still draw them,
+# so this font is in use and ttf-dejavu is a real dependency.
 font pango:DejaVu Sans Mono 9
 
 # Hide borders when a window is the only one on the workspace.
@@ -49,8 +58,12 @@ seat * hide_cursor when-typing enable
 
 ### Output configuration
 #
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg #000000 solid_color
+# Wallpaper. `fit` scales the whole image to fit, letterboxing the rest in the
+# fallback colour. sway expands `~` here (it hands swaybg an absolute path), so
+# this stays free of a hardcoded user name. The image is not tracked in this
+# repo — a machine that lacks it falls back to the plain black, which is why the
+# fallback colour is given.
+output * bg ~/Pictures/Wallpaper/nujabes2-dark.png fit #000000
 
 ### Autostart
 #
@@ -65,42 +78,19 @@ exec nm-applet --indicator
 # exec_always so it survives a config reload.
 exec_always autotiling
 #
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
+# Monitor arrangement is per-machine and lives in ~/.config/sway/local.
+# `swaymsg -t get_outputs` lists the connectors and identities to match on.
 
 ### Idle configuration
 #
-# Example configuration:
-#
-# exec swayidle -w \
-#          timeout 300 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -f -c 000000'
-#
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
+# The timeouts are in ~/.config/swayidle/config; `exec swayidle -w` above starts
+# it. Nothing to declare here.
 
 ### Input configuration
 #
-# Example configuration:
-#
-#   input type:touchpad {
-#       dwt enabled
-#       tap enabled
-#       natural_scroll enabled
-#       middle_emulation enabled
-#   }
-#
-#   input type:keyboard {
-#       xkb_layout "eu"
-#   }
-#
-# You can also configure each device individually.
-# Read `man 5 sway-input` for more information about this section.
+# Keyboard layout and touchpad behaviour are per-machine — see
+# ~/.config/sway/local. Read `man 5 sway-input` for the available settings.
+# Only the genuinely portable bit stays here:
 
 input * {
     repeat_delay 200
@@ -265,8 +255,12 @@ bindsym $mod+r mode "resize"
     bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
     bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
 
-    # Screenshot: flameshot's interactive selection overlay
-    bindsym $mod+Shift+s exec flameshot gui
+    # Screenshot: drag a region — across monitors if you like — to the clipboard.
+    # grim/slurp instead of flameshot because flameshot has to go through the
+    # desktop portal, whose wlroots backend makes you pick one output up front
+    # and then confines the capture to it. slurp exits non-zero when cancelled,
+    # so the && leaves the clipboard alone rather than blanking it.
+    bindsym $mod+Shift+s exec geom=$(slurp) && grim -g "$geom" - | wl-copy
 
 #
 # Status Bar:

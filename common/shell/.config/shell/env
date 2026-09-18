@@ -1,0 +1,33 @@
+# Login-time environment, shared by zsh (~/.zprofile) and bash (~/.bash_profile).
+#
+# This has to be here rather than in ~/.zshrc: that file is only read by
+# interactive shells, so nothing the compositor launches — waybar, fuzzel, a
+# keybinding, an xdg-open handler — would ever see these. The login shell is the
+# parent of the whole graphical session, so what is exported here reaches all of
+# it by inheritance.
+#
+# Keep it POSIX sh: both shells source it.
+
+# eza, bat and friends live here when installed with --user or pipx.
+# Guarded because a login shell can be re-entered (su -l, a nested login), and
+# an unguarded prepend grows PATH a copy at a time.
+case ":$PATH:" in
+    *":$HOME/.local/bin:"*) ;;
+    *) PATH="$HOME/.local/bin:$PATH" ;;
+esac
+export PATH
+
+export EDITOR=nvim
+export VISUAL=nvim
+export BROWSER=zen-browser
+
+# Makes Qt programs (dolphin, ark, gwenview, ...) follow the system GTK theme —
+# dark Adwaita, Adwaita Sans, and the GTK file dialogs — instead of Qt's light
+# default. The plugin ships in qt6-base
+# (/usr/lib/qt6/plugins/platformthemes/libqgtk3.so); nothing extra to install.
+export QT_QPA_PLATFORMTHEME=gtk3
+
+# Per-machine additions, deployed from hosts/<hostname>/shell/. Same idea as
+# ~/.config/sway/local: absent on a machine that has none, and sourced last so
+# it can override anything above.
+[ -r "$HOME/.config/shell/env.local" ] && . "$HOME/.config/shell/env.local"

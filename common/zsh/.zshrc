@@ -1,5 +1,5 @@
-# Instant prompt do powerlevel10k — DEVE ficar no topo do arquivo.
-# Não coloque nada acima daqui que escreva na tela ou peça input.
+# powerlevel10k instant prompt — MUST stay at the top of the file.
+# Put nothing above this that writes to the screen or asks for input.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -8,48 +8,39 @@ fi
 # ~/.zshrc  —  oh-my-zsh
 #
 
+# PATH, EDITOR, VISUAL and BROWSER live in ~/.config/shell/env, read at login —
+# not here: this file is read by interactive shells only, so nothing exported
+# in it reaches the programs sway starts.
+
 export ZSH="$HOME/.oh-my-zsh"
-export PATH="$HOME/.local/bin:$PATH"
-export EDITOR=nvim
-export VISUAL=nvim
-export BROWSER=zen-browser
 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# zsh-syntax-highlighting DEVE ser o último da lista
+# zsh-syntax-highlighting MUST be last in the list
 plugins=(
-    git                     # aliases e completion de git
-    sudo                    # ESC ESC repete o comando com sudo na frente
-    extract                 # "x arquivo.tar.gz" extrai qualquer formato
+    git                     # git aliases and completion
+    sudo                    # ESC ESC repeats the command with sudo in front
+    extract                 # "x file.tar.gz" extracts any format
     colored-man-pages
-    archlinux               # aliases de pacman/yay
-    command-not-found       # sugere o pacote (precisa de pkgfile)
+    archlinux               # pacman/yay aliases
+    command-not-found       # suggests the package (needs pkgfile)
     zsh-autosuggestions
     zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh
 
-# --- histórico ---------------------------------------------------------------
-# o omz já define HISTFILE, share_history, hist_ignore_dups/space e
-# extended_history; aqui só aumento o que fica salvo em disco
+# --- history -----------------------------------------------------------------
+# omz already sets HISTFILE, share_history, hist_ignore_dups/space and
+# extended_history; this only raises what is kept on disk
 SAVEHIST=50000
 setopt HIST_REDUCE_BLANKS
 
 # --- aliases -----------------------------------------------------------------
-# precisam vir DEPOIS do source: o omz define seu próprio "alias ls"
-if command -v bat >/dev/null 2>&1; then
-    alias cat='bat --paging=never'
-    alias catp='bat --paging=never --style=plain'   # sem número de linha, pra copiar
-fi
-
-if command -v eza >/dev/null 2>&1; then
-    alias ls='eza --group-directories-first --icons=auto'
-    alias ll='eza -l  --group-directories-first --icons=auto --git'
-    alias la='eza -la --group-directories-first --icons=auto --git'
-    alias lt='eza --tree --level=2 --group-directories-first --icons=auto'
-fi
+# Shared with bash; see ~/.config/shell/aliases. Sourced AFTER oh-my-zsh on
+# purpose: it defines an `alias ls` of its own, and the last one wins.
+[ -r "$HOME/.config/shell/aliases" ] && . "$HOME/.config/shell/aliases"
 
 # --- powerlevel10k -----------------------------------------------------------
-# rode "p10k configure" pra (re)gerar; o arquivo abaixo guarda suas escolhas
+# run "p10k configure" to (re)generate; the file below stores those choices
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

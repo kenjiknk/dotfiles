@@ -2,9 +2,9 @@
 Name=Neovim
 GenericName=Text Editor
 Comment=Edit text files
-# Sobrepõe /usr/share/applications/nvim.desktop, que usa Terminal=true.
-# Sob Sway não há terminal registrado para o xdg-open resolver, então
-# chamamos o kitty explicitamente.
+# Overrides /usr/share/applications/nvim.desktop, which is Terminal=true.
+# Under Sway there is no terminal registered for xdg-open to resolve, so this
+# calls kitty explicitly.
 Exec=kitty -e nvim %F
 Terminal=false
 Type=Application

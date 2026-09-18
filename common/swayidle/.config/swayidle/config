@@ -1,11 +1,21 @@
 # swayidle configuration file
 # Idle timeout events for Sway
 
-# Lock screen after 5 minutes (300 seconds) of inactivity
-timeout 300 'swaylock -f'
+# `pidof -q swaylock || swaylock -f` everywhere instead of a bare `swaylock -f`:
+# swaylock has no single-instance guard, so suspending an already-locked
+# session would stack a second lock surface and you would have to type the
+# password twice to get back in. ~/Scripts/powermenu does the same.
 
-# Screen off after 5.5 minutes (330 seconds) of inactivity
-timeout 330 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+# Lock screen after 5 minutes (300 seconds) of inactivity
+timeout 300 'pidof -q swaylock || swaylock -f'
+
+# Screen off after 5.5 minutes (330 seconds) of inactivity.
+# `power`, not `dpms`: man 5 sway-output calls dpms a deprecated alias for it.
+timeout 330 'swaymsg "output * power off"' resume 'swaymsg "output * power on"'
 
 # Lock session before sleep
-before-sleep 'swaylock -f'
+before-sleep 'pidof -q swaylock || swaylock -f'
+
+# Lock on request, e.g. `loginctl lock-session`. Without this the timeout above
+# is the only thing that ever locks the screen.
+lock 'pidof -q swaylock || swaylock -f'

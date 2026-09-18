@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# Restores the docked monitor layout: the three external screens in their fixed
+# arrangement, laptop panel off. Run it once to apply, or with --watch to have
+# it react to every hotplug — that is how ~/.config/sway/local starts it.
+#
+# Screens are matched by "make model serial" instead of connector name. The two
+# DisplayLink monitors come up as DVI-I-1/DVI-I-2 in whatever order evdi happens
+# to enumerate them, so the connector name is not a stable identity across
+# reconnects; the identity string is what sway matches an `output` command on.
+#
+# The panel is switched off only while the dock is actually there. Undocking
+# brings it back, so the session is never left with every output disabled.
+#
+# nwg-displays is still the tool for *finding* a layout: drag the screens, read
+# the geometry off the `~/.config/sway/outputs` it writes, and transcribe it
+# into the array below. That file is deliberately not included by the sway
+# config and is gitignored — it keys everything by connector name, which is the
+# one thing that does not survive a reconnect here. This script is the single
+# source of truth for the arrangement; nwg-displays is the ruler, not the plan.
+#
+# Every `output` command sway runs emits an "output" IPC event, and --watch
+# subscribes to exactly those. So apply() must issue commands only for screens
+# that are genuinely wrong: once the layout matches, it runs nothing, emits
+# nothing, and the watch loop goes quiet. Applying unconditionally instead makes
+# each pass wake the next one, and sway then rebases the cursor several times a
+# second — which tears the pointer grab off mid-drag and breaks text selection
+# everywhere.
+
+set -euo pipefail
+
+# Laptop panel.
+panel='Lenovo Group Limited 0x403D Unknown'
+
+# identity | mode | position | dock
+#
+# The layout as arranged in nwg-displays: the small HDMI screen on the left, the
+# LG in the middle, the AOP on the right. `dock` marks the two DisplayLink
+# screens, whose presence is what counts as "the hub is plugged in" — an HDMI
+# monitor on its own (a projector, say) gets positioned but does not turn the
+# laptop panel off.
+screens=(
+    'PEB 777K 806020102|1024x768@84.997Hz|1208 430|'
+    'LG Electronics LG FULL HD 0x01010101|1920x1080@74.973Hz|2232 118|dock'
+    'AOP 22MH1Q 901123123LAJ|1920x1080@60.0Hz|4152 118|dock'
+)
+
+# The sway commands needed to reach the desired layout, one per line — empty
+# when there is nothing to change.
+plan() {
+    swaymsg -t get_outputs -r | python3 -c '
+import json, sys
+
+panel = sys.argv[1]
+desired = [entry.split("|") for entry in sys.argv[2:]]
+
+seen = {}
+for o in json.load(sys.stdin):
+    seen["%s %s %s" % (o["make"], o["model"], o["serial"])] = o
+
+def mode_parts(spec):
+    res, _, rate = spec.partition("@")
+    w, h = res.split("x")
+    return int(w), int(h), round(float(rate.rstrip("Hz")) * 1000)
+
+cmds = []
+docked = False
+
+for ident, mode, pos, dock in desired:
+    o = seen.get(ident)
+    if o is None:
+        continue
+    if dock == "dock":
+        docked = True
+
+    x, y = (int(v) for v in pos.split())
+    rect = o.get("rect") or {}
+    placed = (o.get("active") and rect.get("x") == x and rect.get("y") == y
+              and o.get("scale") == 1.0 and o.get("transform") == "normal")
+    if not placed:
+        cmds.append("output \"%s\" enable pos %d %d scale 1 transform normal"
+                    % (ident, x, y))
+
+    # Geometry and mode stay separate commands on purpose: a mode string the
+    # monitor does not report is refused, and this way that refusal costs the
+    # refresh rate only, never the position.
+    mw, mh, mr = mode_parts(mode)
+    cur = o.get("current_mode") or {}
+    # sway reports refresh in mHz, rounded; a hair of slack avoids churn.
+    if (cur.get("width"), cur.get("height")) != (mw, mh) or abs((cur.get("refresh") or 0) - mr) > 1000:
+        cmds.append("output \"%s\" mode %s" % (ident, mode))
+
+p = seen.get(panel)
+if p is not None:
+    if docked and p.get("active"):
+        cmds.append("output \"%s\" disable" % panel)
+    elif not docked and not p.get("active"):
+        cmds.append("output \"%s\" enable pos 0 0 scale 1 transform normal" % panel)
+
+for c in cmds:
+    print(c)
+' "$panel" "${screens[@]}"
+}
+
+apply() {
+    local cmd
+    while IFS= read -r cmd; do
+        [[ -n $cmd ]] || continue
+        swaymsg -- "$cmd" >/dev/null
+    done < <(plan)
+}
+
+watch() {
+    # One watcher per session: sway re-runs exec_always on every config reload.
+    exec 9>"${XDG_RUNTIME_DIR:-/tmp}/dock-monitors.lock"
+    flock -n 9 || exit 0
+
+    apply
+    swaymsg -t subscribe -m '["output"]' | while read -r _; do
+        # One hotplug fires a burst of events; wait for it to go quiet.
+        while read -r -t 0.5 _; do :; done
+        apply
+    done
+}
+
+case "${1:-}" in
+    ''|--apply) apply ;;
+    --watch)    watch ;;
+    *) printf 'usage: %s [--apply|--watch]\n' "${0##*/}" >&2; exit 1 ;;
+esac

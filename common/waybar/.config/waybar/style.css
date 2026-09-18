@@ -76,6 +76,10 @@ window#waybar {
   opacity: 0.4;
 }
 
+/* Every module any host might declare. config.jsonc is per-host, this file is
+   not, so a selector with no module behind it here is deliberate: a machine
+   that adds #backlight or #bluetooth to its module list inherits the styling
+   instead of having to restate it. */
 #memory,
 #cpu,
 #disk,
@@ -123,6 +127,11 @@ window#waybar {
 
 #custom-power-profile.performance {
   color: @waybar-danger;
+}
+
+/* last-updated.sh emits both classes; warning first, critical escalates. */
+#custom-last-updated.warning {
+  color: @waybar-warning;
 }
 
 #custom-last-updated.critical {

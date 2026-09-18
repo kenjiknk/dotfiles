@@ -1,27 +1,26 @@
-
-# Smooth scrolling and window settings
+# Window and scrolling
 set scroll-step 50
 set statusbar-home-tilde true
 set selection-clipboard clipboard
-
-# Set the font family and make it much larger
 set font "monospace 14"
-
 
 # Open pages fit-to-width automatically
 set pages-per-row 1
 set adjust-open "width"
 
-# Dark Mode / Recoloring (Perfect for reading at night)
+# Dark mode. `recolor` maps the page's own black-on-white to the two colours
+# below; keephue false so coloured figures are inverted along with the text.
 set recolor "true"
 set recolor-keephue "false"
 
-# Customize your color theme (Dark charcoal vibe)
-set default-bg "#1e1e2e"
-set default-fg "#cdd6f4"
-set recolor-lightcolor "#1e1e2e"
-set recolor-darkcolor "#cdd6f4"
+# Same greys as the rest of the setup: #0d0d0d is the surface colour used by
+# mako and fuzzel, #c0c0c0 the foreground used by kitty and foot.
+set default-bg "#0d0d0d"
+set default-fg "#c0c0c0"
+set recolor-lightcolor "#0d0d0d"
+set recolor-darkcolor "#c0c0c0"
 
-# Interactive search highlights
-set highlight-color "#f38ba8"
-set highlight-active-color "#a6e3a1"
+# Search highlights, from the terminal palette: muted for every match, pale
+# cyan for the one the cursor is on.
+set highlight-color "#8c7f70"
+set highlight-active-color "#a7c7c7"

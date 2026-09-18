@@ -1,0 +1,20 @@
+# Interactive aliases, shared by zsh (~/.zshrc) and bash (~/.bashrc).
+#
+# Sourced *after* oh-my-zsh in .zshrc: omz defines its own `ls`, and whichever
+# runs last wins. Keep it POSIX sh — both shells source it.
+
+alias grep='grep --color=auto'
+
+if command -v bat >/dev/null 2>&1; then
+    alias cat='bat --paging=never'
+    alias catp='bat --paging=never --style=plain'   # no line numbers, for copying
+fi
+
+if command -v eza >/dev/null 2>&1; then
+    alias ls='eza --group-directories-first --icons=auto'
+    alias ll='eza -l  --group-directories-first --icons=auto --git'
+    alias la='eza -la --group-directories-first --icons=auto --git'
+    alias lt='eza --tree --level=2 --group-directories-first --icons=auto'
+else
+    alias ls='ls --color=auto'
+fi

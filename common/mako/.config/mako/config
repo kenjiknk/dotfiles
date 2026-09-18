@@ -14,9 +14,5 @@ default-timeout=10000
 ignore-timeout=1
 font=Inter 11
 
-[app-name=lol]
-layer=overlay
-history=0
-
 [mode=do-not-disturb]
 invisible=1

@@ -1,33 +1,34 @@
-# --- nunca versionar --------------------------------------------------------
-# segredos
+# --- never commit -----------------------------------------------------------
+# This repository is a set of stow packages, not the whole $HOME: nothing lands
+# here without an explicit `git add`. The patterns below are a safety net for
+# when that `git add` aims at the wrong directory.
+
+# secrets
 .credentials.json
 *.pem
 *.key
 id_*
 *cookie*
 
-# histórico de shell (costuma conter segredos digitados por engano)
+# shell history (tends to hold secrets typed by mistake)
 .zsh_history
 .bash_history
 .zcompdump*
 
-# estado e cache
+# state and cache, in case a package ever mirrors those paths
 .cache/
 .local/state/
 *.log
 *.bak
 *.tmp
 *~
-.DS_Store
 
-# perfis de navegador (cookies, sessões, senhas salvas)
-mozilla/
-zen/
-
-# específico de máquina — gerado pelo nwg-displays em cada PC
+# Written by nwg-displays on each machine, and deliberately not included by the
+# sway config: the monitor arrangement is owned by
+# hosts/thinkpad/scripts/Scripts/dock-monitors.
 **/sway/outputs
 **/sway/workspaces
 
-# clones de terceiros, reinstalados pelo install.sh
+# third-party clones, cloned by hand at install time (see the README)
 .oh-my-zsh/
 powerlevel10k/

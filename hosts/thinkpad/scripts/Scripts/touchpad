@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Turns the touchpad on, off, or the other way round from wherever it is.
+#
+# The touchpad is off at login: ~/.config/sway/local sets `events disabled` in
+# its input block, and this script is the way back on — bound to $mod+Shift+t
+# there. Sway re-applies the input block on every config reload and every time
+# the device shows up again, so $mod+Shift+c and a resume from suspend both put
+# it back to off regardless of what this script last did. That is the point:
+# the answer to "why is the pointer moving on its own" is always one reload away.
+#
+# Devices are matched as `type:touchpad` rather than by identifier, so there is
+# nothing to edit per machine. The device's other evdev node, the one sway calls
+# a `pointer`, is the HID mouse collection the same chip exposes; it stays
+# enabled because it emits nothing while the multitouch node is bound.
+
+set -euo pipefail
+
+usage() {
+    printf 'usage: %s [toggle|on|off|status]\n' "${0##*/}" >&2
+    exit 1
+}
+
+case "${1:-toggle}" in
+    toggle) want=toggle   ;;
+    on)     want=enabled  ;;
+    off)    want=disabled ;;
+    status) want=status   ;;
+    *)      usage ;;
+esac
+
+if [[ -z ${SWAYSOCK:-} ]]; then
+    printf '%s: no sway session to talk to (SWAYSOCK unset)\n' "${0##*/}" >&2
+    exit 1
+fi
+
+# send_events of the first touchpad sway knows about: enabled, disabled, or
+# empty when the machine has none.
+current=$(swaymsg -t get_inputs -r | python3 -c '
+import json, sys
+for dev in json.load(sys.stdin):
+    if dev["type"] == "touchpad":
+        print(dev.get("libinput", {}).get("send_events", ""))
+        break
+')
+
+if [[ -z $current ]]; then
+    printf '%s: sway reports no touchpad\n' "${0##*/}" >&2
+    exit 1
+fi
+
+if [[ $want == status ]]; then
+    printf '%s\n' "$current"
+    exit 0
+fi
+
+# Resolved here rather than handed to `events toggle` so that every touchpad
+# ends up in the same state, and so the notification can name it.
+if [[ $want == toggle ]]; then
+    if [[ $current == enabled ]]; then
+        want=disabled
+    else
+        want=enabled
+    fi
+fi
+
+swaymsg input type:touchpad events "$want" >/dev/null
+
+# Optional feedback; libnotify is not required for the script to work.
+command -v notify-send >/dev/null &&
+    notify-send -a "touchpad" -t 1500 "Touchpad" "$want"
