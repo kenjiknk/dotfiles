@@ -68,10 +68,14 @@ output * bg ~/Pictures/Wallpaper/nujabes2-dark.png fit #000000
 ### Autostart
 #
 # Started once at login. `swaymsg reload` does NOT restart these; to pick up
-# changes, restart them by hand (e.g. `pkill waybar && waybar`) or re-login.
+# changes, restart them by hand (e.g. `pkill waybar` — the loop below brings it
+# back with the new config) or re-login.
 exec mako
 exec swayidle -w
-exec waybar
+# Respawn loop: waybar 0.15.0's mpris module segfaults now and then when a
+# player appears/disappears (libplayerctl signal -> Gtk::Widget::set_visible on
+# a dead widget), and a bare `exec waybar` would leave the session barless.
+exec sh -c 'while true; do waybar; sleep 1; done'
 # Publishes a system tray icon; without it the waybar tray drawer is empty.
 exec nm-applet --indicator
 # Fibonacci/spiral tiling: splits each new window along the longer edge.

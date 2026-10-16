@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Turns every output back on after swayidle's blank, and checks that it stuck.
+#
+# `swaymsg "output * power on"` replies {"success": true} as soon as sway has
+# accepted the command; the commit that actually re-enables a connector happens
+# afterwards and can fail without that reply changing. On this machine it
+# reliably does. The two DisplayLink screens are evdi devices — their own DRM
+# cards alongside amdgpu's — and they ignore the first "power on" after a blank:
+# the kernel logs no `evdi: Notifying display power state: on` at all, sway goes
+# on reporting `power: false` for them, and only the amdgpu-driven output comes
+# back. Issuing the very same command a second later takes.
+#
+# swayidle fires `resume` exactly once per idle period, so without a retry the
+# docked screens stay dark for the rest of the session, or until something else
+# happens to touch them.
+#
+# Hence: issue, verify against sway's own view, repeat. Only `active` outputs
+# count — a disabled one (the laptop panel while docked, see ~/Scripts/dock-monitors)
+# reports power false forever and would drive the loop to its limit every resume.
+
+set -euo pipefail
+
+attempts=6
+
+all_powered() {
+    swaymsg -t get_outputs -r | python3 -c '
+import json, sys
+
+outs = json.load(sys.stdin)
+sys.exit(0 if all(o.get("power") for o in outs if o.get("active")) else 1)
+'
+}
+
+for _ in $(seq "$attempts"); do
+    swaymsg 'output * power on' >/dev/null
+    sleep 1
+    if all_powered; then
+        exit 0
+    fi
+done
+
+printf '%s: some outputs are still off after %d attempts\n' "${0##*/}" "$attempts" >&2
+exit 1

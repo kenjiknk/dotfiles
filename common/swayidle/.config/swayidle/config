@@ -11,7 +11,12 @@ timeout 300 'pidof -q swaylock || swaylock -f'
 
 # Screen off after 5.5 minutes (330 seconds) of inactivity.
 # `power`, not `dpms`: man 5 sway-output calls dpms a deprecated alias for it.
-timeout 330 'swaymsg "output * power off"' resume 'swaymsg "output * power on"'
+#
+# Waking goes through ~/Scripts/wake-outputs rather than a bare `output * power
+# on`, because that command reports success while silently leaving the
+# DisplayLink screens off; the script re-issues it until sway agrees every
+# active output is really on. Its header has the details.
+timeout 330 'swaymsg "output * power off"' resume '~/Scripts/wake-outputs'
 
 # Lock session before sleep
 before-sleep 'pidof -q swaylock || swaylock -f'
