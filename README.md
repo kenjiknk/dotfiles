@@ -1,7 +1,7 @@
 # dotfiles
 
-i3 on X11, written to run on any distro. Configuration only — how things look,
-and how the tools used day to day behave. Developed on Arch; the baseline is
+i3 on X11, written to run on any distro. Configuration — how things look, and
+how the tools used day to day behave — plus the wallpapers it rotates through. Developed on Arch; the baseline is
 whatever an LTS distro from 2022 on ships (see [Portability](#portability)).
 
 Originally derived from [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles),
@@ -96,6 +96,7 @@ common/
   zsh/           zsh + oh-my-zsh + powerlevel10k
   bash/          bash fallback
   claude/        Claude Code settings and custom statusline
+  wallpapers/    the images ~/Scripts/wallpaper picks from (~/Pictures/Wallpaper)
   scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
                  touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
 
@@ -189,8 +190,9 @@ rests on:
 - **Wallpaper.** Every login and restart, `~/Scripts/wallpaper` picks a
   random image from `~/Pictures/Wallpaper` (never the one already showing). One
   that fits the screen is shown at its original size on black; a larger one is
-  scaled down to fit — never cropped or stretched. The images are not tracked
-  here; an empty folder leaves i3's black background.
+  scaled down to fit — never cropped or stretched. The `wallpapers` package
+  links the tracked images there; files dropped into the folder by hand join
+  the rotation too, without being committed.
 - **Idle and lock.** Lock at 5 minutes, screens off at 5.5, lock before
   suspend: `xset` sets the timers and xss-lock runs i3lock. Lock by hand with
   `loginctl lock-session` (what the power menu does).
