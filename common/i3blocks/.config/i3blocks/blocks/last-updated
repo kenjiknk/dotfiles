@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Days since the last full system upgrade, read from pacman's log: warning
+# colour after a week, danger after two. Left click: the exact date.
+# Empty on a machine that is not Arch (no pacman.log).
+
+set -euo pipefail
+
+LOG=/var/log/pacman.log
+WARN_DAYS=7
+CRIT_DAYS=14
+
+[[ -r $LOG ]] || exit 0
+
+# Last "starting full system upgrade" entry, e.g. [2026-08-30T15:59:55-0300]
+stamp=$(grep -F 'starting full system upgrade' "$LOG" | tail -n 1 | sed -n 's/^\[\([^]]*\)\].*/\1/p')
+[[ -n $stamp ]] || exit 0
+then=$(date -d "$stamp" +%s 2>/dev/null) || exit 0
+
+if [[ ${BLOCK_BUTTON:-} == 1 ]] && command -v notify-send >/dev/null; then
+    notify-send -a updates -t 3000 "Last upgrade" "$(date -d "$stamp" '+%Y-%m-%d %H:%M')"
+fi
+
+days=$(( ($(date +%s) - then) / 86400 ))
+(( days < 0 )) && days=0
+
+echo "days $days"
+echo "days $days"
+if (( days >= CRIT_DAYS )); then
+    echo "#6b3a3a"
+elif (( days >= WARN_DAYS )); then
+    echo "#7a8b6e"
+fi

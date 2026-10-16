@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Power profile in use (power-profiles-daemon). Balanced stays neutral, the two
+# extremes stand out. Left click: the profile menu.
+# Empty on a machine without power-profiles-daemon.
+
+[[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f ~/Scripts/power-profile-menu >/dev/null 2>&1
+
+command -v powerprofilesctl >/dev/null || exit 0
+profile=$(powerprofilesctl get 2>/dev/null) || exit 0
+
+case "$profile" in
+    power-saver) label="eco";  color="#7a8b6e" ;;
+    balanced)    label="bal";  color="" ;;
+    performance) label="perf"; color="#6b3a3a" ;;
+    *)           label="$profile"; color="" ;;
+esac
+
+echo "pwr $label"
+echo "pwr $label"
+[[ -n $color ]] && echo "$color"
+exit 0

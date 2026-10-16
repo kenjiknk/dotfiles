@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Time of day. Left click: the full date as a notification.
+
+if [[ ${BLOCK_BUTTON:-} == 1 ]] && command -v notify-send >/dev/null; then
+    notify-send -a clock -t 3000 "$(date '+%A %d %B')"
+fi
+
+date '+%H:%M'

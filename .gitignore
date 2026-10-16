@@ -23,12 +23,6 @@ id_*
 *.tmp
 *~
 
-# Written by nwg-displays on each machine, and deliberately not included by the
-# sway config: the monitor arrangement is owned by
-# hosts/thinkpad/scripts/Scripts/dock-monitors.
-**/sway/outputs
-**/sway/workspaces
-
 # third-party clones, cloned by hand at install time (see the README)
 .oh-my-zsh/
 powerlevel10k/

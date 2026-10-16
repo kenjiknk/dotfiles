@@ -1,7 +1,7 @@
 # Login-time environment, shared by zsh (~/.zprofile) and bash (~/.bash_profile).
 #
 # This has to be here rather than in ~/.zshrc: that file is only read by
-# interactive shells, so nothing the compositor launches — waybar, fuzzel, a
+# interactive shells, so nothing the window manager launches — the bar, rofi, a
 # keybinding, an xdg-open handler — would ever see these. The login shell is the
 # parent of the whole graphical session, so what is exported here reaches all of
 # it by inheritance.
@@ -28,6 +28,6 @@ export BROWSER=zen-browser
 export QT_QPA_PLATFORMTHEME=gtk3
 
 # Per-machine additions, deployed from hosts/<hostname>/shell/. Same idea as
-# ~/.config/sway/local: absent on a machine that has none, and sourced last so
+# ~/.config/i3/local: absent on a machine that has none, and sourced last so
 # it can override anything above.
 [ -r "$HOME/.config/shell/env.local" ] && . "$HOME/.config/shell/env.local"

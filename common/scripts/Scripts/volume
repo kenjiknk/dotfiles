@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Volume and microphone keys, through pactl. Works with both PulseAudio and
+# PipeWire (pipewire-pulse), which is what keeps it portable.
+#
+# After each change the bar's volume block is refreshed right away (signal 11,
+# see ~/.config/i3blocks/config) instead of at its next interval.
+
+set -euo pipefail
+
+case "${1:-}" in
+    up)       pactl set-sink-mute @DEFAULT_SINK@ 0
+              pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
+    down)     pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
+    mute)     pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+    mic-mute) pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
+    *)        printf 'usage: %s up|down|mute|mic-mute\n' "${0##*/}" >&2; exit 1 ;;
+esac
+
+pkill -RTMIN+11 -x i3blocks 2>/dev/null || true

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Memory in use (total minus available), in GiB. Left click: btop.
+
+[[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f kitty -e btop >/dev/null 2>&1
+
+awk '/^MemTotal:/ { t = $2 } /^MemAvailable:/ { a = $2 }
+     END { printf "mem %.1fgb\n", (t - a) / 1048576 }' /proc/meminfo

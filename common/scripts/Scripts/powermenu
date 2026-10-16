@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
-# Session power menu for Sway, driven by fuzzel.
+# Session power menu for i3, driven by rofi.
 
 set -euo pipefail
 
 choice=$(printf '%s\n' Lock Suspend Logout Reboot Shutdown |
-    fuzzel --dmenu --prompt="power: ") || exit 0
+    rofi -dmenu -i -p "power") || exit 0
 
 case "$choice" in
-    Lock)     pidof -q swaylock || swaylock -f ;;
+    # xss-lock (started by the i3 config) answers lock-session with i3lock, and
+    # never stacks a second one on top of a running lock.
+    Lock)     loginctl lock-session ;;
     Suspend)  systemctl suspend ;;
-    Logout)   swaymsg exit ;;
+    Logout)   i3-msg exit ;;
     Reboot)   systemctl reboot ;;
     Shutdown) systemctl poweroff ;;
     "")       exit 0 ;;

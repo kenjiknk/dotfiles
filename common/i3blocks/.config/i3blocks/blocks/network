@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Active connection through NetworkManager: "wifi <ssid>" or "eth <device>".
+# Left click: nmgui when installed, nm-connection-editor otherwise.
+# Empty on a machine without nmcli.
+
+if [[ ${BLOCK_BUTTON:-} == 1 ]]; then
+    if command -v nmgui >/dev/null; then
+        setsid -f nmgui >/dev/null 2>&1
+    else
+        setsid -f nm-connection-editor >/dev/null 2>&1
+    fi
+fi
+
+command -v nmcli >/dev/null || exit 0
+
+# Lines of TYPE:STATE:DEVICE:CONNECTION; the first connected one wins.
+while IFS=: read -r type state dev conn; do
+    [[ $state == connected ]] || continue
+    case "$type" in
+        wifi)     text="wifi $conn" ;;
+        ethernet) text="eth $dev" ;;
+        *)        continue ;;
+    esac
+    (( ${#text} > 18 )) && text="${text:0:17}…"
+    echo "$text"
+    exit 0
+done < <(nmcli -t -f TYPE,STATE,DEVICE,CONNECTION device 2>/dev/null)
+
+echo "wifi --"

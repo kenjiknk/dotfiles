@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Default output volume through pactl (PulseAudio or PipeWire).
+# Left click: pavucontrol. Right click: mute. Scroll: ±5%.
+
+case "${BLOCK_BUTTON:-}" in
+    1) setsid -f pavucontrol >/dev/null 2>&1 ;;
+    3) pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
+    4) pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
+    5) pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
+esac
+
+command -v pactl >/dev/null || exit 0
+vol=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -o '[0-9]*%' | head -n 1) || exit 0
+[[ -n $vol ]] || exit 0
+
+if pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -q yes; then
+    echo "vol muted"
+else
+    echo "vol $vol"
+fi

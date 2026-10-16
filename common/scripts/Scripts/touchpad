@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Turns the touchpad on, off, or the other way round from wherever it is.
+#
+#   touchpad [toggle]   flip it, with a notification
+#   touchpad on|off     set it, quietly — the i3 config runs `off` at login
+#   touchpad status     print enabled or disabled
+#
+# Touchpads are found by capability, not by name: under libinput only a
+# touchpad has the "libinput Tapping Enabled" property, so there is nothing to
+# edit per machine, and a machine without one gets a quiet exit 1. The
+# TrackPoint and any mouse are left alone.
+#
+# Every call also applies the tuning below (tap to click, natural scrolling,
+# ...). Under X this is the one place it can live without touching /etc: the
+# settings belong to the X device, so they last until it disappears. A suspend
+# or a replug can bring the device back with libinput's defaults — enabled and
+# untuned — and $mod+Shift+c (which re-runs `touchpad off`) puts both right.
+
+set -euo pipefail
+
+usage() {
+    printf 'usage: %s [toggle|on|off|status]\n' "${0##*/}" >&2
+    exit 1
+}
+
+case "${1:-toggle}" in
+    toggle|on|off|status) action=${1:-toggle} ;;
+    *) usage ;;
+esac
+
+touchpads=()
+while read -r id; do
+    if xinput list-props "$id" 2>/dev/null | grep -q 'libinput Tapping Enabled ('; then
+        touchpads+=("$id")
+    fi
+done < <(xinput list --id-only)
+
+if (( ${#touchpads[@]} == 0 )); then
+    printf '%s: no touchpad found\n' "${0##*/}" >&2
+    exit 1
+fi
+
+enabled() {
+    xinput list-props "$1" | sed -n 's/^\s*Device Enabled ([0-9]*):\s*//p'
+}
+
+# Properties a given touchpad lacks (not every one does clickfinger, say) are
+# skipped rather than treated as errors.
+tune() {
+    local id=$1
+    xinput set-prop "$id" 'libinput Tapping Enabled' 1 2>/dev/null || true
+    xinput set-prop "$id" 'libinput Natural Scrolling Enabled' 1 2>/dev/null || true
+    xinput set-prop "$id" 'libinput Disable While Typing Enabled' 1 2>/dev/null || true
+    xinput set-prop "$id" 'libinput Middle Emulation Enabled' 1 2>/dev/null || true
+    # two-finger, edge, on-button-down
+    xinput set-prop "$id" 'libinput Scroll Method Enabled' 1 0 0 2>/dev/null || true
+    # button areas, clickfinger
+    xinput set-prop "$id" 'libinput Click Method Enabled' 0 1 2>/dev/null || true
+}
+
+current=$(enabled "${touchpads[0]}")
+
+if [[ $action == status ]]; then
+    if [[ $current == 1 ]]; then echo enabled; else echo disabled; fi
+    exit 0
+fi
+
+want=$action
+if [[ $want == toggle ]]; then
+    if [[ $current == 1 ]]; then want=off; else want=on; fi
+fi
+
+for id in "${touchpads[@]}"; do
+    tune "$id"
+    if [[ $want == on ]]; then xinput enable "$id"; else xinput disable "$id"; fi
+done
+
+# Only an explicit toggle gets a notification; the `off` that runs at every
+# login and reload stays silent. libnotify is optional.
+if [[ $action == toggle ]] && command -v notify-send >/dev/null; then
+    notify-send -a "touchpad" -t 1500 "Touchpad" "$want"
+fi

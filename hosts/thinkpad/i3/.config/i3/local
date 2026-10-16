@@ -1,0 +1,17 @@
+# ThinkPad E14 Gen 6 — hardware-specific i3 settings.
+# Included from the end of ~/.config/i3/config.
+
+# Two layouts; the first is the active one. On Brazilian ThinkPads the `/ ?` key
+# sits where right Ctrl normally is, hence the `thinkpad` variant. The bar's
+# layout block switches between them through the same script.
+exec_always --no-startup-id ~/Scripts/kbd-layout set br:thinkpad us:intl
+
+# Touchpad tuning, then off: the palm of a hand resting on it while typing is
+# why it starts this way. $mod+Shift+t (~/Scripts/touchpad) turns it back on.
+# Re-applied on every reload, so $mod+Shift+c is the way back to "off".
+exec_always --no-startup-id ~/Scripts/touchpad off
+
+# Monitor layout for the USB dock: three external screens in a fixed
+# arrangement, laptop panel off while docked. Applied at login and re-applied on
+# every hotplug.
+exec_always --no-startup-id ~/Scripts/dock-monitors --watch

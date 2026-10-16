@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Root filesystem usage. Left click: duf (or df) in a terminal.
+
+if [[ ${BLOCK_BUTTON:-} == 1 ]]; then
+    setsid -f kitty -e bash -c '
+        if command -v duf >/dev/null; then duf; else df -h; fi
+        echo; read -n1 -s -r -p "Press any key to close..."' >/dev/null 2>&1
+fi
+
+df -P / | awk 'NR == 2 { print "disk " $5 }'

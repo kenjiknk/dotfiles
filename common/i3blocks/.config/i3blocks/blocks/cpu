@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# CPU usage over a half-second sample of /proc/stat. Left click: btop.
+
+[[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f kitty -e btop >/dev/null 2>&1
+
+read -r _ a1 b1 c1 idle1 iow1 irq1 sirq1 steal1 _ < /proc/stat
+sleep 0.5
+read -r _ a2 b2 c2 idle2 iow2 irq2 sirq2 steal2 _ < /proc/stat
+
+busy=$(( (a2+b2+c2+irq2+sirq2+steal2) - (a1+b1+c1+irq1+sirq1+steal1) ))
+idle=$(( (idle2+iow2) - (idle1+iow1) ))
+total=$(( busy + idle ))
+(( total > 0 )) || total=1
+
+echo "cpu $(( 100 * busy / total ))%"

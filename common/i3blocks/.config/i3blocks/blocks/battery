@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Battery charge from /sys. Empty on a machine without a battery.
+# Left click: a notification with the power draw and the state.
+
+bat=
+for b in /sys/class/power_supply/BAT*; do
+    [[ -r $b/capacity ]] && { bat=$b; break; }
+done
+[[ -n $bat ]] || exit 0
+
+cap=$(<"$bat/capacity")
+status=$(<"$bat/status")
+
+if [[ ${BLOCK_BUTTON:-} == 1 ]] && command -v notify-send >/dev/null; then
+    watts=?
+    [[ -r $bat/power_now ]] && watts=$(( $(<"$bat/power_now") / 1000000 ))
+    notify-send -a battery -t 3000 "Battery" "${watts}W  ·  ${cap}%  ·  ${status,,}"
+fi
+
+echo "bat ${cap}%"
+echo "bat ${cap}%"
+if [[ $status != Charging ]]; then
+    if (( cap <= 10 )); then echo "#6b3a3a"; elif (( cap <= 20 )); then echo "#7a8b6e"; fi
+fi
+exit 0

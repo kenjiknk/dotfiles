@@ -1,0 +1,300 @@
+# Portable i3 configuration: appearance, keybindings, autostart.
+#
+# Anything tied to one machine — keyboard layout, touchpad, monitor arrangement
+# — is in ~/.config/i3/local, included at the end of this file.
+#
+# Written against i3 4.22, the first release with gaps built in. Older i3
+# still loads it, minus the gaps lines it does not know (see the README). Keep
+# every `exec` here free of `,` and `;` inside key bindings: i3 splits commands
+# on them, so anything that needs a shell pipeline lives in ~/Scripts.
+#
+# Read https://i3wm.org/docs/userguide.html for a complete reference.
+
+### Variables
+#
+# Logo key. Use Mod1 for Alt.
+set $mod Mod4
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+# Your preferred terminal emulator
+set $term kitty
+# Your preferred application launcher
+set $menu rofi -show drun
+
+### Appearance
+#
+# Dark mode for GTK4 and libadwaita apps, which read it from gsettings rather
+# than from ~/.config/gtk-*/settings.ini.
+exec_always --no-startup-id gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+#
+# `pixel N` draws a plain border and no titlebar. i3's default is `normal`,
+# which draws a titlebar with the window title across the top of every window.
+default_border pixel 2
+default_floating_border pixel 2
+
+#               border  background  text     indicator child_border
+client.focused          #0080ff #404552 #f7fafc #0080ff #0080ff
+client.focused_inactive #3a3a3a #1e1e1e #a0a0a0 #3a3a3a #3a3a3a
+client.unfocused        #1a1a1a #121212 #505050 #1a1a1a #1a1a1a
+client.urgent           #6b3a3a #6b3a3a #d0d0d0 #6b3a3a #6b3a3a
+# Greys taken from the bar colours below, so borders match the bar.
+
+gaps inner 5
+smart_gaps on
+
+# Title text. `default_border pixel` hides titlebars in the normal split
+# layout, but tabbed and stacking containers ($mod+w, $mod+s) still draw them,
+# so this font is in use and DejaVu Sans Mono is a real dependency.
+font pango:DejaVu Sans Mono 9
+
+# Hide borders when a window is the only one on the workspace.
+hide_edge_borders smart
+
+workspace_auto_back_and_forth yes
+focus_wrapping no
+
+### Autostart
+#
+# `exec` runs once at login; `exec_always` also on every reload ($mod+Shift+c)
+# and restart ($mod+Shift+r). --no-startup-id keeps the busy cursor away for
+# programs that never signal they have started.
+#
+# Optional programs are started the same way as required ones: if one is not
+# installed, its line fails quietly and the session carries on without it.
+
+# Wallpaper. `--bg-max` scales the whole image to fit and letterboxes the rest
+# in --image-bg. The image is not tracked in this repo; without it feh fails and
+# the root window stays i3's plain black.
+exec_always --no-startup-id feh --no-fehbg --bg-max --image-bg black ~/Pictures/Wallpaper/nujabes2-dark.png
+
+# Keyboard repeat: 200 ms delay, 60 per second.
+exec_always --no-startup-id xset r rate 200 60
+
+# Notifications.
+exec --no-startup-id dunst
+
+# Idle and lock. X turns the screen saver on after 300 s, and xss-lock answers
+# by running i3lock; DPMS powers the screens off at 330 s. xss-lock also locks
+# before suspend and on `loginctl lock-session` (what ~/Scripts/powermenu uses),
+# and never starts a second i3lock over a running one, so locking twice never
+# means typing the password twice.
+exec_always --no-startup-id xset s 300 +dpms dpms 0 0 330
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork --color 000000
+
+# Compositor: blur behind translucent windows and dimmed unfocused ones. Purely
+# cosmetic — without picom, kitty is simply opaque. See ~/.config/picom/picom.conf.
+exec --no-startup-id picom
+
+# Tray icon for NetworkManager; i3bar draws the tray.
+exec --no-startup-id nm-applet
+
+# Hide the mouse pointer after 8 s without movement. This is the
+# unclutter-xfixes syntax (Arch's unclutter, Debian/Ubuntu's unclutter-xfixes).
+exec --no-startup-id unclutter --timeout 8
+
+# Fibonacci/spiral tiling: splits each new window along the longer edge.
+# exec_always so it survives a restart, which drops its IPC connection.
+exec_always --no-startup-id autotiling
+#
+# Monitor arrangement is per-machine and lives in ~/.config/i3/local.
+
+### Key bindings
+#
+# Basics:
+#
+    # Start a terminal
+    bindsym $mod+Return exec $term
+
+    # Kill focused window
+    bindsym $mod+Shift+q kill
+
+    # Start your launcher
+    bindsym $mod+d exec --no-startup-id $menu
+
+    # File manager (yazi is a TUI, so it needs a terminal)
+    bindsym $mod+Shift+f exec $term -e yazi
+
+    # Drag floating windows by holding down $mod and left mouse button.
+    # Resize them with right mouse button + $mod.
+    floating_modifier $mod
+
+    # Reload the configuration file
+    bindsym $mod+Shift+c reload
+    # Restart i3 in place, keeping the layout. Needed after editing the bar
+    # block, which a reload does not re-read.
+    bindsym $mod+Shift+r restart
+
+    # Session menu: lock, suspend, logout, reboot, shutdown
+    bindsym $mod+Shift+e exec --no-startup-id ~/Scripts/powermenu
+#
+# Moving around:
+#
+    # Move your focus around
+    bindsym $mod+$left focus left
+    bindsym $mod+$down focus down
+    bindsym $mod+$up focus up
+    bindsym $mod+$right focus right
+    # Or use $mod+[up|down|left|right]
+    bindsym $mod+Left focus left
+    bindsym $mod+Down focus down
+    bindsym $mod+Up focus up
+    bindsym $mod+Right focus right
+
+    # Move the focused window with the same, but add Shift
+    bindsym $mod+Shift+$left move left
+    bindsym $mod+Shift+$down move down
+    bindsym $mod+Shift+$up move up
+    bindsym $mod+Shift+$right move right
+    # Ditto, with arrow keys
+    bindsym $mod+Shift+Left move left
+    bindsym $mod+Shift+Down move down
+    bindsym $mod+Shift+Up move up
+    bindsym $mod+Shift+Right move right
+#
+# Workspaces:
+#
+    # Switch to workspace
+    bindsym $mod+1 workspace number 1
+    bindsym $mod+2 workspace number 2
+    bindsym $mod+3 workspace number 3
+    bindsym $mod+4 workspace number 4
+    bindsym $mod+5 workspace number 5
+    bindsym $mod+6 workspace number 6
+    bindsym $mod+7 workspace number 7
+    bindsym $mod+8 workspace number 8
+    bindsym $mod+9 workspace number 9
+    bindsym $mod+0 workspace number 10
+    # Move focused container to workspace
+    bindsym $mod+Shift+1 move container to workspace number 1
+    bindsym $mod+Shift+2 move container to workspace number 2
+    bindsym $mod+Shift+3 move container to workspace number 3
+    bindsym $mod+Shift+4 move container to workspace number 4
+    bindsym $mod+Shift+5 move container to workspace number 5
+    bindsym $mod+Shift+6 move container to workspace number 6
+    bindsym $mod+Shift+7 move container to workspace number 7
+    bindsym $mod+Shift+8 move container to workspace number 8
+    bindsym $mod+Shift+9 move container to workspace number 9
+    bindsym $mod+Shift+0 move container to workspace number 10
+#
+# Layout stuff:
+#
+    # Split the focused container horizontally or vertically.
+    bindsym $mod+b split h
+    bindsym $mod+v split v
+
+    # Switch the current container between different layout styles
+    bindsym $mod+s layout stacking
+    bindsym $mod+w layout tabbed
+    bindsym $mod+e layout toggle split
+
+    # Make the current focus fullscreen
+    bindsym $mod+f fullscreen toggle
+
+    # Toggle the current focus between tiling and floating mode
+    bindsym $mod+Shift+space floating toggle
+
+    # Swap focus between the tiling area and the floating area
+    bindsym $mod+space focus mode_toggle
+#
+# Scratchpad:
+#
+    # A bag of holding for windows: send them there and get them back later.
+
+    # Move the currently focused window to the scratchpad
+    bindsym $mod+Shift+minus move scratchpad
+
+    # Show the next scratchpad window or hide the focused scratchpad window.
+    # If there are multiple scratchpad windows, this command cycles through them.
+    bindsym $mod+minus scratchpad show
+#
+# Resizing containers:
+#
+mode "resize" {
+    # left will shrink the containers width
+    # right will grow the containers width
+    # up will shrink the containers height
+    # down will grow the containers height
+    bindsym $left resize shrink width 10 px or 10 ppt
+    bindsym $down resize grow height 10 px or 10 ppt
+    bindsym $up resize shrink height 10 px or 10 ppt
+    bindsym $right resize grow width 10 px or 10 ppt
+
+    # Ditto, with arrow keys
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # Return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+#
+# Utilities:
+#
+    # Volume keys. ~/Scripts/volume changes it through pactl and refreshes the
+    # bar right away instead of at the block's next interval.
+    bindsym XF86AudioMute exec --no-startup-id ~/Scripts/volume mute
+    bindsym XF86AudioLowerVolume exec --no-startup-id ~/Scripts/volume down
+    bindsym XF86AudioRaiseVolume exec --no-startup-id ~/Scripts/volume up
+    bindsym XF86AudioMicMute exec --no-startup-id ~/Scripts/volume mic-mute
+
+    # Special keys to control media via playerctl
+    bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
+    bindsym XF86AudioPause exec --no-startup-id playerctl play-pause
+    bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+    bindsym XF86AudioNext exec --no-startup-id playerctl next
+    bindsym XF86AudioStop exec --no-startup-id playerctl stop
+
+    # Special keys to adjust brightness via brightnessctl
+    bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
+    bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set 5%+
+
+    # Screenshot: drag a region — across monitors if you like — to the clipboard.
+    bindsym $mod+Shift+s exec --no-startup-id ~/Scripts/screenshot
+
+    # Touchpad on/off/on again. The script finds the touchpad itself and exits
+    # quietly on a machine without one, so the binding is safe everywhere.
+    bindsym $mod+Shift+t exec --no-startup-id ~/Scripts/touchpad
+    bindsym XF86TouchpadToggle exec --no-startup-id ~/Scripts/touchpad
+
+    # Power profile: power-saver / balanced / performance. Needs
+    # power-profiles-daemon; without it the menu says so and exits.
+    bindsym $mod+Shift+b exec --no-startup-id ~/Scripts/power-profile-menu
+
+#
+# Status Bar:
+#
+# i3bar draws the workspaces and the tray; i3blocks fills in the status line
+# from ~/.config/i3blocks/config. Every block hides itself on a machine that
+# lacks what it reports (no battery, no power-profiles-daemon, not Arch), so the
+# same bar works everywhere.
+bar {
+    status_command i3blocks
+    position top
+    font pango:Inter SemiBold 8
+    separator_symbol " "
+    tray_padding 2
+
+    colors {
+        background #121212
+        statusline #d0d0d0
+        separator  #121212
+
+        #                  border  background text
+        focused_workspace  #333333 #333333    #d0d0d0
+        active_workspace   #121212 #121212    #a0a0a0
+        inactive_workspace #121212 #121212    #505050
+        urgent_workspace   #6b3a3a #6b3a3a    #d0d0d0
+        binding_mode       #333333 #333333    #d0d0d0
+    }
+}
+
+# Machine-specific settings: keyboard layout, touchpad default, monitors.
+# Deployed from hosts/<hostname>/i3/ — absent on machines that have none, which
+# i3 accepts without complaint.
+include ~/.config/i3/local

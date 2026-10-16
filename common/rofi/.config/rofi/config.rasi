@@ -1,0 +1,74 @@
+/* Application launcher ($mod+d) and the menus in ~/Scripts. Same look as the
+ * fuzzel setup this replaced. Kept to syntax rofi 1.7 understands, the version
+ * older LTS distros ship. */
+
+configuration {
+    modi: "drun,run";
+    show-icons: false;
+    terminal: "kitty";
+    matching: "fuzzy";
+    drun-display-format: "{name}";
+    display-drun: ">";
+    display-run: "run";
+
+    /* Ctrl+j/k move through the list, as in fuzzel. Both are taken by default
+     * (accept, delete to end of line), so they are freed up first — rofi
+     * refuses to start when one key is bound twice. */
+    kb-accept-entry: "Return,KP_Enter";
+    kb-remove-to-eol: "";
+    kb-row-up: "Up,Control+p,Control+k";
+    kb-row-down: "Down,Control+n,Control+j";
+}
+
+* {
+    background-color: #0d0d0d;
+    text-color: #999999;
+    font: "JetBrainsMono Nerd Font 10";
+}
+
+window {
+    width: 40em;
+    border: 1px;
+    border-color: #1a1a1a;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+mainbox {
+    spacing: 6px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    spacing: 8px;
+}
+
+prompt {
+    text-color: #cccccc;
+}
+
+entry {
+    text-color: #e0e0e0;
+}
+
+listview {
+    lines: 10;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 0;
+}
+
+element {
+    padding: 3px 6px;
+}
+
+element selected.normal {
+    background-color: #1a1a1a;
+    text-color: #e0e0e0;
+}
+
+element-text {
+    background-color: inherit;
+    text-color: inherit;
+    highlight: bold #cccccc;
+}

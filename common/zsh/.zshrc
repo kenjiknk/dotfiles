@@ -10,7 +10,7 @@ fi
 
 # PATH, EDITOR, VISUAL and BROWSER live in ~/.config/shell/env, read at login —
 # not here: this file is read by interactive shells only, so nothing exported
-# in it reaches the programs sway starts.
+# in it reaches the programs i3 starts.
 
 export ZSH="$HOME/.oh-my-zsh"
 

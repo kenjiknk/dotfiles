@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Drag a region — across monitors if you like — and put it on the clipboard as
+# PNG. Bound to $mod+Shift+s.
+#
+# Goes through a temporary file rather than a pipe: maim exits non-zero when the
+# selection is cancelled, and a pipe would still run xclip on the empty output
+# and blank the clipboard.
+
+set -euo pipefail
+
+shot=$(mktemp --suffix=.png)
+trap 'rm -f "$shot"' EXIT
+
+maim --select --hidecursor "$shot" || exit 0
+
+# xclip forks to keep serving the selection; the image stays available after
+# this script (and its temp file) is gone, since xclip has already read it.
+xclip -selection clipboard -t image/png -i "$shot"
