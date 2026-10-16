@@ -95,7 +95,6 @@ common/
   shell/         environment and aliases shared by both shells
   zsh/           zsh + oh-my-zsh + powerlevel10k
   bash/          bash fallback
-  claude/        Claude Code statusline (settings.json is left to Claude Code)
   wallpapers/    the images ~/Scripts/wallpaper picks from (~/Pictures/Wallpaper)
   scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
                  touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
@@ -258,8 +257,7 @@ pavucontrol
 **Called by the bar, the keybindings and the scripts:** power-profiles-daemon,
 pkgfile, playerctl (media keys), libpulse (`pactl`),
 libnotify (`notify-send`), network-manager-applet (tray icon), nmgui (clicking
-the network block), glib2 (`gsettings`), python (the statusline and
-`dock-monitors`), qt6-base (the Qt/GTK theme bridge)
+the network block), glib2 (`gsettings`), python (`dock-monitors`), qt6-base (the Qt/GTK theme bridge)
 
 **Fonts:** inter-font, ttf-jetbrains-mono-nerd, ttf-dejavu (i3's tab and
 stack titles), noto-fonts, noto-fonts-emoji
