@@ -23,11 +23,12 @@ exec_always --no-startup-id gsettings set org.gnome.desktop.interface color-sche
 default_border pixel 2
 default_floating_border pixel 2
 
+# Kanagawa Dragon, like the rest of the desktop.
 #               border  background  text     indicator child_border
-client.focused          #0080ff #404552 #f7fafc #0080ff #0080ff
-client.focused_inactive #3a3a3a #1e1e1e #a0a0a0 #3a3a3a #3a3a3a
-client.unfocused        #1a1a1a #121212 #505050 #1a1a1a #1a1a1a
-client.urgent           #6b3a3a #6b3a3a #d0d0d0 #6b3a3a #6b3a3a
+client.focused          #8ba4b0 #282727 #c5c9c5 #8ba4b0 #8ba4b0
+client.focused_inactive #393836 #1D1C19 #a6a69c #393836 #393836
+client.unfocused        #282727 #181616 #625e5a #282727 #282727
+client.urgent           #c4746e #c4746e #12120f #c4746e #c4746e
 
 gaps inner 5
 smart_gaps on
@@ -58,7 +59,7 @@ exec --no-startup-id dunst
 # Lock at 300 s (screen saver -> xss-lock -> i3lock), screens off at 330 s.
 # xss-lock also locks before suspend and on `loginctl lock-session`.
 exec_always --no-startup-id xset s 300 +dpms dpms 0 0 330
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork --color 000000
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork --color 181616
 
 exec --no-startup-id picom
 exec --no-startup-id nm-applet
@@ -186,16 +187,16 @@ bar {
     tray_padding 2
 
     colors {
-        background #121212
-        statusline #d0d0d0
-        separator  #121212
+        background #12120f
+        statusline #c5c9c5
+        separator  #12120f
 
         #                  border  background text
-        focused_workspace  #333333 #333333    #d0d0d0
-        active_workspace   #121212 #121212    #d0d0d0
-        inactive_workspace #121212 #121212    #d0d0d0
-        urgent_workspace   #6b3a3a #6b3a3a    #d0d0d0
-        binding_mode       #333333 #333333    #d0d0d0
+        focused_workspace  #393836 #393836    #c5c9c5
+        active_workspace   #12120f #12120f    #c5c9c5
+        inactive_workspace #12120f #12120f    #c5c9c5
+        urgent_workspace   #c4746e #c4746e    #12120f
+        binding_mode       #393836 #393836    #c5c9c5
     }
 }
 

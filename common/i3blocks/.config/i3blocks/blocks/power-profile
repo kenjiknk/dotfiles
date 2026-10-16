@@ -8,9 +8,9 @@ command -v powerprofilesctl >/dev/null || exit 0
 profile=$(powerprofilesctl get 2>/dev/null) || exit 0
 
 case "$profile" in
-    power-saver) label="eco";  color="#7a8b6e" ;;
+    power-saver) label="eco";  color="#c4b28a" ;;
     balanced)    label="bal";  color="" ;;
-    performance) label="perf"; color="#6b3a3a" ;;
+    performance) label="perf"; color="#c4746e" ;;
     *)           label="$profile"; color="" ;;
 esac
 

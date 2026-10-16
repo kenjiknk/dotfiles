@@ -56,6 +56,6 @@ fi
 echo "bat ${cap}%"
 echo "bat ${cap}%"
 if [[ $status != Charging ]]; then
-    if (( cap <= 10 )); then echo "#6b3a3a"; elif (( cap <= 20 )); then echo "#7a8b6e"; fi
+    if (( cap <= 10 )); then echo "#c4746e"; elif (( cap <= 20 )); then echo "#c4b28a"; fi
 fi
 exit 0

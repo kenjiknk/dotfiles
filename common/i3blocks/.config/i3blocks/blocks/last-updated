@@ -23,7 +23,7 @@ days=$(( ($(date +%s) - then) / 86400 ))
 echo "days $days"
 echo "days $days"
 if (( days >= CRIT_DAYS )); then
-    echo "#6b3a3a"
+    echo "#c4746e"
 elif (( days >= WARN_DAYS )); then
-    echo "#7a8b6e"
+    echo "#c4b28a"
 fi

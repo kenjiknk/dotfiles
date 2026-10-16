@@ -1,4 +1,5 @@
-/* Launcher ($mod+d) and the menus in ~/Scripts. rofi 1.7+ syntax. */
+/* Launcher ($mod+d) and the menus in ~/Scripts, in Kanagawa Dragon.
+ * rofi 1.7+ syntax. */
 
 configuration {
     modi: "drun,run";
@@ -21,15 +22,15 @@ configuration {
 @theme "/dev/null"
 
 * {
-    background-color: #0d0d0d;
-    text-color: #999999;
+    background-color: #0d0c0c;
+    text-color: #a6a69c;
     font: "JetBrainsMono Nerd Font 10";
 }
 
 window {
     width: 40em;
     border: 1px;
-    border-color: #1a1a1a;
+    border-color: #393836;
     border-radius: 4px;
     padding: 8px 12px;
 }
@@ -44,11 +45,11 @@ inputbar {
 }
 
 prompt {
-    text-color: #cccccc;
+    text-color: #C8C093;
 }
 
 entry {
-    text-color: #e0e0e0;
+    text-color: #c5c9c5;
 }
 
 listview {
@@ -63,8 +64,8 @@ element {
 }
 
 element selected.normal {
-    background-color: #1a1a1a;
-    text-color: #e0e0e0;
+    background-color: #2D4F67;
+    text-color: #C8C093;
 }
 
 element-icon {
@@ -75,5 +76,5 @@ element-icon {
 element-text {
     background-color: inherit;
     text-color: inherit;
-    highlight: bold #cccccc;
+    highlight: bold #c4b28a;
 }

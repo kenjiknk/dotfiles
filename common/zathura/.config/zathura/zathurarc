@@ -13,14 +13,12 @@ set adjust-open "width"
 set recolor "true"
 set recolor-keephue "false"
 
-# Neutral greys like the rest of the desktop: #0d0d0d is the background of
-# dunst and rofi.
-set default-bg "#0d0d0d"
-set default-fg "#c0c0c0"
-set recolor-lightcolor "#0d0d0d"
-set recolor-darkcolor "#c0c0c0"
+# Kanagawa Dragon, like the rest of the desktop.
+set default-bg "#181616"
+set default-fg "#c5c9c5"
+set recolor-lightcolor "#181616"
+set recolor-darkcolor "#c5c9c5"
 
-# Search highlights, from the terminal palette: muted for every match, pale
-# cyan for the one the cursor is on.
-set highlight-color "#8c7f70"
-set highlight-active-color "#a7c7c7"
+# Search highlights: yellow for every match, aqua for the current one.
+set highlight-color "#c4b28a"
+set highlight-active-color "#8ea4a2"
