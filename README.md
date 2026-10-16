@@ -95,7 +95,7 @@ common/
   shell/         environment and aliases shared by both shells
   zsh/           zsh + oh-my-zsh + powerlevel10k
   bash/          bash fallback
-  claude/        Claude Code settings and custom statusline
+  claude/        Claude Code statusline (settings.json is left to Claude Code)
   wallpapers/    the images ~/Scripts/wallpaper picks from (~/Pictures/Wallpaper)
   scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
                  touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
@@ -174,9 +174,8 @@ rests on:
 - **Symlinks that programs may replace.** Stow deploys files as symlinks, but a
   program that saves by writing a temp file and renaming it over the target
   destroys the link — silently, since the repo copy stays untouched and
-  `git status` shows nothing. Known candidates here: `p10k configure` (rewrites
-  `~/.p10k.zsh`) and Claude Code (rewrites `~/.claude/settings.json` when
-  settings change). After using either, re-run the `stow` commands from step 3
+  `git status` shows nothing. Known candidate here: `p10k configure`, which
+  rewrites `~/.p10k.zsh`. After using it, re-run the `stow` commands from step 3
   with `--restow`.
 - **`--no-folding`.** Pass it to every `stow` call. Without it, stow replaces a
   directory it is the sole owner of with a single symlink to the package —
