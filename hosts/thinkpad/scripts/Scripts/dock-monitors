@@ -171,10 +171,13 @@ apply() {
         done
         xrandr "${norate[@]}" || true
     fi
+
+    # The root window changed size; redraw the wallpaper over the new layout.
+    [[ -x ~/Scripts/wallpaper ]] && ~/Scripts/wallpaper --same || true
 }
 
 watch() {
-    # One watcher per session (exec_always re-runs on reload).
+    # One watcher per session (exec_always re-runs on restart).
     exec 9>"${XDG_RUNTIME_DIR:-/tmp}/dock-monitors.lock"
     flock -n 9 || exit 0
 

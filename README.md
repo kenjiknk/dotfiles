@@ -97,7 +97,7 @@ common/
   bash/          bash fallback
   claude/        Claude Code settings and custom statusline
   scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
-                 touchpad, power-profile-menu — deployed to ~/Scripts
+                 touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
 
 hosts/thinkpad/
   i3/            keyboard layout, touchpad off at login, dock watcher
@@ -183,12 +183,14 @@ rests on:
   meets a folded symlink it does not own and aborts the whole run. Real
   directories holding one symlink per file cost nothing and let the layers
   stack.
-- **Reload vs restart.** `$mod+Shift+c` reloads the config; `$mod+Shift+r`
-  restarts i3 in place, keeping every window. The `bar` block and the `exec`
-  (not `exec_always`) lines are only read again on a restart or a new login.
-- **Wallpaper.** `common/i3` hands `~/Pictures/Wallpaper/nujabes2-dark.png` to
-  feh. The image itself is not tracked here (this repo is configuration only); a
-  machine without it keeps i3's black background.
+- **`$mod+Shift+c` restarts i3** in place, keeping every window. Not a plain
+  reload: i3 runs `exec_always` lines — wallpaper, touchpad off, keyboard
+  settings — only on a restart, unlike sway, which ran them on reload.
+- **Wallpaper.** Every login and restart, `~/Scripts/wallpaper` picks a
+  random image from `~/Pictures/Wallpaper` (never the one already showing). One
+  that fits the screen is shown at its original size on black; a larger one is
+  scaled down to fit — never cropped or stretched. The images are not tracked
+  here; an empty folder leaves i3's black background.
 - **Idle and lock.** Lock at 5 minutes, screens off at 5.5, lock before
   suspend: `xset` sets the timers and xss-lock runs i3lock. Lock by hand with
   `loginctl lock-session` (what the power menu does).
@@ -201,7 +203,7 @@ rests on:
   X leaves detached until `xrandr --setprovideroutputsource` hands it to the GPU.
   `dock-monitors` does that before arranging anything.
 - **Touchpad.** It starts disabled — `hosts/thinkpad/i3` runs `touchpad off` on
-  every reload. `~/Scripts/touchpad` (bound to `$mod+Shift+t`) turns it on, off,
+  every restart. `~/Scripts/touchpad` (bound to `$mod+Shift+t`) turns it on, off,
   or flips it; `touchpad status` prints the current state. The tuning (tap to
   click, natural scrolling, two-finger scroll, clickfinger) is applied by the
   same script with `xinput`, so no file under `/etc` is needed. A resume from

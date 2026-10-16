@@ -4,7 +4,7 @@
 # switches to us-intl and back.
 exec_always --no-startup-id ~/Scripts/kbd-layout set br:thinkpad us:intl
 
-# Off at login and on every reload; $mod+Shift+t turns it on.
+# Off at login and on every restart; $mod+Shift+t turns it on.
 exec_always --no-startup-id ~/Scripts/touchpad off
 
 # Dock layout, re-applied on every hotplug.

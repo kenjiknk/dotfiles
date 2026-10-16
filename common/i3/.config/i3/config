@@ -47,7 +47,8 @@ focus_wrapping no
 #
 # Optional programs fail quietly when missing; the session carries on.
 
-exec_always --no-startup-id feh --no-fehbg --bg-max --image-bg black ~/Pictures/Wallpaper/nujabes2-dark.png
+# A different random wallpaper on every login and restart.
+exec_always --no-startup-id ~/Scripts/wallpaper
 
 # Repeat rate, re-applied with the layouts to keyboards plugged in later.
 exec_always --no-startup-id ~/Scripts/keyboard-watch
@@ -66,7 +67,7 @@ exec --no-startup-id nm-applet
 exec --no-startup-id xbanish -t 8
 
 # Spiral tiling. exec_always because a restart drops its IPC connection; the
-# lock stops a reload from starting a second copy.
+# lock keeps a copy that outlives it from doubling up.
 exec_always --no-startup-id flock -n "$XDG_RUNTIME_DIR/autotiling.lock" autotiling
 
 ### Key bindings
@@ -77,9 +78,9 @@ bindsym $mod+d exec --no-startup-id $menu
 bindsym $mod+Shift+f exec $term -e yazi
 bindsym $mod+Shift+e exec --no-startup-id ~/Scripts/powermenu
 
-# Reload re-reads the config; restart (keeps windows) is needed for the bar block.
-bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r restart
+# Restart, not reload: i3 runs exec_always lines (wallpaper, touchpad off,
+# keyboard settings) only on restart. Windows and layout are kept.
+bindsym $mod+Shift+c restart
 
 floating_modifier $mod
 

@@ -67,7 +67,7 @@ for id in "${touchpads[@]}"; do
     if [[ $want == on ]]; then xinput enable "$id"; else xinput disable "$id"; fi
 done
 
-# Notify on toggle only, so the `off` at every reload stays silent.
+# Notify on toggle only, so the `off` at every restart stays silent.
 if [[ $action == toggle ]] && command -v notify-send >/dev/null; then
     notify-send -a "touchpad" -t 1500 "Touchpad" "$want"
 fi

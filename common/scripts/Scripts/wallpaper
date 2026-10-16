@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# wallpaper [--same]
+#
+# Picks a random image from ~/Pictures/Wallpaper (or $WALLPAPER_DIR), never the
+# one already showing. An image that fits the smallest screen is shown at its
+# original size, centred on black; a larger one is scaled down to fit. Nothing
+# is cropped, stretched or enlarged. `--same` redraws the current one, for
+# after a monitor layout change.
+
+set -euo pipefail
+
+dir=${WALLPAPER_DIR:-$HOME/Pictures/Wallpaper}
+state=${XDG_CACHE_HOME:-$HOME/.cache}/wallpaper-current
+
+last=$(cat "$state" 2>/dev/null || true)
+
+if [[ ${1:-} == --same && -r $last ]]; then
+    img=$last
+else
+    mapfile -t images < <(find -L "$dir" -maxdepth 1 -type f \
+        \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) 2>/dev/null)
+    (( ${#images[@]} )) || exit 0
+    if (( ${#images[@]} > 1 )); then
+        mapfile -t images < <(printf '%s\n' "${images[@]}" | grep -vxF -- "$last")
+    fi
+    img=$(printf '%s\n' "${images[@]}" | shuf -n 1)
+fi
+
+# Smallest active output, e.g. "1920 1200".
+read -r sw sh < <(xrandr --current |
+    grep -oE ' connected( primary)? [0-9]+x[0-9]+\+' |
+    grep -oE '[0-9]+x[0-9]+' | tr x ' ' | sort -n -k1,1 -k2,2 | head -n 1) || true
+
+read -r iw ih < <(feh -l "$img" | awk 'NR == 2 { print $3, $4 }')
+
+mode=--bg-max
+if [[ -n ${sw:-} && -n ${iw:-} ]] && (( iw <= sw && ih <= sh )); then
+    mode=--bg-center
+fi
+
+feh --no-fehbg "$mode" --image-bg black "$img"
+mkdir -p "${state%/*}"
+printf '%s\n' "$img" > "$state"
