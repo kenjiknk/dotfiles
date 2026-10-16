@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Root filesystem usage. Left click: duf (or df) in a terminal.
+# Root filesystem usage. Click: duf (or df).
 
 if [[ ${BLOCK_BUTTON:-} == 1 ]]; then
     setsid -f kitty -e bash -c '

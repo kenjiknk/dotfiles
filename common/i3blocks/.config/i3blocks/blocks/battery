@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Battery charge from /sys. Empty on a machine without a battery.
-# Left click: a notification with the power draw and the state.
+# Battery charge. Click: power draw, charge and time left (to empty or to full).
+# Hidden on machines without a battery.
 
 bat=
 for b in /sys/class/power_supply/BAT*; do
@@ -11,10 +11,46 @@ done
 cap=$(<"$bat/capacity")
 status=$(<"$bat/status")
 
+read_or_empty() { [[ -r $1 ]] && cat "$1" 2>/dev/null; }
+
+# Energy (µWh/µW) or charge (µAh/µA), depending on the battery; same arithmetic.
+now=$(read_or_empty "$bat/energy_now")
+full=$(read_or_empty "$bat/energy_full")
+rate=$(read_or_empty "$bat/power_now")
+if [[ -z $now ]]; then
+    now=$(read_or_empty "$bat/charge_now")
+    full=$(read_or_empty "$bat/charge_full")
+    rate=$(read_or_empty "$bat/current_now")
+fi
+
+time_left() {
+    local remaining=$1
+    [[ -n $remaining && -n $rate ]] && (( rate > 0 )) || return 0
+    local minutes=$(( remaining * 60 / rate ))
+    printf '%dh %02dm' $(( minutes / 60 )) $(( minutes % 60 ))
+}
+
 if [[ ${BLOCK_BUTTON:-} == 1 ]] && command -v notify-send >/dev/null; then
     watts=?
-    [[ -r $bat/power_now ]] && watts=$(( $(<"$bat/power_now") / 1000000 ))
-    notify-send -a battery -t 3000 "Battery" "${watts}W  ·  ${cap}%  ·  ${status,,}"
+    if [[ -r $bat/power_now ]]; then
+        watts=$(( $(<"$bat/power_now") / 1000000 ))
+    elif [[ -n $rate && -r $bat/voltage_now ]]; then
+        watts=$(( rate * $(<"$bat/voltage_now") / 1000000000000 ))
+    fi
+
+    case "$status" in
+        Discharging)
+            t=$(time_left "$now")
+            body="${watts}W ↓  ·  ${cap}%  ·  ${t:-?} left" ;;
+        Charging)
+            t=$( [[ -n $full && -n $now ]] && time_left $(( full - now )) )
+            body="${watts}W ↑  ·  ${cap}%  ·  ${t:-?} to full" ;;
+        Full)
+            body="${watts}W  ·  ${cap}%  ·  full" ;;
+        *)
+            body="${watts}W  ·  ${cap}%  ·  plugged" ;;
+    esac
+    notify-send -a battery -t 5000 "Battery" "$body"
 fi
 
 echo "bat ${cap}%"

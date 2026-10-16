@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Switch the active power profile (power-profiles-daemon) through a rofi menu.
-# The profile currently in use is marked with a dot.
+# Pick a power profile (power-profiles-daemon); the current one is marked.
 
 set -euo pipefail
 
@@ -22,8 +21,6 @@ profile=${choice##* }
 
 powerprofilesctl set "$profile"
 
-# Refresh the bar's power-profile block immediately instead of at its interval.
 pkill -RTMIN+9 -x i3blocks 2>/dev/null || true
 
-# Optional feedback; libnotify is not required for the script to work.
 command -v notify-send >/dev/null && notify-send -a "power" "Power profile" "$profile"

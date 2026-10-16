@@ -1,8 +1,5 @@
-# Notifications. Same look as the mako setup this replaced: dark translucent
-# card, top-right, Inter 11, newest first, ten seconds on screen.
-#
-# Uses the geometry keys of dunst 1.7+ (width/height/offset/origin); older
-# releases took a single `geometry` string instead.
+# Notifications: dark card, top-right, newest first, ten seconds each.
+# Needs dunst 1.7+ for the geometry keys.
 
 [global]
     origin = top-right
@@ -26,7 +23,8 @@
     icon_position = left
     max_icon_size = 64
 
-    sort = no
+    # Newest on top (dunst 1.11+; older ones fall back to their default).
+    sort = update
     stack_duplicates = true
     history_length = 10
 
@@ -38,8 +36,7 @@
     mouse_middle_click = do_action, close_current
     mouse_right_click = close_all
 
-# Every urgency gets the same ten seconds, whatever the sender asked for — what
-# mako's ignore-timeout did.
+# Same timeout for every urgency, whatever the sender asks for.
 [urgency_low]
     timeout = 10
 

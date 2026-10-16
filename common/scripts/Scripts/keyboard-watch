@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Under X, a keyboard plugged in after login (dock, USB, back from suspend)
+# starts with the server's default layout and repeat rate. This sets the repeat
+# rate, then re-applies it and the active layouts on every input hotplug.
+# One instance per session; exits with the X server.
+
+set -euo pipefail
+
+repeat() { xset r rate 200 60; }
+
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/keyboard-watch.lock"
+flock -n 9 || { repeat; exit 0; }
+
+# i3 runs this in its own process group, so `kill 0` only stops the pipeline.
+trap 'trap - EXIT; kill 0' EXIT
+
+repeat
+
+udevadm monitor --udev --subsystem-match=input | while read -r _; do
+    # Wait out the burst of events, then give X a moment to add the device.
+    while read -r -t 1 _; do :; done
+    sleep 0.5
+    repeat || true
+    ~/Scripts/kbd-layout reapply || true
+done &
+
+# Live only as long as the X server does.
+while xrandr --current >/dev/null 2>&1; do
+    sleep 10
+done

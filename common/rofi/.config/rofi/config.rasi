@@ -1,24 +1,24 @@
-/* Application launcher ($mod+d) and the menus in ~/Scripts. Same look as the
- * fuzzel setup this replaced. Kept to syntax rofi 1.7 understands, the version
- * older LTS distros ship. */
+/* Launcher ($mod+d) and the menus in ~/Scripts. rofi 1.7+ syntax. */
 
 configuration {
     modi: "drun,run";
-    show-icons: false;
+    show-icons: true;
     terminal: "kitty";
     matching: "fuzzy";
     drun-display-format: "{name}";
     display-drun: ">";
     display-run: "run";
 
-    /* Ctrl+j/k move through the list, as in fuzzel. Both are taken by default
-     * (accept, delete to end of line), so they are freed up first — rofi
-     * refuses to start when one key is bound twice. */
+    /* Ctrl+j/k move through the list. Their default bindings are cleared
+     * first: rofi refuses to start when a key is bound twice. */
     kb-accept-entry: "Return,KP_Enter";
     kb-remove-to-eol: "";
     kb-row-up: "Up,Control+p,Control+k";
     kb-row-down: "Down,Control+n,Control+j";
 }
+
+/* Empty base theme: the built-in one colours list rows itself, overriding `*`. */
+@theme "/dev/null"
 
 * {
     background-color: #0d0d0d;
@@ -65,6 +65,11 @@ element {
 element selected.normal {
     background-color: #1a1a1a;
     text-color: #e0e0e0;
+}
+
+element-icon {
+    background-color: inherit;
+    size: 1em;
 }
 
 element-text {

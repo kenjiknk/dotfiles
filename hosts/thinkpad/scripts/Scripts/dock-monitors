@@ -1,32 +1,13 @@
 #!/usr/bin/env bash
-# Restores the docked monitor layout: the three external screens in their fixed
-# arrangement, laptop panel off. Run it once to apply, or with --watch to have
-# it react to every hotplug — that is how ~/.config/i3/local starts it.
+# Docked layout: three external screens in a fixed arrangement, laptop panel
+# off while the dock is connected. `--watch` re-applies it on every hotplug.
 #
-# Screens are matched by "make model serial" instead of output name. The two
-# DisplayLink monitors come up in whatever order evdi happens to enumerate them,
-# so the output name is not a stable identity across reconnects. The identity is
-# decoded here from each screen's EDID, the same way wlroots does it (make from
-# hwdata's pnp.ids, model from the name descriptor or else the product code,
-# serial from the serial descriptor or else the numeric one), so the strings
-# below are the ones `swaymsg -t get_outputs` used to print.
+# Screens are matched by EDID "make model serial", decoded the way wlroots does,
+# because the DisplayLink outputs swap names across reconnects. Use arandr to
+# find a layout, then copy the geometry into `screens`.
 #
-# The panel is switched off only while the dock is actually there. Undocking
-# brings it back, so the session is never left with every output disabled.
-#
-# arandr is the tool for *finding* a layout: drag the screens, read the
-# geometry off it, and transcribe it into the array below. Its saved scripts
-# key everything by output name, which is the one thing that does not survive a
-# reconnect here, so this script stays the single source of truth.
-#
-# DisplayLink under X: each dock screen sits on its own evdi provider, and X
-# shows its outputs only once that provider is told to take frames from the
-# GPU (`xrandr --setprovideroutputsource`). apply() does that first, for every
-# sink provider that is not yet associated.
-#
-# apply() only issues xrandr when something is genuinely wrong. A mode set can
-# itself make the kernel emit a DRM uevent, so an unconditional apply would wake
-# the watcher again in a loop; once the layout matches, it runs nothing.
+# Only runs xrandr when something differs: a mode set can emit a DRM uevent,
+# and an unconditional apply would wake the watcher in a loop.
 
 set -euo pipefail
 
@@ -34,18 +15,16 @@ set -euo pipefail
 panel='Lenovo Group Limited 0x403D Unknown'
 
 # identity | mode | position | dock
-#
-# The small HDMI screen on the left, the LG in the middle, the AOP on the
-# right. `dock` marks the two DisplayLink screens, whose presence is what counts
-# as "the hub is plugged in" — an HDMI monitor on its own (a projector, say)
-# gets positioned but does not turn the laptop panel off.
+# `dock` marks the DisplayLink screens: only their presence turns the panel off,
+# so a lone HDMI monitor (a projector) does not.
 screens=(
     'PEB 777K 806020102|1024x768@84.997Hz|1208 430|'
     'LG Electronics LG FULL HD 0x01010101|1920x1080@74.973Hz|2232 118|dock'
     'AOP 22MH1Q 901123123LAJ|1920x1080@60.0Hz|4152 118|dock'
 )
 
-# Hand every DisplayLink (evdi) provider to the GPU as an output sink.
+# X shows a DisplayLink (evdi) provider's outputs only once it is attached to
+# the GPU as an output sink.
 attach_providers() {
     local line idx
     while IFS= read -r line; do
@@ -56,8 +35,7 @@ attach_providers() {
     done < <(xrandr --listproviders)
 }
 
-# The xrandr arguments needed to reach the desired layout, one per line — empty
-# when there is nothing to change.
+# xrandr arguments to reach the layout, one per line; empty when it is right.
 plan() {
     xrandr --verbose | python3 -c '
 import re, sys
@@ -92,8 +70,7 @@ def identity(edid):
     return "%s %s %s" % (pnp.get(pnpid, pnpid), name or "0x%04X" % product,
                          serial or ("0x%08X" % number if number else "Unknown"))
 
-# Parse `xrandr --verbose`: per connected output, its EDID, whether it is
-# active, where it sits, its rotation, and the size and refresh of its mode.
+# Per connected output: EDID, active, position, rotation, current mode.
 outputs = {}
 cur = None
 in_edid = False
@@ -183,9 +160,8 @@ apply() {
 
     (( ${#args[@]} )) || return 0
 
-    # One xrandr call, so the screens move together. A mode or rate a monitor
-    # does not report is refused; then try again without the rates, so that
-    # costs the refresh rate only, never the arrangement.
+    # One call so the screens move together. If a rate is refused, retry
+    # without rates rather than lose the arrangement.
     if ! xrandr "${args[@]}"; then
         local -a norate=() skip=0 a
         for a in "${args[@]}"; do
@@ -198,25 +174,22 @@ apply() {
 }
 
 watch() {
-    # One watcher per session: i3 re-runs exec_always on every reload.
+    # One watcher per session (exec_always re-runs on reload).
     exec 9>"${XDG_RUNTIME_DIR:-/tmp}/dock-monitors.lock"
     flock -n 9 || exit 0
 
-    # i3 starts this in its own process group (setsid), so `kill 0` takes the
-    # udevadm pipeline down with it and nothing else.
+    # i3 runs this in its own process group, so `kill 0` only stops the pipeline.
     trap 'trap - EXIT; kill 0' EXIT
 
     apply
-    # Connecting the dock adds DRM devices and connectors; udev announces each.
     udevadm monitor --udev --subsystem-match=drm | while read -r _; do
-        # One hotplug fires a burst of events; wait for it to go quiet.
+        # Wait out the burst of events one hotplug fires.
         while read -r -t 1 _; do :; done
         apply
     done &
 
-    # Nothing ends the udev stream when the X session does, and a watcher left
-    # over from the last login would keep the lock and leave the next session
-    # unwatched. So stay alive only as long as the X server answers.
+    # Live only as long as the X server does, or a leftover watcher would hold
+    # the lock in the next session.
     while xrandr --current >/dev/null 2>&1; do
         sleep 10
     done

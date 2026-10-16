@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Volume and microphone keys, through pactl. Works with both PulseAudio and
-# PipeWire (pipewire-pulse), which is what keeps it portable.
-#
-# After each change the bar's volume block is refreshed right away (signal 11,
-# see ~/.config/i3blocks/config) instead of at its next interval.
+# volume up|down|mute|mic-mute — pactl (PulseAudio or PipeWire), then an
+# immediate refresh of the bar's volume block.
 
 set -euo pipefail
 

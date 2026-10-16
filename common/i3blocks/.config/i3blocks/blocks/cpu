@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CPU usage over a half-second sample of /proc/stat. Left click: btop.
+# CPU usage over half a second. Click: btop.
 
 [[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f kitty -e btop >/dev/null 2>&1
 

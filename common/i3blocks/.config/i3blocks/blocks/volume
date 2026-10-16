@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Default output volume through pactl (PulseAudio or PipeWire).
-# Left click: pavucontrol. Right click: mute. Scroll: ±5%.
+# Output volume. Click: pavucontrol. Right click: mute. Scroll: ±5%.
 
 case "${BLOCK_BUTTON:-}" in
     1) setsid -f pavucontrol >/dev/null 2>&1 ;;

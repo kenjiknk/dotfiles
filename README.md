@@ -86,7 +86,7 @@ common/
   i3blocks/      status line: config plus one script per block
   dunst/         notifications
   rofi/          application launcher and the menus in ~/Scripts
-  picom/         compositor: blur and dimmed unfocused windows (optional)
+  picom/         compositor: blur, dimmed unfocused windows, animations (optional)
   kitty/         terminal
   yazi/          file manager theme
   zathura/       PDF reader
@@ -96,8 +96,8 @@ common/
   zsh/           zsh + oh-my-zsh + powerlevel10k
   bash/          bash fallback
   claude/        Claude Code settings and custom statusline
-  scripts/       powermenu, screenshot, volume, kbd-layout, touchpad,
-                 power-profile-menu — deployed to ~/Scripts
+  scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
+                 touchpad, power-profile-menu — deployed to ~/Scripts
 
 hosts/thinkpad/
   i3/            keyboard layout, touchpad off at login, dock watcher
@@ -162,8 +162,10 @@ rests on:
   i3 project's own apt repository carries current releases.
 - **Only stable tools.** setxkbmap, xinput, xrandr, xset and pactl instead of
   anything distro-specific. rofi, dunst and picom configs stick to syntax their
-  2022-era versions (rofi 1.7, dunst 1.8, picom 9) understand.
-- **Optional extras fail quietly.** picom, autotiling, unclutter, nm-applet and
+  2022-era versions (rofi 1.7, dunst 1.8, picom 9) understand; the few newer
+  options (dunst's `sort = update`, picom's animations, GTK 4.20's colour-scheme
+  key) are ignored by older versions.
+- **Optional extras fail quietly.** picom, autotiling, xbanish, nm-applet and
   the wallpaper are started so that a missing one costs only that feature.
 
 ## Notes
@@ -207,7 +209,10 @@ rests on:
   `$mod+Shift+c` puts it right. The TrackPoint is untouched.
 - **Keyboard.** `hosts/thinkpad` uses layout `br` with the `thinkpad` variant:
   on Brazilian ThinkPads the `/ ?` key sits where right Ctrl normally is. Click
-  the layout block in the bar to switch to `us` (intl) and back.
+  the layout block in the bar to switch to `us` (intl) and back. Under X a
+  keyboard plugged in after login starts with the server defaults, so
+  `~/Scripts/keyboard-watch` listens to udev and re-applies the repeat rate and
+  the active layouts on every input hotplug.
 - **Last upgrade.** The `last-updated` block reads `/var/log/pacman.log`, so it
   shows on Arch only and stays hidden elsewhere.
 - **Default editor.** `common/xdg` ships an `nvim.desktop` that overrides the
@@ -232,8 +237,8 @@ i3lock, xss-lock, dunst, rofi, feh, maim, xclip, xorg-xrandr, xorg-xinput,
 xorg-setxkbmap, xorg-xset, xdg-desktop-portal-gtk
 
 **Optional — each missing one costs only its feature:** picom (blur and dim),
-autotiling, unclutter (the xfixes one: Arch's `unclutter`, Debian/Ubuntu's
-`unclutter-xfixes`), arandr (finding a monitor layout)
+autotiling, xbanish (hides the pointer while typing and after 8 s idle; AUR on
+Arch, in the repositories on Debian/Ubuntu), arandr (finding a monitor layout)
 
 **Deploying this repo:** stow, git
 
@@ -244,7 +249,7 @@ zsh-syntax-highlighting, zsh-completions, bat, eza
 pavucontrol
 
 **Called by the bar, the keybindings and the scripts:** power-profiles-daemon,
-pkgfile, playerctl (media keys and the mpris block), libpulse (`pactl`),
+pkgfile, playerctl (media keys), libpulse (`pactl`),
 libnotify (`notify-send`), network-manager-applet (tray icon), nmgui (clicking
 the network block), glib2 (`gsettings`), python (the statusline and
 `dock-monitors`), qt6-base (the Qt/GTK theme bridge)

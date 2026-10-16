@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Active keyboard layout. Left click: switch to the next one.
+# Active keyboard layout. Click: next layout.
 
 [[ ${BLOCK_BUTTON:-} == 1 ]] && ~/Scripts/kbd-layout next >/dev/null
 

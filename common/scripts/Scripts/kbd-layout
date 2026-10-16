@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
-# Keyboard layouts under X, with nothing but setxkbmap.
+# Keyboard layouts with nothing but setxkbmap.
 #
-#   kbd-layout set br:thinkpad us:intl   the layouts, first one active
-#   kbd-layout next                      rotate: the second becomes the first
-#   kbd-layout current                   print the active layout (for the bar)
+#   kbd-layout set br:thinkpad us:intl   set the layouts, first one active
+#   kbd-layout next                      rotate the list: the second becomes first
+#   kbd-layout reapply                   set the current layouts again
+#   kbd-layout current                   print the active layout
 #
-# `next` rotates the whole list instead of switching XKB groups. The layout in
-# front is then always the one in use, so `setxkbmap -query` alone answers
-# "which layout is active" — no xkb-switch or other extra tool, which is what
-# keeps this working on any distro.
-#
-# Each LAYOUT:VARIANT pair may leave the variant out (`us` = plain us).
+# Rotating the list (rather than switching XKB groups) keeps the active layout
+# first, so `setxkbmap -query` is all it takes to read it back.
 
 set -euo pipefail
 
 refresh_bar() { pkill -RTMIN+10 -x i3blocks 2>/dev/null || true; }
 
-# setxkbmap -query prints e.g. "layout:     br,us" and "variant:    thinkpad,intl".
 query() { setxkbmap -query | sed -n "s/^$1: *//p"; }
 
 apply() {
@@ -46,12 +42,17 @@ case "${1:-}" in
         done
         apply "${pairs[@]:1}" "${pairs[0]}"
         ;;
+    reapply)
+        layouts=$(query layout)
+        [[ -n $layouts ]] || exit 0
+        setxkbmap -layout "$layouts" -variant "$(query variant)"
+        ;;
     current)
         layout=$(query layout)
         printf '%s\n' "${layout%%,*}"
         ;;
     *)
-        printf 'usage: %s set LAYOUT[:VARIANT]... | next | current\n' "${0##*/}" >&2
+        printf 'usage: %s set LAYOUT[:VARIANT]... | next | reapply | current\n' "${0##*/}" >&2
         exit 1
         ;;
 esac

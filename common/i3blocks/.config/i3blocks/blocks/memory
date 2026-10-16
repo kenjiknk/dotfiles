@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Memory in use (total minus available), in GiB. Left click: btop.
+# Memory in use (total minus available). Click: btop.
 
 [[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f kitty -e btop >/dev/null 2>&1
 

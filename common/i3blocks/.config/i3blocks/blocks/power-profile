@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Power profile in use (power-profiles-daemon). Balanced stays neutral, the two
-# extremes stand out. Left click: the profile menu.
-# Empty on a machine without power-profiles-daemon.
+# Current power profile; the two extremes are coloured. Click: the menu.
+# Hidden without power-profiles-daemon.
 
 [[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f ~/Scripts/power-profile-menu >/dev/null 2>&1
 

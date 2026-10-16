@@ -1,22 +1,13 @@
-# i3blocks: the status line of i3bar. One config for every machine — each block
-# prints nothing when the machine lacks what it reports (no battery, no
-# power-profiles-daemon, no pacman), and i3bar then leaves it out.
+# Status line for i3bar. Each block is ~/.config/i3blocks/blocks/<name> and
+# prints nothing when the machine lacks what it shows, so one config fits all.
+# Output: line 1 text, line 3 (optional) colour.
 #
-# Every block is a script in ~/.config/i3blocks/blocks named after it. Plain
-# output: first line is the text, third line (when present) the colour.
-#
-# `signal` lets a script elsewhere refresh a block at once with
-# `pkill -RTMIN+N -x i3blocks`:
-#    9  power-profile   ~/Scripts/power-profile-menu
-#   10  layout          ~/Scripts/kbd-layout
-#   11  volume          ~/Scripts/volume
+# Signals, sent by scripts with `pkill -RTMIN+N -x i3blocks` for an instant
+# refresh: 9 power-profile, 10 layout, 11 volume.
 
 command=$HOME/.config/i3blocks/blocks/$BLOCK_NAME
 separator=false
 separator_block_width=14
-
-[mpris]
-interval=3
 
 [last-updated]
 interval=3600
@@ -50,3 +41,4 @@ interval=5
 
 [clock]
 interval=5
+markup=pango

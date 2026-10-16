@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
-# Days since the last full system upgrade, read from pacman's log: warning
-# colour after a week, danger after two. Left click: the exact date.
-# Empty on a machine that is not Arch (no pacman.log).
-
-set -euo pipefail
+# Days since the last full upgrade (pacman.log). Yellow after a week, red after
+# two. Click: the exact date. Hidden on non-Arch machines.
 
 LOG=/var/log/pacman.log
 WARN_DAYS=7
@@ -11,7 +8,7 @@ CRIT_DAYS=14
 
 [[ -r $LOG ]] || exit 0
 
-# Last "starting full system upgrade" entry, e.g. [2026-08-30T15:59:55-0300]
+# e.g. [2026-08-30T15:59:55-0300] [PACMAN] starting full system upgrade
 stamp=$(grep -F 'starting full system upgrade' "$LOG" | tail -n 1 | sed -n 's/^\[\([^]]*\)\].*/\1/p')
 [[ -n $stamp ]] || exit 0
 then=$(date -d "$stamp" +%s 2>/dev/null) || exit 0

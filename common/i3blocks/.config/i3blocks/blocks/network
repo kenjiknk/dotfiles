@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# Active connection through NetworkManager: "wifi <ssid>" or "eth <device>".
-# Left click: nmgui when installed, nm-connection-editor otherwise.
-# Empty on a machine without nmcli.
+# Active NetworkManager connection. Click: nmgui, or nm-connection-editor.
 
 if [[ ${BLOCK_BUTTON:-} == 1 ]]; then
     if command -v nmgui >/dev/null; then
@@ -13,7 +11,6 @@ fi
 
 command -v nmcli >/dev/null || exit 0
 
-# Lines of TYPE:STATE:DEVICE:CONNECTION; the first connected one wins.
 while IFS=: read -r type state dev conn; do
     [[ $state == connected ]] || continue
     case "$type" in

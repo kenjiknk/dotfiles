@@ -27,6 +27,11 @@ export BROWSER=zen-browser
 # (/usr/lib/qt6/plugins/platformthemes/libqgtk3.so); nothing extra to install.
 export QT_QPA_PLATFORMTHEME=gtk3
 
+# Under X nothing sets the cursor for every client; without these it differs
+# per toolkit and comes out small.
+export XCURSOR_THEME=Adwaita
+export XCURSOR_SIZE=24
+
 # Per-machine additions, deployed from hosts/<hostname>/shell/. Same idea as
 # ~/.config/i3/local: absent on a machine that has none, and sourced last so
 # it can override anything above.

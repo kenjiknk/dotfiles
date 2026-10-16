@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Session power menu for i3, driven by rofi.
+# Session menu: lock, suspend, logout, reboot, shutdown.
 
 set -euo pipefail
 
@@ -7,8 +7,7 @@ choice=$(printf '%s\n' Lock Suspend Logout Reboot Shutdown |
     rofi -dmenu -i -p "power") || exit 0
 
 case "$choice" in
-    # xss-lock (started by the i3 config) answers lock-session with i3lock, and
-    # never stacks a second one on top of a running lock.
+    # xss-lock answers with i3lock, never stacking a second one.
     Lock)     loginctl lock-session ;;
     Suspend)  systemctl suspend ;;
     Logout)   i3-msg exit ;;
