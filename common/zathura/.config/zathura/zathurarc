@@ -14,7 +14,7 @@ set recolor "true"
 set recolor-keephue "false"
 
 # Same greys as the rest of the setup: #0d0d0d is the surface colour used by
-# dunst and rofi, #c0c0c0 the foreground used by kitty.
+# dunst and rofi, #c0c0c0 the light grey of the bar and notifications.
 set default-bg "#0d0d0d"
 set default-fg "#c0c0c0"
 set recolor-lightcolor "#0d0d0d"
