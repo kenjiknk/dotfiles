@@ -13,8 +13,8 @@ set adjust-open "width"
 set recolor "true"
 set recolor-keephue "false"
 
-# Same greys as the rest of the setup: #0d0d0d is the surface colour used by
-# dunst and rofi, #c0c0c0 the light grey of the bar and notifications.
+# Neutral greys like the rest of the desktop: #0d0d0d is the background of
+# dunst and rofi.
 set default-bg "#0d0d0d"
 set default-fg "#c0c0c0"
 set recolor-lightcolor "#0d0d0d"
