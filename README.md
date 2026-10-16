@@ -187,6 +187,10 @@ rests on:
 - **`$mod+Shift+c` restarts i3** in place, keeping every window. Not a plain
   reload: i3 runs `exec_always` lines — wallpaper, touchpad off, keyboard
   settings — only on a restart, unlike sway, which ran them on reload.
+- **Colours.** Kanagawa Dragon throughout — kitty (the upstream file from
+  kanagawa.nvim), i3 borders, the bar, rofi, dunst, zathura, yazi and i3lock —
+  so changing the palette means touching each of those. GTK and Qt apps stay
+  on Adwaita dark.
 - **Wallpaper.** Every login and restart, `~/Scripts/wallpaper` picks a
   random image from `~/Pictures/Wallpaper` (never the one already showing). One
   that fits the screen is shown at its original size on black; a larger one is
@@ -228,7 +232,7 @@ rests on:
 - **No licence, on purpose.** There is no `LICENSE` file, so default copyright
   applies: all rights reserved, nothing here is granted for reuse. Parts derive
   from [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles) and
-  `yazi/theme.toml` is theirs ("Symphony by vyrx"), so check their terms before
+  `yazi/theme.toml` is based on theirs ("Symphony by vyrx"), so check their terms before
   lifting anything out of here.
 
 ## Dependencies
