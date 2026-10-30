@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""keybinds — every i3 keybinding in a searchable rofi list ($mod+Shift+p).
+
+Read from ~/.config/i3/config (and the files it includes) each time it opens,
+so it can never fall out of step with the real bindings. Variables are
+expanded, modes are shown as "resize › key", workspace 1–10 are folded into
+one line each, and common commands get a short description. Choosing a line
+does nothing: it is a reference, not a launcher.
+"""
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "i3/config"
+
+KEYS = {
+    "Mod4": "Super", "Mod1": "Alt", "Return": "Enter", "space": "Space",
+    "minus": "-", "period": ".", "comma": ",", "Escape": "Esc",
+    "XF86AudioRaiseVolume": "Volume+", "XF86AudioLowerVolume": "Volume-",
+    "XF86AudioMute": "Mute", "XF86AudioMicMute": "MicMute",
+    "XF86AudioPlay": "Play", "XF86AudioPause": "Pause", "XF86AudioNext": "Next",
+    "XF86AudioPrev": "Prev", "XF86AudioStop": "Stop",
+    "XF86MonBrightnessUp": "Brightness+", "XF86MonBrightnessDown": "Brightness-",
+    "XF86TouchpadToggle": "TouchpadToggle",
+}
+
+# Exact i3 commands -> description. Anything else is shown as written.
+COMMANDS = {
+    "kill": "close window",
+    "fullscreen toggle": "fullscreen",
+    "floating toggle": "toggle floating",
+    "focus mode_toggle": "switch focus: floating / tiled",
+    "split h": "next window to the side",
+    "split v": "next window below",
+    "layout stacking": "stacked layout",
+    "layout tabbed": "tabbed layout",
+    "layout toggle split": "toggle horizontal/vertical split",
+    "move scratchpad": "send window to scratchpad",
+    "scratchpad show": "show/hide scratchpad",
+    "restart": "restart i3 (keeps windows)",
+    "mode \"resize\"": "resize mode",
+    "mode \"default\"": "leave mode",
+}
+DIRECTIONS = {"left": "left", "right": "right", "up": "up", "down": "down"}
+
+# What a script or program does, for exec bindings.
+PROGRAMS = {
+    "kitty": "terminal", "rofi -show drun": "launch app (rofi)",
+    "kitty -e yazi": "files (yazi)", "powermenu": "power menu",
+    "screenshot": "screenshot", "touchpad": "toggle touchpad",
+    "power-profile-menu": "power profile", "keybinds": "this keybinding list",
+    "volume up": "volume +5%", "volume down": "volume -5%",
+    "volume mute": "mute", "volume mic-mute": "mute microphone",
+    "brightness up": "brightness +5%", "brightness down": "brightness -5%",
+    "playerctl play-pause": "play/pause", "playerctl next": "next track",
+    "playerctl previous": "previous track", "playerctl stop": "stop",
+}
+
+
+def read_lines(path, seen):
+    path = Path(os.path.expanduser(path))
+    if path in seen or not path.is_file():
+        return []
+    seen.add(path)
+    lines = []
+    for line in path.read_text().splitlines():
+        m = re.match(r"\s*include\s+(.+)", line)
+        lines += read_lines(m.group(1).strip(), seen) if m else [line]
+    return lines
+
+
+def describe(cmd):
+    if cmd in COMMANDS:
+        return COMMANDS[cmd]
+    m = re.fullmatch(r"(focus|move) (left|right|up|down)", cmd)
+    if m:
+        verb = "focus" if m.group(1) == "focus" else "move window"
+        return f"{verb} {DIRECTIONS[m.group(2)]}"
+    m = re.fullmatch(r"resize (grow|shrink) (width|height).*", cmd)
+    if m:
+        what = m.group(2)
+        return f"{m.group(1)} {what}"
+    m = re.fullmatch(r"exec (?:--no-startup-id )?(.+)", cmd)
+    if m:
+        prog = re.sub(r"^(?:\S+=\S+ )+", "", m.group(1))       # VAR=value prefixes
+        prog = re.sub(r"^~/Scripts/", "", prog)
+        for known, text in PROGRAMS.items():
+            if prog == known:
+                return text
+        if prog.startswith("clipmenu"):
+            return "clipboard history"
+        if "emoji" in prog:
+            return "emoji"
+        if prog.startswith("kitty -e tsuzuri"):
+            return "notes (Tsuzuri)"
+        return prog
+    return cmd
+
+
+def key_name(combo):
+    return "+".join(KEYS.get(k, k.upper() if len(k) == 1 else k) for k in combo.split("+"))
+
+
+def main():
+    lines = read_lines(CONFIG, set())
+    variables = {}
+    for line in lines:
+        m = re.match(r"\s*set\s+(\$\w+)\s+(.+)", line)
+        if m:
+            variables[m.group(1)] = m.group(2).strip()
+
+    def expand(text):
+        for name in sorted(variables, key=len, reverse=True):
+            text = text.replace(name, variables[name])
+        return text
+
+    rows, mode, workspaces = [], None, {}
+    for line in lines:
+        line = line.strip()
+        m = re.match(r'mode\s+"([^"]+)"\s*\{', line)
+        if m:
+            mode = m.group(1)
+            continue
+        if line == "}":
+            mode = None
+            continue
+        m = re.match(r"bindsym\s+((?:--\S+\s+)*)(\S+)\s+(.+)", line)
+        if not m:
+            continue
+        combo, cmd = expand(m.group(2)), expand(m.group(3)).strip()
+        w = re.fullmatch(r"(workspace number|move container to workspace number) (\d+)", cmd)
+        if w and not mode:
+            # Fold Super+1..0 into one line per action.
+            mods = combo.rsplit("+", 1)[0]
+            workspaces.setdefault((mods, w.group(1)), []).append(w.group(2))
+            continue
+        key = key_name(combo)
+        rows.append((f"{mode} › {key}" if mode else key, describe(cmd)))
+
+    for (mods, action), nums in workspaces.items():
+        nums = sorted(nums, key=int)
+        text = "go to workspace" if action == "workspace number" else "move window to workspace"
+        rows.append((f"{key_name(mods)}+1…0", f"{text} {nums[0]}–{nums[-1]}"))
+
+    width = max(len(k) for k, _ in rows) + 3
+    text = "\n".join(f"{k:<{width}}{d}" for k, d in rows)
+
+    if not shutil.which("rofi") or "--print" in sys.argv:
+        print(text)
+        return
+    subprocess.run(
+        ["rofi", "-dmenu", "-i", "-no-custom", "-p", "keybinds",
+         "-theme-str", "window { width: 52em; } listview { lines: 18; }"],
+        input=text, text=True, check=False,
+    )
+
+
+if __name__ == "__main__":
+    main()
