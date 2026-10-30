@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# trackpoint
+#
+# Custom acceleration curve for the Elan TrackPoint. libinput's default
+# adaptive profile is slow in the middle of the range and hard to predict; this
+# one is 1:1 under a light press, for small targets, and climbs steadily with
+# pressure. Needs libinput 1.23 and xf86-input-libinput 1.3.
+
+set -euo pipefail
+
+dev='pointer:TPPS/2 Elan TrackPoint'
+
+# Output speed at input speeds 0, 0.1, 0.2, ... device units per ms. Past the
+# last point the curve keeps the slope of the final segment.
+points=(0 0.10 0.22 0.40 0.66 1.00 1.40 1.85 2.35)
+
+xinput set-prop "$dev" 'libinput Accel Custom Motion Points' "${points[@]}"
+xinput set-prop "$dev" 'libinput Accel Custom Motion Step' 0.1
+# adaptive, flat, custom
+xinput set-prop "$dev" 'libinput Accel Profile Enabled' 0 0 1

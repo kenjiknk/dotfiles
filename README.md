@@ -100,8 +100,9 @@ common/
                  touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
 
 hosts/thinkpad/
-  i3/            keyboard layout, touchpad off at login, dock watcher
-  scripts/       dock-monitors
+  i3/            keyboard layout, touchpad off at login, TrackPoint curve,
+                 dock watcher
+  scripts/       dock-monitors, trackpoint
 ```
 
 Deploy one package with

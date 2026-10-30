@@ -7,5 +7,8 @@ exec_always --no-startup-id ~/Scripts/kbd-layout set br:thinkpad us:intl
 # Off at login and on every restart; $mod+Shift+t turns it on.
 exec_always --no-startup-id ~/Scripts/touchpad off
 
+# TrackPoint acceleration curve; a restart re-applies it.
+exec_always --no-startup-id ~/Scripts/trackpoint
+
 # Dock layout, re-applied on every hotplug.
 exec_always --no-startup-id ~/Scripts/dock-monitors --watch
