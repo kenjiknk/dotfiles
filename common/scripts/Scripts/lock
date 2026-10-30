@@ -41,6 +41,11 @@ export XSECURELOCK_AUTH_CURSOR_BLINK=0
 export XSECURELOCK_AUTH_TIMEOUT=30
 export XSECURELOCK_BURNIN_MITIGATION=100
 export XSECURELOCK_SINGLE_AUTH_WINDOW=1
+# No "obscurer" window. It only matters if the compositor crashes, it never
+# draws anything, and picom's close animation showed its undefined content as
+# a white flash on every unlock. The lock itself is drawn on the composite
+# overlay, which covers everything regardless.
+export XSECURELOCK_COMPOSITE_OBSCURER=0
 
 lock_now() {
     if command -v xsecurelock >/dev/null; then
