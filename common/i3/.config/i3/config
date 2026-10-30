@@ -56,10 +56,12 @@ exec_always --no-startup-id ~/Scripts/keyboard-watch
 
 exec --no-startup-id dunst
 
-# Lock at 300 s (screen saver -> xss-lock -> i3lock), screens off at 330 s.
-# xss-lock also locks before suspend and on `loginctl lock-session`.
-exec_always --no-startup-id xset s 300 +dpms dpms 0 0 330
-exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/Scripts/lock
+# At 300 s idle the screen fades to black over 5 s (xsecurelock's dimmer; any
+# input cancels it), then ~/Scripts/lock locks; screens off at 330 s.
+# xss-lock also locks before suspend and on `loginctl lock-session`. The
+# dimmer's 2 s fade plus 3 s wait must add up to xset's 5 s cycle.
+exec_always --no-startup-id xset s 300 5 +dpms dpms 0 0 330
+exec --no-startup-id XSECURELOCK_DIM_TIME_MS=2000 XSECURELOCK_WAIT_TIME_MS=3000 xss-lock --notifier=/usr/lib/xsecurelock/dimmer --transfer-sleep-lock -- ~/Scripts/lock
 
 exec --no-startup-id picom
 
