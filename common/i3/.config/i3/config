@@ -183,6 +183,8 @@ bindsym $mod+Shift+b exec --no-startup-id ~/Scripts/power-profile-menu
 # Clipboard history (clipmenu) and emoji picker (rofi-emoji), both in rofi.
 bindsym $mod+c exec --no-startup-id CM_LAUNCHER=rofi clipmenu -p clip
 bindsym $mod+period exec --no-startup-id rofi -modi emoji -show emoji
+# Notes: Tsuzuri (terminal notebook, plain Markdown) on the notes vault.
+bindsym $mod+Shift+n exec --no-startup-id kitty -e tsuzuri -theme kanagawa-dragon -dir ~/Documents/obsidian-vault
 
 ### Bar
 #

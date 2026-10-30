@@ -280,7 +280,8 @@ prompts for programs that need admin rights; started by i3)
 
 **Optional — each missing one costs only its feature:** i3lock-color (AUR on
 Arch; replaces i3lock, adds the clock and ring), clipmenu (clipboard history,
-`$mod+c`), rofi-emoji (emoji picker, `$mod+.`), picom (dim, corners, animations),
+`$mod+c`), rofi-emoji (emoji picker, `$mod+.`), tsuzuri (notes, `$mod+Shift+n`,
+opens ~/Documents/obsidian-vault), picom (dim, corners, animations),
 autotiling, xbanish (hides the pointer while typing and after 8 s idle; AUR on
 Arch, in the repositories on Debian/Ubuntu), arandr (finding a monitor layout)
 
