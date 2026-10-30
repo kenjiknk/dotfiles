@@ -8,6 +8,11 @@ for b in /sys/class/power_supply/BAT*; do
 done
 [[ -n $bat ]] || exit 0
 
+# Palette ($red, $yellow), generated from ~/.config/theme/theme.toml. Without it
+# the states just go uncoloured.
+# shellcheck source=/dev/null
+. "${XDG_CONFIG_HOME:-$HOME/.config}/theme/colors.sh" 2>/dev/null
+
 cap=$(<"$bat/capacity")
 status=$(<"$bat/status")
 
@@ -56,6 +61,6 @@ fi
 echo "bat ${cap}%"
 echo "bat ${cap}%"
 if [[ $status != Charging ]]; then
-    if (( cap <= 10 )); then echo "#c4746e"; elif (( cap <= 20 )); then echo "#c4b28a"; fi
+    if (( cap <= 10 )); then echo "${red:-}"; elif (( cap <= 20 )); then echo "${yellow:-}"; fi
 fi
 exit 0

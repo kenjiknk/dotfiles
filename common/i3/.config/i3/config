@@ -17,25 +17,25 @@ set $menu rofi -show drun
 
 ### Appearance
 
-# libadwaita apps read dark mode from gsettings through the settings portal.
-exec_always --no-startup-id gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+# libadwaita and Flatpak apps read theme, icons, fonts and dark mode from
+# gsettings through the settings portal; this copies them from gtk-3.0's
+# settings.ini, so that file stays the only place they are set.
+exec_always --no-startup-id ~/Scripts/gsettings-sync
 
 default_border pixel 2
 default_floating_border pixel 2
 
-# Kanagawa Dragon, like the rest of the desktop.
-#               border  background  text     indicator child_border
-client.focused          #8ba4b0 #282727 #c5c9c5 #8ba4b0 #8ba4b0
-client.focused_inactive #393836 #1D1C19 #a6a69c #393836 #393836
-client.unfocused        #282727 #181616 #625e5a #282727 #282727
-client.urgent           #c4746e #c4746e #12120f #c4746e #c4746e
+# Window colours and the bar, generated from ~/.config/theme/theme.toml.
+include ~/.config/i3/colors
 
-gaps inner 5
+# 4 px scale: 8 between windows. Corners (4 px) come from picom.
+gaps inner 8
 smart_gaps on
 hide_edge_borders smart
 
-# Used by the titles of tabbed and stacked containers.
-font pango:DejaVu Sans Mono 9
+# Used by the titles of tabbed and stacked containers. Inter for interface
+# text everywhere, JetBrains Mono for monospace: two families in total.
+font pango:Inter SemiBold 9
 
 # kitty (hide_window_decorations) and others ask for no decorations through the
 # Motif hints, which i3 honours by dropping the border. Put it back.
@@ -48,8 +48,8 @@ focus_wrapping no
 #
 # Optional programs fail quietly when missing; the session carries on.
 
-# A different random wallpaper on every login and restart.
-exec_always --no-startup-id ~/Scripts/wallpaper
+# No wallpaper: with nothing drawing on the root window, X leaves it pure
+# black (#000000), which an OLED panel shows as pixels switched off.
 
 # Repeat rate, re-applied with the layouts to keyboards plugged in later.
 exec_always --no-startup-id ~/Scripts/keyboard-watch
@@ -59,10 +59,17 @@ exec --no-startup-id dunst
 # Lock at 300 s (screen saver -> xss-lock -> i3lock), screens off at 330 s.
 # xss-lock also locks before suspend and on `loginctl lock-session`.
 exec_always --no-startup-id xset s 300 +dpms dpms 0 0 330
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork --color 181616
+exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/Scripts/lock
 
 exec --no-startup-id picom
-exec --no-startup-id nm-applet
+
+# Password prompts for programs that ask for admin rights (polkit); without
+# an agent running they fail without a word.
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+# Clipboard history for $mod+c. Only the clipboard (Ctrl+C), not every mouse
+# selection. Kept under $XDG_RUNTIME_DIR, so it is gone after a reboot.
+exec --no-startup-id CM_SELECTIONS=clipboard clipmenud
 
 # Hide the pointer while typing and after 8 s idle.
 exec --no-startup-id xbanish -t 8
@@ -79,8 +86,8 @@ bindsym $mod+d exec --no-startup-id $menu
 bindsym $mod+Shift+f exec $term -e yazi
 bindsym $mod+Shift+e exec --no-startup-id ~/Scripts/powermenu
 
-# Restart, not reload: i3 runs exec_always lines (wallpaper, touchpad off,
-# keyboard settings) only on restart. Windows and layout are kept.
+# Restart, not reload: i3 runs exec_always lines (touchpad off, keyboard
+# settings) only on restart. Windows and layout are kept.
 bindsym $mod+Shift+c restart
 
 floating_modifier $mod
@@ -165,40 +172,21 @@ bindsym XF86AudioPause exec --no-startup-id playerctl play-pause
 bindsym XF86AudioPrev exec --no-startup-id playerctl previous
 bindsym XF86AudioNext exec --no-startup-id playerctl next
 bindsym XF86AudioStop exec --no-startup-id playerctl stop
-bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
-bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set 5%+
+bindsym XF86MonBrightnessDown exec --no-startup-id ~/Scripts/brightness down
+bindsym XF86MonBrightnessUp exec --no-startup-id ~/Scripts/brightness up
 bindsym XF86TouchpadToggle exec --no-startup-id ~/Scripts/touchpad
 
 # Utilities
 bindsym $mod+Shift+s exec --no-startup-id ~/Scripts/screenshot
 bindsym $mod+Shift+t exec --no-startup-id ~/Scripts/touchpad
 bindsym $mod+Shift+b exec --no-startup-id ~/Scripts/power-profile-menu
+# Clipboard history (clipmenu) and emoji picker (rofi-emoji), both in rofi.
+bindsym $mod+c exec --no-startup-id CM_LAUNCHER=rofi clipmenu -p clip
+bindsym $mod+period exec --no-startup-id rofi -modi emoji -show emoji
 
 ### Bar
 #
-# i3bar draws workspaces and the tray; the status line is i3blocks
-# (~/.config/i3blocks/config).
-
-bar {
-    status_command i3blocks
-    position top
-    font pango:Inter SemiBold 8
-    separator_symbol " "
-    tray_padding 2
-
-    colors {
-        background #12120f
-        statusline #c5c9c5
-        separator  #12120f
-
-        #                  border  background text
-        focused_workspace  #393836 #393836    #c5c9c5
-        active_workspace   #12120f #12120f    #c5c9c5
-        inactive_workspace #12120f #12120f    #c5c9c5
-        urgent_workspace   #c4746e #c4746e    #12120f
-        binding_mode       #393836 #393836    #c5c9c5
-    }
-}
+# Defined in ~/.config/i3/colors (included above), next to its colours.
 
 # From hosts/<hostname>/i3/; a missing file is fine.
 include ~/.config/i3/local

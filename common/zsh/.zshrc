@@ -43,4 +43,10 @@ setopt HIST_REDUCE_BLANKS
 
 # --- powerlevel10k -----------------------------------------------------------
 # run "p10k configure" to (re)generate; the file below stores those choices
+# fzf: Ctrl+R history, Ctrl+T files, Alt+C directories. zoxide: `z part`
+# jumps to the best-matching directory visited before, `zi` picks with fzf.
+# Guarded so the shell still starts on a machine without them.
+command -v fzf >/dev/null && source <(fzf --zsh)
+command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# osd <name> <percent> [icon] [text] — a short-lived notification with a
+# progress bar, replacing the previous one of the same name instead of
+# stacking. Used by ~/Scripts/volume and ~/Scripts/brightness. dunst draws it
+# (rule [osd] in dunstrc: short timeout, kept out of the history). Quiet
+# without notify-send.
+
+set -euo pipefail
+
+command -v notify-send >/dev/null || exit 0
+
+name=$1
+value=$2
+icon=${3:-}
+text=${4:-"$value%"}
+
+notify-send -a osd -u low \
+    -h "string:x-dunst-stack-tag:osd-$name" \
+    -h "int:value:$value" \
+    ${icon:+-i "$icon"} \
+    "$text"

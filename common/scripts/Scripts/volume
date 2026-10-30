@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # volume up|down|mute|mic-mute — pactl (PulseAudio or PipeWire), then an
-# immediate refresh of the bar's volume block.
+# on-screen bar (~/Scripts/osd) and an immediate refresh of the bar's volume
+# block.
 
 set -euo pipefail
 
@@ -14,3 +15,21 @@ case "${1:-}" in
 esac
 
 pkill -RTMIN+11 -x i3blocks 2>/dev/null || true
+
+# "Volume: front-left: 58680 /  90% / -2.88 dB, ..." -> 90; "Mute: yes"
+percent() { pactl "$1" "$2" | grep -oE '[0-9]+%' | head -n 1 | tr -d %; }
+muted() { [[ $(pactl "$1" "$2") == *yes ]]; }
+
+if [[ $1 == mic-mute ]]; then
+    if muted get-source-mute @DEFAULT_SOURCE@; then
+        ~/Scripts/osd mic 0 microphone-sensitivity-muted-symbolic "Muted"
+    else
+        v=$(percent get-source-volume @DEFAULT_SOURCE@)
+        ~/Scripts/osd mic "$v" microphone-sensitivity-high-symbolic "$v%"
+    fi
+elif muted get-sink-mute @DEFAULT_SINK@; then
+    ~/Scripts/osd volume 0 audio-volume-muted-symbolic "Muted"
+else
+    v=$(percent get-sink-volume @DEFAULT_SINK@)
+    ~/Scripts/osd volume "$v" audio-volume-high-symbolic "$v%"
+fi

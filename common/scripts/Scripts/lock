@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# lock — the lock screen, in the palette's colours. Run by xss-lock (idle,
+# before suspend, `loginctl lock-session`); lock by hand with that loginctl
+# command, as the power menu does, so xss-lock never stacks a second one.
+#
+# With i3lock-color: a clock, and a ring that shows the accent while typing and
+# red on a wrong password. Plain i3lock knows none of those options and gets
+# the background colour only. If i3lock-color refuses the options (a newer
+# release renaming one), the plain lock runs instead: the screen always locks.
+#
+# The sleep-lock handling follows xss-lock's transfer-sleep-lock-i3lock.sh:
+# i3lock must not inherit the fd, and closing ours tells logind the screen is
+# locked and suspend may go ahead.
+
+set -u
+
+colors=${XDG_CONFIG_HOME:-$HOME/.config}/theme/colors.sh
+bg='#181616'
+# shellcheck source=/dev/null
+[[ -r $colors ]] && . "$colors"
+
+rgba() { printf '%sff' "${1#\#}"; }
+
+plain() { i3lock "$@" --color "${bg#\#}"; }
+
+fancy() {
+    i3lock "$@" --color "${bg#\#}" \
+        --indicator --radius 96 --ring-width 6 \
+        --inside-color 00000000 --insidever-color 00000000 \
+        --insidewrong-color 00000000 --line-uses-inside \
+        --separator-color 00000000 \
+        --ring-color "$(rgba "$surface2")" \
+        --ringver-color "$(rgba "$accent")" \
+        --ringwrong-color "$(rgba "$red")" \
+        --keyhl-color "$(rgba "$accent")" \
+        --bshl-color "$(rgba "$red")" \
+        --clock --time-str '%H:%M' --date-str '%A, %d %B' \
+        --time-font Inter --date-font Inter \
+        --time-size 40 --date-size 14 \
+        --time-color "$(rgba "$fg")" --date-color "$(rgba "$fg_dim")" \
+        --verif-text '' --wrong-text '' --noinput-text ''
+}
+
+# i3lock-color's version reads like "2.13.c.5"; it also needs the palette.
+locker=plain
+if [[ -r $colors ]] && i3lock --version 2>&1 | grep -q '[0-9]\.c\.[0-9]'; then
+    locker=fancy
+fi
+
+if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
+    kill_i3lock() { pkill -xu "$EUID" "$@" i3lock; }
+    trap kill_i3lock TERM INT
+
+    # Forking mode: returns once the screen is locked, or at once on an error.
+    $locker {XSS_SLEEP_LOCK_FD}<&- || plain {XSS_SLEEP_LOCK_FD}<&-
+
+    exec {XSS_SLEEP_LOCK_FD}<&-
+
+    while kill_i3lock -0; do
+        sleep 0.5
+    done
+else
+    trap 'kill %%' TERM INT
+    { $locker --nofork || plain --nofork; } &
+    wait
+fi

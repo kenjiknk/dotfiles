@@ -171,9 +171,6 @@ apply() {
         done
         xrandr "${norate[@]}" || true
     fi
-
-    # The root window changed size; redraw the wallpaper over the new layout.
-    [[ -x ~/Scripts/wallpaper ]] && ~/Scripts/wallpaper --same || true
 }
 
 watch() {

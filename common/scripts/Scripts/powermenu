@@ -1,18 +1,33 @@
 #!/usr/bin/env bash
-# Session menu: lock, suspend, logout, reboot, shutdown.
+# Session menu: lock, suspend, logout, reboot, shutdown. The three that end
+# the session ask for confirmation first; lock and suspend lose nothing.
+# Icons are Nerd Font glyphs, from rofi's JetBrainsMono Nerd Font.
 
 set -euo pipefail
 
-choice=$(printf '%s\n' Lock Suspend Logout Reboot Shutdown |
-    rofi -dmenu -i -p "power") || exit 0
+lock='󰌾  Lock'
+suspend='󰒲  Suspend'
+logout='󰍃  Logout'
+reboot='󰜉  Reboot'
+shutdown='󰐥  Shutdown'
+
+menu() { rofi -dmenu -i -p "$1"; }
+
+# Asks "<action>?" with No first, so a stray Enter does nothing.
+confirm() {
+    [[ $(printf '%s\n' No Yes | menu "${1,,}?") == Yes ]]
+}
+
+choice=$(printf '%s\n' "$lock" "$suspend" "$logout" "$reboot" "$shutdown" |
+    menu "power") || exit 0
 
 case "$choice" in
-    # xss-lock answers with i3lock, never stacking a second one.
-    Lock)     loginctl lock-session ;;
-    Suspend)  systemctl suspend ;;
-    Logout)   i3-msg exit ;;
-    Reboot)   systemctl reboot ;;
-    Shutdown) systemctl poweroff ;;
-    "")       exit 0 ;;
-    *)        printf 'unknown choice: %s\n' "$choice" >&2; exit 1 ;;
+    # xss-lock answers with ~/Scripts/lock, never stacking a second one.
+    "$lock")     loginctl lock-session ;;
+    "$suspend")  systemctl suspend ;;
+    "$logout")   confirm Logout   && i3-msg exit ;;
+    "$reboot")   confirm Reboot   && systemctl reboot ;;
+    "$shutdown") confirm Shutdown && systemctl poweroff ;;
+    "")          exit 0 ;;
+    *)           printf 'unknown choice: %s\n' "$choice" >&2; exit 1 ;;
 esac

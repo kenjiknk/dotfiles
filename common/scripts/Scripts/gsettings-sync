@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# gsettings-sync — copies theme, icons, font, cursor and dark mode from
+# ~/.config/gtk-3.0/settings.ini to gsettings. libadwaita and Flatpak apps read
+# those through the settings portal, not from settings.ini; this keeps the
+# .ini the one place they are set. Run by i3 on every restart. Quiet without
+# gsettings or the file.
+
+set -euo pipefail
+
+ini=${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini
+command -v gsettings >/dev/null || exit 0
+[[ -r $ini ]] || exit 0
+
+get() { sed -n "s/^$1=//p" "$ini" | tail -n 1; }
+
+put() {
+    [[ -n $2 ]] || return 0
+    gsettings set org.gnome.desktop.interface "$1" "$2"
+}
+
+put gtk-theme    "$(get gtk-theme-name)"
+put icon-theme   "$(get gtk-icon-theme-name)"
+put font-name    "$(get gtk-font-name)"
+put cursor-theme "$(get gtk-cursor-theme-name)"
+put cursor-size  "$(get gtk-cursor-theme-size)"
+
+if [[ $(get gtk-application-prefer-dark-theme) == 1 ]]; then
+    put color-scheme prefer-dark
+else
+    put color-scheme default
+fi

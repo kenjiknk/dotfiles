@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# brightness up|down — 5% steps with brightnessctl, then an on-screen bar.
+
+set -euo pipefail
+
+case "${1:-}" in
+    up)   brightnessctl -q set 5%+ ;;
+    down) brightnessctl -q set 5%- ;;
+    *)    printf 'usage: %s up|down\n' "${0##*/}" >&2; exit 1 ;;
+esac
+
+# -m: "device,class,current,percent%,max"
+percent=$(brightnessctl -m | cut -d, -f4)
+percent=${percent%\%}
+~/Scripts/osd brightness "$percent" display-brightness-symbolic "$percent%"

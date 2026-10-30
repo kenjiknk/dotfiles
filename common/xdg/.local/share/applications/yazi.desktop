@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Yazi
+GenericName=File Manager
+Comment=Browse files in the terminal
+# Overrides /usr/share/applications/yazi.desktop, which is Terminal=true.
+# A bare window manager registers no terminal for xdg-open to resolve, so
+# this calls kitty explicitly. The default for folders (mimeapps.list).
+Exec=kitty -e yazi %f
+Terminal=false
+Type=Application
+Icon=yazi
+Categories=Utility;FileManager;
+StartupNotify=false
+MimeType=inode/directory;

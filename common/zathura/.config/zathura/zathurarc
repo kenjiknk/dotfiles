@@ -2,7 +2,8 @@
 set scroll-step 50
 set statusbar-home-tilde true
 set selection-clipboard clipboard
-set font "monospace 14"
+# 11 pt, the size of the other content text (GTK, dunst, kitty).
+set font "monospace 11"
 
 # Open pages fit-to-width automatically
 set pages-per-row 1
@@ -13,12 +14,6 @@ set adjust-open "width"
 set recolor "true"
 set recolor-keephue "false"
 
-# Kanagawa Dragon, like the rest of the desktop.
-set default-bg "#181616"
-set default-fg "#c5c9c5"
-set recolor-lightcolor "#181616"
-set recolor-darkcolor "#c5c9c5"
-
-# Search highlights: yellow for every match, aqua for the current one.
-set highlight-color "#c4b28a"
-set highlight-active-color "#8ea4a2"
+# Page, recolor and highlight colours, generated from
+# ~/.config/theme/theme.toml. Relative to this file.
+include colors

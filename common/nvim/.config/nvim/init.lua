@@ -5,9 +5,11 @@
 -- start and pins it in nvim-pack-lock.json.
 vim.pack.add({ "https://github.com/rebelot/kanagawa.nvim" }, { confirm = false })
 
--- kitty makes every cell whose background equals its own (#181616, the same
--- Dragon black) translucent. One step off keeps Neovim opaque and looks the same.
+-- Colours from the desktop palette (lua/palette.lua, generated from
+-- ~/.config/theme/theme.toml), under kanagawa.nvim's own names.
+local palette = require("palette")
+
 require("kanagawa").setup({
-    colors = { theme = { dragon = { ui = { bg = "#181617" } } } },
+    colors = { palette = palette },
 })
 vim.cmd.colorscheme("kanagawa-dragon")

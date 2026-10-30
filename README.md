@@ -1,7 +1,7 @@
 # dotfiles
 
 i3 on X11, written to run on any distro. Configuration — how things look, and
-how the tools used day to day behave — plus the wallpapers it rotates through. Developed on Arch; the baseline is
+how the tools used day to day behave. Developed on Arch; the baseline is
 whatever an LTS distro from 2022 on ships (see [Portability](#portability)).
 
 Originally derived from [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles),
@@ -86,18 +86,22 @@ common/
   i3blocks/      status line: config plus one script per block
   dunst/         notifications
   rofi/          application launcher and the menus in ~/Scripts
-  picom/         compositor: blur, dimmed unfocused windows, animations (optional)
+  picom/         compositor: dimmed unfocused windows, corners, animations (optional)
   kitty/         terminal
   yazi/          file manager theme
   zathura/       PDF reader
-  gtk/           dark mode for GTK 3 and 4
-  xdg/           default applications (browser, editor, PDF)
+  gtk/           GTK 3 and 4: adw-gtk3, Papirus icons, Inter, palette colours
+  theme/         the palette (theme.toml) and its templates — see Colours below
+  fontconfig/    `sans-serif` is Inter, `monospace` JetBrains Mono
+  flatpak/       global override: Flatpak apps may read the GTK theme files
+  xdg/           default applications (browser, editor, PDF, folders)
   shell/         environment and aliases shared by both shells
   zsh/           zsh + oh-my-zsh + powerlevel10k
   bash/          bash fallback
-  wallpapers/    the images ~/Scripts/wallpaper picks from (~/Pictures/Wallpaper)
   scripts/       powermenu, screenshot, volume, kbd-layout, keyboard-watch,
-                 touchpad, power-profile-menu, wallpaper — deployed to ~/Scripts
+                 touchpad, power-profile-menu, lock, gsettings-sync,
+                 theme-render, zen-chrome, osd, brightness —
+                 deployed to ~/Scripts
 
 hosts/thinkpad/
   i3/            keyboard layout, touchpad off at login, TrackPoint curve,
@@ -166,8 +170,8 @@ rests on:
   2022-era versions (rofi 1.7, dunst 1.8, picom 9) understand; the few newer
   options (dunst's `sort = update`, picom's animations, GTK 4.20's colour-scheme
   key) are ignored by older versions.
-- **Optional extras fail quietly.** picom, autotiling, xbanish, nm-applet and
-  the wallpaper are started so that a missing one costs only that feature.
+- **Optional extras fail quietly.** picom, autotiling, xbanish and clipmenud
+  are started so that a missing one costs only that feature.
 
 ## Notes
 
@@ -184,21 +188,49 @@ rests on:
   directories holding one symlink per file cost nothing and let the layers
   stack.
 - **`$mod+Shift+c` restarts i3** in place, keeping every window. Not a plain
-  reload: i3 runs `exec_always` lines — wallpaper, touchpad off, keyboard
+  reload: i3 runs `exec_always` lines — touchpad off, keyboard
   settings — only on a restart, unlike sway, which ran them on reload.
-- **Colours.** Kanagawa Dragon throughout — kitty (the upstream file from
-  kanagawa.nvim), i3 borders, the bar, rofi, dunst, zathura, yazi and i3lock —
-  so changing the palette means touching each of those. GTK and Qt apps stay
-  on Adwaita dark.
-- **Wallpaper.** Every login and restart, `~/Scripts/wallpaper` picks a
-  random image from `~/Pictures/Wallpaper` (never the one already showing). One
-  that fits the screen is shown at its original size on black; a larger one is
-  scaled down to fit — never cropped or stretched. The `wallpapers` package
-  links the tracked images there; files dropped into the folder by hand join
-  the rotation too, without being committed.
+- **Colours.** One palette, Kanagawa Dragon, in
+  `common/theme/.config/theme/theme.toml`, with colours named by role (`bg`,
+  `bg_alt`, `fg`, `accent`, ...). `~/Scripts/theme-render
+  ~/.config/theme/theme.toml` fills the templates next to it and writes, through
+  the stow symlinks, i3's window colours and bar (`i3/colors`), rofi, dunst
+  (the whole `dunstrc`), kitty, GTK 3 and 4 (`gtk.css`), zathura, yazi, nvim
+  (`lua/palette.lua`, fed to kanagawa.nvim under its own colour names), Zen
+  Browser's `userChrome.css` and
+  `theme/colors.sh` for the lock screen and the bar's warning colours. Then it
+  reloads i3, dunst and kitty. The outputs are tracked, so a fresh checkout
+  needs no render step; never edit them by hand. Needs Python 3.11+, only when
+  changing the palette.
+- **Zen Browser.** Profiles have random names, so the repo cannot link into
+  one. Run `~/Scripts/zen-chrome` once per machine (and after creating a new
+  profile): it links the generated `userChrome.css` into the default profile
+  and enables the pref that makes Zen read it. Restart Zen. Only the interface
+  changes; private windows keep Zen's own look.
+- **Flatpak.** `flatpak/` holds a user-level global override that lets every
+  Flatpak app read `gtk.css` (and the repo directory its symlink points into,
+  which assumes the clone lives at `~/dotfiles`). The theme itself must also
+  exist inside the sandbox: `flatpak install flathub org.gtk.Gtk3theme.adw-gtk3-dark`.
+  `flatpak override --user` rewrites that file, replacing the link; restow
+  afterwards.
+- **GTK and Qt.** GTK 3 uses adw-gtk3 (the libadwaita look) and GTK 4
+  libadwaita, both recoloured by `gtk.css`; without adw-gtk3, GTK 3 falls back
+  to plain Adwaita dark. Qt programs follow GTK through the gtk3 platform
+  theme.
+  `~/Scripts/gsettings-sync` copies the GTK settings to gsettings on every i3
+  restart, for libadwaita and Flatpak apps.
+- **Geometry.** A 4 px scale: 8 px gaps, 8 px terminal padding, notifications
+  8 px from the edge and below the bar, and 4 px corners on windows (picom),
+  rofi and dunst. Two fonts: Inter for interface text, JetBrains Mono for
+  monospace.
+- **Background.** None: nothing draws on the root window, so X leaves it pure
+  black (`#000000`) — pixels off on an OLED panel.
 - **Idle and lock.** Lock at 5 minutes, screens off at 5.5, lock before
-  suspend: `xset` sets the timers and xss-lock runs i3lock. Lock by hand with
-  `loginctl lock-session` (what the power menu does).
+  suspend: `xset` sets the timers and xss-lock runs `~/Scripts/lock`. Lock by
+  hand with `loginctl lock-session` (what the power menu does). With
+  i3lock-color installed the lock shows a clock and a palette-coloured ring;
+  plain i3lock gets the background colour, and so does i3lock-color if it ever
+  rejects an option, so the screen always locks.
 - **Monitors.** `arandr` is the tool for *finding* a layout, not for applying
   one: its saved scripts key screens by output name, and the two DisplayLink
   outputs swap names across reconnects. Drag the screens there, then transcribe
@@ -240,10 +272,15 @@ Install these first — this repo configures them, it does not install them.
 
 **Window manager and desktop:** xorg-server, xorg-xauth (ly needs it for X
 sessions), i3-wm (4.22 or newer, see [Portability](#portability)), i3blocks,
-i3lock, xss-lock, dunst, rofi, feh, maim, xclip, xorg-xrandr, xorg-xinput,
-xorg-setxkbmap, xorg-xset, xdg-desktop-portal-gtk
+i3lock, xss-lock, dunst, rofi, maim, xclip, xorg-xrandr, xorg-xinput,
+xorg-setxkbmap, xorg-xset, xdg-desktop-portal-gtk, polkit-gnome (password
+prompts for programs that need admin rights; started by i3)
 
-**Optional — each missing one costs only its feature:** picom (blur and dim),
+**Theme:** adw-gtk-theme, papirus-icon-theme
+
+**Optional — each missing one costs only its feature:** i3lock-color (AUR on
+Arch; replaces i3lock, adds the clock and ring), clipmenu (clipboard history,
+`$mod+c`), rofi-emoji (emoji picker, `$mod+.`), picom (dim, corners, animations),
 autotiling, xbanish (hides the pointer while typing and after 8 s idle; AUR on
 Arch, in the repositories on Debian/Ubuntu), arandr (finding a monitor layout)
 
@@ -252,13 +289,17 @@ Arch, in the repositories on Debian/Ubuntu), arandr (finding a monitor layout)
 **Terminals and shell:** kitty, zsh, zsh-autosuggestions,
 zsh-syntax-highlighting, zsh-completions, bat, eza
 
-**Tools:** yazi, zathura, zathura-pdf-mupdf, btop, duf, brightnessctl,
-pavucontrol
+**Tools:** yazi, zathura, zathura-pdf-mupdf, btop, duf, brightnessctl
+
+**Terminal apps in place of GUI ones:** lazygit, lazydocker, fzf and zoxide
+(hooked into zsh), fd, ripgrep, jq, glow, tealdeer (`tldr`), dua-cli (`dua`),
+wiremix (mixer; clicking the volume block), bluetui (Bluetooth; clicking the
+`bt` block, which reads bluez over D-Bus and needs the `bluetooth` service), spotify-player (needs Spotify Premium). Wi-Fi is
+`nmtui`, part of NetworkManager. yazi is the default for folders.
 
 **Called by the bar, the keybindings and the scripts:** power-profiles-daemon,
 pkgfile, playerctl (media keys), libpulse (`pactl`),
-libnotify (`notify-send`), network-manager-applet (tray icon), nmgui (clicking
-the network block), glib2 (`gsettings`), python (`dock-monitors`), qt6-base (the Qt/GTK theme bridge)
+libnotify (`notify-send`), networkmanager (`nmtui`, clicking the network
+block), glib2 (`gsettings`), python (`dock-monitors`), qt6-base (the Qt/GTK theme bridge)
 
-**Fonts:** inter-font, ttf-jetbrains-mono-nerd, ttf-dejavu (i3's tab and
-stack titles), noto-fonts, noto-fonts-emoji
+**Fonts:** inter-font, ttf-jetbrains-mono-nerd, noto-fonts, noto-fonts-emoji

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Output volume. Click: pavucontrol. Right click: mute. Scroll: ±5%.
+# Output volume. Click: wiremix (mixer). Right click: mute. Scroll: ±5%.
 
 case "${BLOCK_BUTTON:-}" in
-    1) setsid -f pavucontrol >/dev/null 2>&1 ;;
+    1) setsid -f kitty -e wiremix >/dev/null 2>&1 ;;
     3) pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
     4) pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
     5) pactl set-sink-volume @DEFAULT_SINK@ -5% ;;

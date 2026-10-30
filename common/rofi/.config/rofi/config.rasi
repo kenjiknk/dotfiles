@@ -1,4 +1,4 @@
-/* Launcher ($mod+d) and the menus in ~/Scripts, in Kanagawa Dragon.
+/* Launcher ($mod+d) and the menus in ~/Scripts, in the desktop's palette.
  * rofi 1.7+ syntax. */
 
 configuration {
@@ -21,22 +21,28 @@ configuration {
 /* Empty base theme: the built-in one colours list rows itself, overriding `*`. */
 @theme "/dev/null"
 
+/* @bg-alt, @fg, @accent, ...: generated from ~/.config/theme/theme.toml.
+ * After @theme, which discards whatever came before it. */
+@import "colors.rasi"
+
 * {
-    background-color: #0d0c0c;
-    text-color: #a6a69c;
+    background-color: @bg-alt;
+    text-color: @fg-dim;
     font: "JetBrainsMono Nerd Font 10";
 }
 
+/* Same geometry as the windows: 2 px border in the accent (rofi has focus
+ * while open), 4 px corners, spacing on a 4 px scale. */
 window {
     width: 40em;
-    border: 1px;
-    border-color: #393836;
+    border: 2px;
+    border-color: @accent;
     border-radius: 4px;
     padding: 8px 12px;
 }
 
 mainbox {
-    spacing: 6px;
+    spacing: 8px;
 }
 
 inputbar {
@@ -45,11 +51,11 @@ inputbar {
 }
 
 prompt {
-    text-color: #C8C093;
+    text-color: @fg-warm;
 }
 
 entry {
-    text-color: #c5c9c5;
+    text-color: @fg;
 }
 
 listview {
@@ -60,12 +66,13 @@ listview {
 }
 
 element {
-    padding: 3px 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
 element selected.normal {
-    background-color: #2D4F67;
-    text-color: #C8C093;
+    background-color: @selection;
+    text-color: @fg-warm;
 }
 
 element-icon {
@@ -76,5 +83,5 @@ element-icon {
 element-text {
     background-color: inherit;
     text-color: inherit;
-    highlight: bold #c4b28a;
+    highlight: @match-highlight;
 }

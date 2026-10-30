@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+"""theme-render — uma paleta, muitos arquivos de cor.
+
+Copy of scripts/theme_render.py from the linux-ricing Claude skill, with one
+change: no .bak files unless --backup is given. The outputs here are tracked
+in git, which already keeps every previous version. Needs Python 3.11+.
+
+Lê um TOML assim:
+
+    [meta]
+    name = "catppuccin-mocha"
+    templates_dir = "~/.config/theme/templates"   # opcional; relativo ao TOML se não for absoluto
+
+    [palette]
+    bg = "#1e1e2e"
+    accent = "#cba6f7"
+
+    [[target]]
+    template = "kitty.conf"                        # dentro de templates_dir
+    output = "~/.config/kitty/colors.conf"
+    hook = "pkill -SIGUSR1 kitty"                  # opcional
+
+Placeholders nos templates (para a cor `accent` = #cba6f7):
+    {{accent}} / {{accent.hex}}   -> #cba6f7
+    {{accent.strip}}              -> cba6f7
+    {{accent.rgb}}                -> 203, 166, 247
+    {{accent.argb}}               -> 0xffcba6f7      (Hyprland Lua)
+    {{accent.argb:cc}}            -> 0xcccba6f7      (alpha em hex)
+    {{accent.rgba:0.8}}           -> rgba(203, 166, 247, 0.8)
+    {{meta.name}}                 -> valor de [meta]
+
+Uso:
+    theme-render theme.toml [--dry-run] [--no-hooks] [--backup]
+"""
+import argparse
+import re
+import shutil
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    sys.exit("Precisa de Python 3.11+ (tomllib).")
+
+PLACEHOLDER = re.compile(r"\{\{\s*([A-Za-z0-9_\-]+)(?:\.([a-z]+)(?::([0-9A-Fa-f.]+))?)?\s*\}\}")
+
+
+def norm_hex(value: str) -> str:
+    h = value.strip().lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    if not re.fullmatch(r"[0-9A-Fa-f]{6}", h):
+        raise ValueError(f"cor inválida: {value!r} (use #rrggbb)")
+    return h.lower()
+
+
+def render_value(key: str, fmt: str, arg: str, palette: dict, meta: dict) -> str:
+    if key == "meta":
+        if fmt in meta:
+            return str(meta[fmt])
+        raise KeyError(f"meta.{fmt} não definido")
+    if key not in palette:
+        raise KeyError(f"cor '{key}' não está em [palette]")
+    h = palette[key]
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
+    fmt = fmt or "hex"
+    if fmt == "hex":
+        return f"#{h}"
+    if fmt == "strip":
+        return h
+    if fmt == "rgb":
+        return f"{r}, {g}, {b}"
+    if fmt == "argb":
+        alpha = (arg or "ff").lower()
+        if not re.fullmatch(r"[0-9a-f]{2}", alpha):
+            raise ValueError(f"alpha inválido em {key}.argb:{arg} (use 2 dígitos hex)")
+        return f"0x{alpha}{h}"
+    if fmt == "rgba":
+        a = arg or "1"
+        return f"rgba({r}, {g}, {b}, {a})"
+    raise ValueError(f"formato desconhecido: {key}.{fmt}")
+
+
+def render(text: str, palette: dict, meta: dict, src: str) -> str:
+    errors = []
+
+    def sub(m):
+        key, fmt, arg = m.group(1), m.group(2), m.group(3)
+        if key == "meta" and fmt is None:
+            errors.append(f"{src}: use meta.<campo>")
+            return m.group(0)
+        try:
+            return render_value(key, fmt, arg, palette, meta)
+        except (KeyError, ValueError) as e:
+            errors.append(f"{src}: {e}")
+            return m.group(0)
+
+    out = PLACEHOLDER.sub(sub, text)
+    for leftover in re.findall(r"\{\{[^}]*\}\}", out):
+        if not PLACEHOLDER.fullmatch(leftover):
+            errors.append(f"{src}: placeholder malformado {leftover}")
+    if errors:
+        raise SystemExit("Erros de template:\n  " + "\n  ".join(errors))
+    return out
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("theme", type=Path)
+    ap.add_argument("--dry-run", action="store_true", help="mostra o que faria, sem escrever")
+    ap.add_argument("--no-hooks", action="store_true", help="não roda os hooks de reload")
+    ap.add_argument("--backup", action="store_true", help="cria .bak de arquivos alterados")
+    args = ap.parse_args()
+
+    theme_path = args.theme.expanduser().resolve()
+    data = tomllib.loads(theme_path.read_text())
+    meta = data.get("meta", {})
+    try:
+        palette = {k: norm_hex(v) for k, v in data["palette"].items()}
+    except KeyError:
+        sys.exit("O TOML precisa de uma tabela [palette].")
+    targets = data.get("target", [])
+    if not targets:
+        sys.exit("Nenhum [[target]] definido.")
+
+    tdir = Path(meta.get("templates_dir", "templates")).expanduser()
+    if not tdir.is_absolute():
+        tdir = theme_path.parent / tdir
+
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    hooks = []
+    for t in targets:
+        tpl = tdir / t["template"]
+        out = Path(t["output"]).expanduser()
+        if not tpl.exists():
+            sys.exit(f"Template não encontrado: {tpl}")
+        content = render(tpl.read_text(), palette, meta, str(tpl))
+        old = out.read_text() if out.exists() else None
+        if old == content:
+            print(f"  igual     {out}")
+            continue
+        if args.dry_run:
+            print(f"  escreveria {out}")
+        else:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            if old is not None and args.backup:
+                shutil.copy2(out, out.with_name(f"{out.name}.bak-{stamp}"))
+            out.write_text(content)
+            print(f"  escrito   {out}")
+        if t.get("hook"):
+            hooks.append(t["hook"])
+
+    if hooks and not args.no_hooks:
+        for h in dict.fromkeys(hooks):  # sem repetir, na ordem
+            if args.dry_run:
+                print(f"  rodaria hook: {h}")
+                continue
+            r = subprocess.run(h, shell=True)
+            status = "ok" if r.returncode == 0 else f"saiu com {r.returncode} (o app pode não estar aberto)"
+            print(f"  hook: {h} -> {status}")
+
+
+if __name__ == "__main__":
+    main()

@@ -8,6 +8,11 @@ CRIT_DAYS=14
 
 [[ -r $LOG ]] || exit 0
 
+# Palette ($red, $yellow), generated from ~/.config/theme/theme.toml. Without it
+# the states just go uncoloured.
+# shellcheck source=/dev/null
+. "${XDG_CONFIG_HOME:-$HOME/.config}/theme/colors.sh" 2>/dev/null
+
 # e.g. [2026-08-30T15:59:55-0300] [PACMAN] starting full system upgrade
 stamp=$(grep -F 'starting full system upgrade' "$LOG" | tail -n 1 | sed -n 's/^\[\([^]]*\)\].*/\1/p')
 [[ -n $stamp ]] || exit 0
@@ -23,7 +28,7 @@ days=$(( ($(date +%s) - then) / 86400 ))
 echo "days $days"
 echo "days $days"
 if (( days >= CRIT_DAYS )); then
-    echo "#c4746e"
+    echo "${red:-}"
 elif (( days >= WARN_DAYS )); then
-    echo "#c4b28a"
+    echo "${yellow:-}"
 fi

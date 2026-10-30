@@ -21,11 +21,18 @@ export EDITOR=nvim
 export VISUAL=nvim
 export BROWSER=zen-browser
 
-# Makes Qt programs (dolphin, ark, gwenview, ...) follow the system GTK theme —
-# dark Adwaita, Adwaita Sans, and the GTK file dialogs — instead of Qt's light
-# default. The plugin ships in qt6-base
-# (/usr/lib/qt6/plugins/platformthemes/libqgtk3.so); nothing extra to install.
+# Makes Qt programs follow the system GTK theme —
+# adw-gtk3 recoloured with the palette (~/.config/gtk-3.0/gtk.css), Papirus
+# icons, Inter, and the GTK file dialogs — instead of Qt's light default. The
+# plugin ships in qt6-base (/usr/lib/qt6/plugins/platformthemes/libqgtk3.so);
+# nothing extra to install, and no second colour file to keep in step.
 export QT_QPA_PLATFORMTHEME=gtk3
+
+# nmtui (and anything else on newt) defaults to a light blue-and-grey scheme.
+# Named ANSI colours, so kitty turns them into the palette: windows on black
+# (dragonBlack0), the accent (blue) for titles and the selection, the
+# terminal's own background behind.
+export NEWT_COLORS='root=white,default;roottext=gray,default;helpline=gray,default;window=white,black;border=gray,black;shadow=,default;title=blue,black;label=white,black;textbox=white,black;acttextbox=black,blue;button=white,black;actbutton=black,blue;compactbutton=white,black;checkbox=white,black;actcheckbox=black,blue;entry=white,black;disentry=gray,black;listbox=white,black;actlistbox=black,blue;sellistbox=blue,black;actsellistbox=black,blue;emptyscale=,black;fullscale=,blue'
 
 # Under X nothing sets the cursor for every client; without these it differs
 # per toolkit and comes out small.

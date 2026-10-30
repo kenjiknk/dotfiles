@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Bluetooth: "bt off", "bt on", or the connected device's name ("+N" for more
+# than one). Click: bluetui in a terminal. Asks bluez over D-Bus with busctl,
+# so bluez-utils (bluetoothctl) is not needed. Hidden without an adapter.
+
+[[ ${BLOCK_BUTTON:-} == 1 ]] && setsid -f kitty -e bluetui >/dev/null 2>&1
+
+command -v busctl >/dev/null || exit 0
+
+# First adapter, e.g. /org/bluez/hci0.
+adapter=$(busctl --list tree org.bluez 2>/dev/null | grep -m1 -xE '/org/bluez/hci[0-9]+')
+[[ -n $adapter ]] || exit 0
+
+# `busctl get-property` prints "b true" / s "Name".
+prop() { busctl get-property org.bluez "$1" "$2" "$3" 2>/dev/null; }
+
+if [[ $(prop "$adapter" org.bluez.Adapter1 Powered) != "b true" ]]; then
+    echo "bt off"
+    echo "bt off"
+    exit 0
+fi
+
+connected=()
+while read -r dev; do
+    if [[ $(prop "$dev" org.bluez.Device1 Connected) == "b true" ]]; then
+        alias=$(prop "$dev" org.bluez.Device1 Alias)
+        alias=${alias#s \"}
+        connected+=("${alias%\"}")
+    fi
+done < <(busctl --list tree org.bluez 2>/dev/null | grep -E "^$adapter/dev_[0-9A-F_]+$")
+
+if (( ${#connected[@]} == 0 )); then
+    label="bt on"
+elif (( ${#connected[@]} == 1 )); then
+    label="bt ${connected[0]}"
+else
+    label="bt ${connected[0]} +$(( ${#connected[@]} - 1 ))"
+fi
+
+echo "$label"
+echo "$label"
+exit 0

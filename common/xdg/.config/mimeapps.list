@@ -43,6 +43,9 @@ application/x-shellscript=nvim.desktop
 # PDF
 application/pdf=org.pwmt.zathura.desktop
 
+# folders
+inode/directory=yazi.desktop
+
 [Added Associations]
 x-scheme-handler/http=zen.desktop;
 x-scheme-handler/https=zen.desktop;

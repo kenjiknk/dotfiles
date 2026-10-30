@@ -1,0 +1,100 @@
+# The desktop's palette, in one place. Every colour file below is generated
+# from it; edit here, never in the outputs, then run:
+#
+#     ~/Scripts/theme-render ~/.config/theme/theme.toml
+#
+# Outputs are written through the stow symlinks into this repository and are
+# tracked, so a fresh checkout works without running anything; `git diff`
+# shows what a palette change did.
+#
+# Kanagawa Dragon, from kanagawa.nvim (MIT, Tommaso Laurenzi); names by role.
+
+[meta]
+name = "kanagawa-dragon"
+templates_dir = "templates"
+
+[palette]
+# Surfaces, darkest to lightest.
+bg_dark  = "#0d0c0c"   # ANSI black
+bg_alt   = "#12120f"   # panels: bar, rofi, dunst, GTK views and header bars
+bg       = "#181616"   # windows: terminal, zathura, GTK windows
+bg_soft  = "#1d1c19"   # raised: GTK cards and sidebars, i3 inactive titles
+surface  = "#282727"   # focused i3 title, GTK popovers
+surface2 = "#393836"   # subtle borders, inactive workspace on another screen
+overlay  = "#625e5a"   # decoration only: below 3:1, never for text
+
+# Text.
+fg       = "#c5c9c5"   # main text
+fg_dim   = "#a6a69c"   # secondary text
+fg_warm  = "#c8c093"   # cursor, prompt, text on the selection
+muted    = "#7a8382"   # quiet but legible text (4.5:1 on bg)
+
+# Accent and selection.
+accent    = "#8ba4b0"  # focus: window border, current workspace, GTK accent
+selection = "#2d4f67"  # selected rows and text
+url       = "#72a7bc"
+
+# ANSI and states.
+red      = "#c4746e"
+green    = "#8a9a7b"
+yellow   = "#c4b28a"
+blue     = "#8ba4b0"
+magenta  = "#a292a3"
+cyan     = "#8ea4a2"
+red2     = "#e46876"
+green2   = "#87a987"
+yellow2  = "#e6c384"
+blue2    = "#7fb4ca"
+magenta2 = "#938aa9"
+cyan2    = "#7aa89f"
+orange   = "#b6927b"
+orange2  = "#b98d7b"
+
+# Outputs: paths through the deployed symlinks, so they land in the repo.
+
+[[target]]
+template = "i3-colors"
+output   = "~/.config/i3/colors"
+hook     = "i3-msg -q reload"
+
+[[target]]
+template = "rofi-colors.rasi"
+output   = "~/.config/rofi/colors.rasi"
+
+[[target]]
+template = "dunstrc"
+output   = "~/.config/dunst/dunstrc"
+hook     = "dunstctl reload"
+
+[[target]]
+template = "kitty-colors.conf"
+output   = "~/.config/kitty/colors.conf"
+hook     = "pkill -USR1 -x kitty"
+
+[[target]]
+template = "gtk3.css"
+output   = "~/.config/gtk-3.0/gtk.css"
+
+[[target]]
+template = "gtk4.css"
+output   = "~/.config/gtk-4.0/gtk.css"
+
+[[target]]
+template = "zathura-colors"
+output   = "~/.config/zathura/colors"
+
+[[target]]
+template = "yazi-theme.toml"
+output   = "~/.config/yazi/theme.toml"
+
+[[target]]
+template = "nvim-palette.lua"
+output   = "~/.config/nvim/lua/palette.lua"
+
+[[target]]
+template = "zen-userChrome.css"
+output   = "~/.config/theme/zen/userChrome.css"
+
+[[target]]
+template = "colors.sh"
+output   = "~/.config/theme/colors.sh"

@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-# Active NetworkManager connection. Click: nmgui, or nm-connection-editor.
+# Active NetworkManager connection. Click: nmtui in a terminal.
 
 if [[ ${BLOCK_BUTTON:-} == 1 ]]; then
-    if command -v nmgui >/dev/null; then
-        setsid -f nmgui >/dev/null 2>&1
-    else
-        setsid -f nm-connection-editor >/dev/null 2>&1
-    fi
+    setsid -f kitty -e nmtui >/dev/null 2>&1
 fi
 
 command -v nmcli >/dev/null || exit 0
