@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# wallpaper — the desktop theme's Tux with pscircle's process tree growing
+# from it. Adapted from arindas/dotfiles-manjaro-i3 (.local/bin/pscircle_horizontal
+# and Pictures/wallpaper.png): same tree geometry, colours from the theme.
+#
+#   wallpaper          draw once (theme-render runs this after a theme switch)
+#   wallpaper --loop   redraw every $WALLPAPER_INTERVAL s (default 30), from i3
+#
+# Background: ~/.config/theme/wallpaper.svg (generated per theme), rendered at
+# the screen's size. Tree colours: ~/.config/theme/colors.sh — links from
+# magenta to error and dots from green2 to error as CPU use rises, the
+# original's gruvbox choice by role. Without pscircle it sets just the Tux;
+# without feh or rsvg-convert it does nothing and exits 0, so a theme switch
+# never fails over it.
+#
+# The tree is kept on screen: its depth changes with what runs (a terminal
+# running a shell running a program adds a ring each), and the original's
+# fixed rings ran off the bottom. Before each draw a quarter-scale probe on a
+# canvas twice the screen's height shows how far the tree reaches; the rings
+# shrink, by as little as needed, to fit.
+
+set -u
+
+theme=${XDG_CONFIG_HOME:-$HOME/.config}/theme
+run=${XDG_RUNTIME_DIR:-/tmp}/wallpaper
+interval=${WALLPAPER_INTERVAL:-30}
+
+# The original's geometry: centre 7,40 px from the top-left corner (on the
+# Tux), a 90° sector from pointing right to straight down, a 350 px first
+# ring and 200 px between the next ones.
+CX=7 CY=40 SECTOR=1.5707 FIRST=350 STEP=200
+MARGIN=16       # px kept free at the right and bottom edges
+MIN_SCALE=0.4   # smaller and the labels pile up; a deeper tree then overflows
+
+# Width and height of the first monitor, from "0: +*eDP-1 1920/302x1200/189+0+0 eDP-1".
+screen_size() {
+    xrandr --listmonitors 2>/dev/null |
+        awk 'NR == 2 { split($3, a, /[\/x+]/); print a[1], a[3]; exit }'
+}
+
+# pscircle drawing the tree into $out (w x h), the geometry scaled by $s and
+# the rings by $k; any further arguments (colours, background) are passed on.
+tree() { # out w h s k [pscircle args...]
+    local out=$1 w=$2 h=$3 s=$4 k=$5
+    shift 5
+    local g
+    g=$(awk -v w="$w" -v h="$h" -v s="$s" -v k="$k" -v cx="$CX" -v cy="$CY" \
+        -v first="$FIRST" -v step="$STEP" 'BEGIN {
+        font = (k < 0.75 ? 11 : 12) * s
+        printf "%.1f:%.1f %.1f,%.1f %.2f %.2f %.2f\n",
+            -w / 2 + cx * s, -h / 2 + cy * s, first * k * s, step * k * s, font, 4 * s, 2 * s
+    }')
+    local center radii font dot link
+    read -r center radii font dot link <<<"$g"
+    pscircle --output="$out" --output-width="$w" --output-height="$h" \
+        --tree-center="$center" --tree-sector-angle="$SECTOR" \
+        --tree-rotate=1 --tree-rotation-angle=0 \
+        --tree-radius-increment="$radii" \
+        --root-pid=1 --max-children=100 --collapse-threads=1 \
+        --tree-font-face="JetBrainsMono Nerd Font" --tree-font-size="$font" \
+        --link-convexity=0.4 --link-width="$link" \
+        --dot-radius="$dot" --dot-border-width=0 \
+        --cpulist-show=0 --memlist-show=0 "$@" 2>/dev/null
+}
+
+# Right-most and bottom-most drawn pixel of a PNG on black, as "x y".
+extent() {
+    python3 -I - "$1" <<'PY'
+import struct, sys, zlib
+data = open(sys.argv[1], "rb").read()
+pos, idat = 8, b""
+while pos < len(data):
+    n, typ = struct.unpack(">I4s", data[pos:pos + 8])
+    body = data[pos + 8:pos + 8 + n]
+    pos += 12 + n
+    if typ == b"IHDR":
+        w, h, _, ctype = struct.unpack(">IIBB", body[:10])
+    elif typ == b"IDAT":
+        idat += body
+bpp = {2: 3, 6: 4}[ctype]
+raw, stride = zlib.decompress(idat), w * bpp
+prev, i, mx, my = bytearray(stride), 0, 0, 0
+for y in range(h):
+    f, line = raw[i], bytearray(raw[i + 1:i + 1 + stride])
+    i += 1 + stride
+    for x in range(stride):
+        a = line[x - bpp] if x >= bpp else 0
+        b = prev[x]
+        c = prev[x - bpp] if x >= bpp else 0
+        if f == 1: line[x] = (line[x] + a) & 255
+        elif f == 2: line[x] = (line[x] + b) & 255
+        elif f == 3: line[x] = (line[x] + (a + b) // 2) & 255
+        elif f == 4:
+            p = a + b - c
+            pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+            line[x] = (line[x] + (a if pa <= pb and pa <= pc else b if pb <= pc else c)) & 255
+    for x in range(w):
+        if any(line[x * bpp:x * bpp + 3]):
+            mx, my = max(mx, x), y
+    prev = line
+print(mx, my)
+PY
+}
+
+# Ring scale (1 = the original's) at which the tree fits a w x h screen.
+fit() { # w h
+    local w=$1 h=$2 s=0.25 k=1 tries=0 ext
+    while ((tries++ < 3)); do
+        # Twice the screen's height, so whatever would overflow is measured.
+        tree "$run/probe.png" "$(awk -v w="$w" -v s=$s 'BEGIN { printf "%d", w * s }')" \
+            "$(awk -v h="$h" -v s=$s 'BEGIN { printf "%d", 2 * h * s }')" "$s" "$k" \
+            --background-color=000000 --tree-font-color=ffffff \
+            --link-color-min=ffffff --link-color-max=ffffff \
+            --dot-color-min=ffffff --dot-color-max=ffffff || break
+        ext=$(extent "$run/probe.png") || break
+        k=$(awk -v e="$ext" -v w="$w" -v h="$h" -v s=$s -v k="$k" -v cx=$CX -v cy=$CY \
+            -v m=$MARGIN -v min=$MIN_SCALE 'BEGIN {
+            split(e, p, " "); x = (p[1] + 1) / s; y = (p[2] + 1) / s
+            f = 1
+            if (y > h - m) f = (h - m - cy) / (y - cy)
+            if (x > w - m && (w - m - cx) / (x - cx) < f) f = (w - m - cx) / (x - cx)
+            if (f >= 1) { print "ok " k; exit }
+            # Labels do not shrink with the rings: aim a little lower.
+            k = k * f * 0.97; if (k < min) k = min
+            print "again " k
+        }')
+        [[ $k == ok* ]] && break
+        k=${k#again }
+        [[ $k == "$MIN_SCALE" ]] && break
+    done
+    echo "${k#ok }"
+}
+
+# Levels below PID 1 in the deepest branch of the process tree.
+tree_depth() {
+    ps -e -o pid=,ppid= | awk '
+        { parent[$1] = $2 }
+        END {
+            max = 1
+            for (pid in parent) {
+                d = 0; p = pid
+                while (p != 1 && (p in parent) && d < 64) { p = parent[p]; d++ }
+                if (p == 1 && d > max) max = d
+            }
+            print max
+        }'
+}
+
+# fit, but measured again only when the screen size or the tree's depth
+# changed, or after 5 minutes (labels can change the shape at the same depth):
+# the probe costs about a second of CPU, the drawing itself very little.
+cached_fit() { # w h
+    local key cache=$run/fit k
+    key="$1x$2 depth $(tree_depth)"
+    if [[ -r $cache ]] && (($(date +%s) - $(stat -c %Y "$cache") < 300)); then
+        local ckey ck
+        { read -r ckey; read -r ck; } <"$cache"
+        [[ $ckey == "$key" && -n $ck ]] && { echo "$ck"; return; }
+    fi
+    k=$(fit "$1" "$2")
+    printf '%s\n%s\n' "$key" "$k" >"$cache"
+    echo "$k"
+}
+
+draw() {
+    command -v feh >/dev/null && command -v rsvg-convert >/dev/null || return 0
+    [[ -r $theme/wallpaper.svg ]] || return 0
+
+    local w h out k
+    read -r w h < <(screen_size)
+    w=${w:-1920} h=${h:-1200}
+    mkdir -p "$run"
+
+    rsvg-convert -w "$w" -h "$h" "$theme/wallpaper.svg" -o "$run/background.png" || return 0
+    out=$run/background.png
+
+    if command -v pscircle >/dev/null; then
+        # shellcheck source=/dev/null
+        . "$theme/colors.sh"
+        k=$(cached_fit "$w" "$h")
+        if tree "$run/tree.png" "$w" "$h" 1 "${k:-1}" \
+            --background-image="$run/background.png" \
+            --tree-font-color="${fg#\#}" \
+            --link-color-min="${magenta#\#}" --link-color-max="${red#\#}" \
+            --dot-color-min="${green2#\#}" --dot-color-max="${red#\#}"; then
+            out=$run/tree.png
+        fi
+    fi
+
+    feh --no-fehbg --bg-fill "$out"
+}
+
+if [[ ${1:-} == --loop ]]; then
+    while :; do
+        draw
+        sleep "$interval"
+    done
+else
+    draw
+fi
