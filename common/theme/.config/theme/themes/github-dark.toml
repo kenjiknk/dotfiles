@@ -1,0 +1,43 @@
+# GitHub Dark Default, from GitHub Primer (primer/primitives, MIT) via projekt0n/github-nvim-theme (MIT). selection = accent blended into bg at 30%.
+# Roles as in ../theme.toml. Switch with ~/Scripts/theme-switch ($mod+t).
+
+[meta]
+name = "github-dark"
+label = "GitHub Dark"
+nvim_plugin = "https://github.com/projekt0n/github-nvim-theme"
+nvim_colorscheme = "github_dark_default"
+nvim_setup = ''
+vscode_extension = "GitHub.github-vscode-theme"
+vscode_theme = "GitHub Dark Default"
+tsuzuri = "github_dark"
+
+[palette]
+bg_dark = "#010409"
+bg_alt = "#010409"
+bg = "#0d1117"
+bg_soft = "#161b22"
+surface = "#21262d"
+surface2 = "#30363d"
+overlay = "#484f58"
+fg = "#e6edf3"
+fg_dim = "#8b949e"
+fg_warm = "#f0f6fc"
+muted = "#7d8590"
+accent = "#2f81f7"
+selection = "#1a365c"
+url = "#58a6ff"
+error = "#f85149"
+red = "#ff7b72"
+green = "#3fb950"
+yellow = "#d29922"
+blue = "#58a6ff"
+magenta = "#bc8cff"
+cyan = "#39c5cf"
+red2 = "#ffa198"
+green2 = "#56d364"
+yellow2 = "#e3b341"
+blue2 = "#79c0ff"
+magenta2 = "#d2a8ff"
+cyan2 = "#56d4dd"
+orange = "#f0883e"
+orange2 = "#ffa657"

@@ -10,7 +10,7 @@
 client.focused          {{accent}} {{surface}} {{fg}} {{accent}} {{accent}}
 client.focused_inactive {{surface2}} {{bg_soft}} {{fg_dim}} {{surface2}} {{surface2}}
 client.unfocused        {{surface}} {{bg}} {{muted}} {{surface}} {{surface}}
-client.urgent           {{red}} {{red}} {{bg_alt}} {{red}} {{red}}
+client.urgent           {{error}} {{error}} {{bg_alt}} {{error}} {{error}}
 
 # i3bar draws workspaces and the tray; the status line is i3blocks
 # (~/.config/i3blocks/config).
@@ -32,7 +32,7 @@ bar {
         focused_workspace  {{accent}} {{accent}} {{bg_alt}}
         active_workspace   {{surface2}} {{surface2}} {{fg}}
         inactive_workspace {{bg_alt}} {{bg_alt}} {{fg_dim}}
-        urgent_workspace   {{red}} {{red}} {{bg_alt}}
+        urgent_workspace   {{error}} {{error}} {{bg_alt}}
         binding_mode       {{surface2}} {{surface2}} {{fg}}
     }
 }

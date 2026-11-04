@@ -67,7 +67,7 @@
 
 [urgency_critical]
     timeout = 10
-    foreground = "{{red}}"
+    foreground = "{{error}}"
 
 # On-screen bars from ~/Scripts/osd: gone in under two seconds, and not worth
 # keeping in the history.

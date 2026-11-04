@@ -15,13 +15,13 @@ find_position = { fg = "{{cyan}}", bold = true, italic = true }
 
 # Marker
 marker_copied = { fg = "{{yellow}}", bg = "{{yellow}}" }
-marker_cut = { fg = "{{red}}", bg = "{{red}}" }
+marker_cut = { fg = "{{error}}", bg = "{{error}}" }
 marker_marked = { fg = "{{cyan}}", bg = "{{cyan}}" }
 marker_selected = { fg = "{{accent}}", bg = "{{accent}}" }
 
 # Count
 count_copied = { fg = "{{bg_alt}}", bg = "{{yellow}}" }
-count_cut = { fg = "{{bg_alt}}", bg = "{{red}}" }
+count_cut = { fg = "{{bg_alt}}", bg = "{{error}}" }
 count_selected = { fg = "{{bg_alt}}", bg = "{{accent}}" }
 
 # Border
@@ -41,13 +41,13 @@ sep_right = { open = "🭁", close = "" }
 perm_type = { fg = "{{accent}}" }
 perm_read = { fg = "{{yellow}}" }
 perm_write = { fg = "{{cyan}}" }
-perm_exec = { fg = "{{red}}" }
+perm_exec = { fg = "{{error}}" }
 perm_sep = { fg = "{{fg_dim}}" }
 
 # Progress
 progress_label = { bold = true }
 progress_normal = { fg = "{{accent}}", bg = "{{surface2}}" }
-progress_error = { fg = "{{red}}", bg = "{{surface2}}" }
+progress_error = { fg = "{{error}}", bg = "{{surface2}}" }
 
 [mode]
 # Mode
@@ -139,7 +139,7 @@ footer = { fg = "{{bg_alt}}", bg = "{{fg_dim}}" }
 [notify]
 title_info = { fg = "{{accent}}" }
 title_warn = { fg = "{{cyan}}" }
-title_error = { fg = "{{red}}" }
+title_error = { fg = "{{error}}" }
 
 # : ]]]
 
@@ -162,7 +162,7 @@ rules = [
     { mime = "application/{pdf,doc,rtf}", fg = "{{blue2}}" },
 
     # Special files
-    { url = "*", is = "orphan", bg = "{{red}}" },
+    { url = "*", is = "orphan", bg = "{{error}}" },
     { url = "*", is = "exec", fg = "{{fg}}" },
 
     # Fallback

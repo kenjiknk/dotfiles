@@ -1,0 +1,43 @@
+# Ayu Dark, from ayu-theme/ayu-colors (MIT) via Shatur/neovim-ayu. fg_dim and muted are derived: ayu's own grey (#565b66) is too dark for text.
+# Roles as in ../theme.toml. Switch with ~/Scripts/theme-switch ($mod+t).
+
+[meta]
+name = "ayu-dark"
+label = "Ayu Dark"
+nvim_plugin = "https://github.com/Shatur/neovim-ayu"
+nvim_colorscheme = "ayu-dark"
+nvim_setup = ''
+vscode_extension = "teabyii.ayu"
+vscode_theme = "Ayu Dark"
+tsuzuri = "ayu_dark"
+
+[palette]
+bg_dark = "#05070a"
+bg_alt = "#0f131a"
+bg = "#0b0e14"
+bg_soft = "#11151c"
+surface = "#1e222a"
+surface2 = "#3c414a"
+overlay = "#565b66"
+fg = "#bfbdb6"
+fg_dim = "#8e8d88"
+fg_warm = "#e6e1cf"
+muted = "#7a7f88"
+accent = "#e6b450"
+selection = "#1b3a5b"
+url = "#39bae6"
+error = "#f07178"
+red = "#f07178"
+green = "#aad94c"
+yellow = "#e6b450"
+blue = "#59c2ff"
+magenta = "#d2a6ff"
+cyan = "#95e6cb"
+red2 = "#f26d78"
+green2 = "#7fd962"
+yellow2 = "#ffb454"
+blue2 = "#73b8ff"
+magenta2 = "#cb9ff8"
+cyan2 = "#39bae6"
+orange = "#ff8f40"
+orange2 = "#f29668"

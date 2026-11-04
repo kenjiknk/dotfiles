@@ -15,6 +15,10 @@ Reads a TOML like this:
     bg = "#1e1e2e"
     accent = "#cba6f7"
 
+or, instead of [palette], `palette = "themes/catppuccin-mocha.toml"` under
+[meta]: a file with its own [meta] and [palette], merged in (~/Scripts/theme-switch
+swaps that line).
+
     [[target]]
     template = "kitty.conf"                        # inside templates_dir
     output = "~/.config/kitty/colors.conf"
@@ -45,7 +49,7 @@ try:
 except ModuleNotFoundError:
     sys.exit("Needs Python 3.11+ (tomllib).")
 
-PLACEHOLDER = re.compile(r"\{\{\s*([A-Za-z0-9_\-]+)(?:\.([a-z]+)(?::([0-9A-Fa-f.]+))?)?\s*\}\}")
+PLACEHOLDER = re.compile(r"\{\{\s*([A-Za-z0-9_\-]+)(?:\.([a-z_]+)(?::([0-9A-Fa-f.]+))?)?\s*\}\}")
 
 
 def norm_hex(value: str) -> str:
@@ -118,10 +122,22 @@ def main() -> None:
     theme_path = args.theme.expanduser().resolve()
     data = tomllib.loads(theme_path.read_text())
     meta = data.get("meta", {})
+    # The palette may live in its own file (`[meta] palette = "themes/x.toml"`,
+    # relative to this TOML), so several themes can share one target list.
+    # That file's [meta] (name, editor themes, ...) is merged over this one.
+    if "palette" in meta:
+        pal_path = Path(meta["palette"]).expanduser()
+        if not pal_path.is_absolute():
+            pal_path = theme_path.parent / pal_path
+        if not pal_path.exists():
+            sys.exit(f"Palette file not found: {pal_path}")
+        pal_data = tomllib.loads(pal_path.read_text())
+        meta = {**meta, **pal_data.get("meta", {})}
+        data["palette"] = pal_data.get("palette", {})
     try:
         palette = {k: norm_hex(v) for k, v in data["palette"].items()}
     except KeyError:
-        sys.exit("The TOML needs a [palette] table.")
+        sys.exit("The TOML needs a [palette] table (or [meta] palette = <file>).")
     targets = data.get("target", [])
     if not targets:
         sys.exit("No [[target]] defined.")

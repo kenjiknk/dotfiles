@@ -9,8 +9,8 @@
     --accent-bg-color: {{accent}};
     --accent-fg-color: {{bg_alt}};
 
-    --destructive-color: {{red}};
-    --destructive-bg-color: {{red}};
+    --destructive-color: {{error}};
+    --destructive-bg-color: {{error}};
     --destructive-fg-color: {{bg_alt}};
     --success-color: {{green}};
     --success-bg-color: {{green}};
@@ -18,8 +18,8 @@
     --warning-color: {{yellow}};
     --warning-bg-color: {{yellow}};
     --warning-fg-color: {{bg_alt}};
-    --error-color: {{red}};
-    --error-bg-color: {{red}};
+    --error-color: {{error}};
+    --error-bg-color: {{error}};
     --error-fg-color: {{bg_alt}};
 
     --window-bg-color: {{bg}};
@@ -48,8 +48,8 @@
 @define-color accent_color {{accent}};
 @define-color accent_bg_color {{accent}};
 @define-color accent_fg_color {{bg_alt}};
-@define-color destructive_color {{red}};
-@define-color destructive_bg_color {{red}};
+@define-color destructive_color {{error}};
+@define-color destructive_bg_color {{error}};
 @define-color destructive_fg_color {{bg_alt}};
 @define-color success_color {{green}};
 @define-color success_bg_color {{green}};
@@ -57,8 +57,8 @@
 @define-color warning_color {{yellow}};
 @define-color warning_bg_color {{yellow}};
 @define-color warning_fg_color {{bg_alt}};
-@define-color error_color {{red}};
-@define-color error_bg_color {{red}};
+@define-color error_color {{error}};
+@define-color error_bg_color {{error}};
 @define-color error_fg_color {{bg_alt}};
 @define-color window_bg_color {{bg}};
 @define-color window_fg_color {{fg}};

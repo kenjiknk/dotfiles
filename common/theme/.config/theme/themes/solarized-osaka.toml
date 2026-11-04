@@ -1,0 +1,43 @@
+# Solarized Osaka, from craftzdog/solarized-osaka.nvim (Apache-2.0) and its kitty extra. bg_dark, bg_alt, surface2 and muted are derived; brights are its 300-400 shades.
+# Roles as in ../theme.toml. Switch with ~/Scripts/theme-switch ($mod+t).
+
+[meta]
+name = "solarized-osaka"
+label = "Solarized Osaka"
+nvim_plugin = "https://github.com/craftzdog/solarized-osaka.nvim"
+nvim_colorscheme = "solarized-osaka"
+nvim_setup = 'require("solarized-osaka").setup({ transparent = false })'
+vscode_extension = "sherloach.solarized-osaka"
+vscode_theme = "Solarized Osaka"
+tsuzuri = "solarized_osaka"
+
+[palette]
+bg_dark = "#000b0e"
+bg_alt = "#000f13"
+bg = "#001419"
+bg_soft = "#002c38"
+surface = "#073541"
+surface2 = "#0b4250"
+overlay = "#586e74"
+fg = "#9fabad"
+fg_dim = "#839395"
+fg_warm = "#adb8b8"
+muted = "#738a90"
+accent = "#268bd3"
+selection = "#073541"
+url = "#29a298"
+error = "#f65351"
+red = "#db302d"
+green = "#849900"
+yellow = "#b28500"
+blue = "#268bd3"
+magenta = "#d23681"
+cyan = "#29a298"
+red2 = "#f65351"
+green2 = "#b7d300"
+yellow2 = "#e6ac00"
+blue2 = "#47adf5"
+magenta2 = "#f254a1"
+cyan2 = "#2bd1c3"
+orange = "#ca4c16"
+orange2 = "#f84f0d"

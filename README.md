@@ -1,6 +1,6 @@
 # dotfiles
 
-i3 on X11, Kanagawa Dragon everywhere, terminal apps over GUI ones. Arch Linux
+i3 on X11, one colour theme everywhere (six to pick from), terminal apps over GUI ones. Arch Linux
 on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 
 ![screenshot](assets/screenshot.png)
@@ -17,12 +17,12 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Lock** | [xsecurelock](https://github.com/google/xsecurelock) + xss-lock, with a fade before locking |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
 | **Shell** | zsh + oh-my-zsh + powerlevel10k, fzf, zoxide |
-| **Editor** | [neovim](https://neovim.io) with [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) |
+| **Editor** | [neovim](https://neovim.io), colour scheme following the desktop theme |
 | **Fetch** | [fastfetch](https://github.com/fastfetch-cli/fastfetch) — small Arch logo, Nerd Font keys, ANSI colours from kitty |
 | **Files** | [yazi](https://github.com/sxyazi/yazi) |
 | **Notes** | [tsuzuri](https://github.com/jaisuriya-11/tsuzuri) |
 | **TUIs** | lazygit, lazydocker, btop, wiremix, bluetui, nmtui, spotify-player, dua |
-| **Colours** | [Kanagawa Dragon](https://github.com/rebelot/kanagawa.nvim), one file for the whole desktop |
+| **Colours** | six themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark |
 | **Fonts** | Inter (interface), JetBrains Mono Nerd Font (monospace) |
 | **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark |
 | **Background** | none — pure black, pixels off on OLED |
@@ -92,6 +92,7 @@ ones:
 | `Super+Shift+s` | screenshot |
 | `Super+Shift+e` | power menu (lock, suspend, logout, reboot, shutdown) |
 | `Super+Shift+c` | restart i3 in place |
+| `Super+t` | desktop theme |
 
 Clicking a bar block opens its TUI: network → nmtui, bt → bluetui, volume →
 wiremix, cpu/mem → btop.
@@ -104,7 +105,7 @@ Each directory is a stow package that mirrors `$HOME`.
 common/            any machine
   i3/ i3blocks/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
   gtk/ fontconfig/ flatpak/ xdg/
-  theme/           the palette and the templates every colour file comes from
+  theme/           the themes (palettes) and the templates every colour file comes from
   shell/ zsh/ bash/
   scripts/         ~/Scripts: lock, powermenu, volume, brightness, keybinds, ...
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
@@ -116,16 +117,37 @@ assets/            the screenshot above
 
 ## Colours
 
-Everything comes from `common/theme/.config/theme/theme.toml`. To change the
-palette, edit it and run:
+Each theme is one file in `common/theme/.config/theme/themes/`: a palette by
+role (backgrounds, text, accent, error, ANSI) and the editors' own theme
+names. `Super+t` (`~/Scripts/theme-switch`) picks one in rofi; also
+`theme-switch nord`, or `theme-switch --list`.
+
+A switch points `theme.toml` at that file and runs
+`~/Scripts/theme-render`, which rewrites the colour files for i3 and the bar,
+rofi, dunst, kitty, GTK/Qt, zathura, yazi, Zen, the lock screen, Neovim and
+Tsuzuri, and reloads i3, dunst and kitty. It also sets VS Code's theme and
+runs `:ThemeReload` in every open Neovim. GTK/Qt apps, yazi, zathura and Zen
+change when reopened. The shell prompt uses ANSI colours, so it follows
+kitty.
+
+To add a theme, copy a file in `themes/`, change its colours and `[meta]`,
+and add its Neovim plugin to `init.lua`. To change the current one, edit its
+file and run `~/Scripts/theme-render ~/.config/theme/theme.toml`. The
+generated files are tracked, so a fresh clone needs no render step, and it
+starts on the theme last picked. Needs Python 3.11+.
+
+Editor themes, installed once per machine:
 
 ```sh
-~/Scripts/theme-render ~/.config/theme/theme.toml
+code --install-extension metaphore.kanagawa-vscode-color-theme   # and:
+code --install-extension jdinhlife.gruvbox
+code --install-extension arcticicestudio.nord-visual-studio-code
+code --install-extension teabyii.ayu
+code --install-extension sherloach.solarized-osaka
+code --install-extension GitHub.github-vscode-theme
 ```
 
-It rewrites the colour files for i3 and the bar, rofi, dunst, kitty, GTK,
-zathura, yazi, nvim and Zen, then reloads what it can. The generated files are
-tracked, so a fresh clone needs no render step. Needs Python 3.11+.
+Neovim installs its six colour schemes on first start (`vim.pack`).
 
 ## Notes
 
@@ -140,8 +162,14 @@ tracked, so a fresh clone needs no render step. Needs Python 3.11+.
 
 ## Credits
 
-[kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) by Tommaso Laurenzi
-(palette, MIT). Originally based on
+Palettes: [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) (Tommaso
+Laurenzi, MIT), [gruvbox](https://github.com/morhetz/gruvbox) (Pavel Pertsev),
+[Nord](https://github.com/nordtheme/nord) (MIT),
+[ayu](https://github.com/ayu-theme/ayu-colors) (MIT),
+[solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim)
+(Apache-2.0) and [GitHub Primer](https://github.com/primer/primitives) (MIT).
+
+Originally based on
 [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles); the yazi theme
 derives from their "Symphony".
 

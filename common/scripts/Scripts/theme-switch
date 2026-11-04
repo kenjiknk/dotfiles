@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""theme-switch — pick a desktop theme; everything follows.
+
+    theme-switch            rofi menu, the current theme marked ($mod+t)
+    theme-switch <name>     switch directly (a file name in themes/, no .toml)
+    theme-switch --list     print the themes, `*` on the current one
+
+A theme is ~/.config/theme/themes/<name>.toml: a [palette] with the roles
+theme.toml lists, and a [meta] with the editors' own themes. Switching:
+
+  1. points theme.toml's `palette =` line at it (tracked in the dotfiles repo,
+     so a fresh checkout starts on the theme last picked);
+  2. runs theme-render: i3, bar, rofi, dunst, kitty, GTK/Qt, zathura, yazi,
+     Zen, lock screen, i3blocks, Neovim's theme.lua and Tsuzuri; i3, dunst and
+     kitty reload at once;
+  3. sets VS Code's workbench.colorTheme, which VS Code applies live;
+  4. runs :ThemeReload in every running Neovim.
+
+GTK/Qt apps, yazi, zathura and Zen pick the new colours up when reopened.
+"""
+import glob
+import json
+import os
+import re
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+THEME_TOML = CONFIG / "theme" / "theme.toml"
+THEMES = CONFIG / "theme" / "themes"
+RENDER = Path.home() / "Scripts" / "theme-render"
+VSCODE_SETTINGS = CONFIG / "Code" / "User" / "settings.json"
+PALETTE_LINE = re.compile(r'^(palette\s*=\s*)"themes/([^"]+)\.toml"', re.M)
+
+
+def themes() -> dict:
+    """name -> [meta] of every theme file, sorted by label."""
+    found = {}
+    for path in THEMES.glob("*.toml"):
+        meta = tomllib.loads(path.read_text()).get("meta", {})
+        found[path.stem] = meta
+    return dict(sorted(found.items(), key=lambda kv: kv[1].get("label", kv[0]).lower()))
+
+
+def current() -> str | None:
+    m = PALETTE_LINE.search(THEME_TOML.read_text())
+    return m.group(2) if m else None
+
+
+def notify(body: str, urgency: str = "low") -> None:
+    try:
+        subprocess.run(["notify-send", "-a", "theme", "-u", urgency, "Theme", body], check=False)
+    except FileNotFoundError:
+        pass
+
+
+def pick(all_themes: dict, cur: str | None) -> str | None:
+    rows = [f"{'●' if name == cur else ' '} {meta.get('label', name)}" for name, meta in all_themes.items()]
+    r = subprocess.run(["rofi", "-dmenu", "-i", "-p", "theme", "-no-custom", "-format", "i"],
+                       input="\n".join(rows), capture_output=True, text=True)
+    if r.returncode != 0 or not r.stdout.strip():
+        return None
+    return list(all_themes)[int(r.stdout.strip())]
+
+
+def set_vscode(meta: dict) -> str | None:
+    """Sets workbench.colorTheme; returns a warning, or None."""
+    theme, ext = meta.get("vscode_theme"), meta.get("vscode_extension")
+    if not theme or not VSCODE_SETTINGS.exists():
+        return None
+    if ext:
+        try:
+            installed = subprocess.run(["code", "--list-extensions"], capture_output=True, text=True,
+                                       timeout=20).stdout.lower().split()
+            if ext.lower() not in installed:
+                return f"VS Code: extension {ext} is not installed (code --install-extension {ext})"
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+    text = VSCODE_SETTINGS.read_text()
+    line = f'"workbench.colorTheme": {json.dumps(theme)}'
+    # settings.json is JSONC (comments, trailing commas): edit the one line
+    # rather than parse and rewrite, which would drop the comments.
+    new, n = re.subn(r'"workbench\.colorTheme"\s*:\s*"[^"]*"', line, text)
+    if n == 0:
+        new = re.sub(r"\}\s*$", f",\n    {line}\n}}\n", text.rstrip(), count=1)
+    if new != text:
+        VSCODE_SETTINGS.write_text(new)
+    return None
+
+
+def reload_neovims() -> None:
+    runtime = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
+    for sock in glob.glob(f"{runtime}/nvim.*.0"):
+        try:
+            subprocess.run(["nvim", "--server", sock, "--remote-expr", 'execute("ThemeReload")'],
+                           capture_output=True, timeout=5)
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            pass
+
+
+def switch(name: str, all_themes: dict) -> None:
+    text = THEME_TOML.read_text()
+    if not PALETTE_LINE.search(text):
+        sys.exit(f"theme-switch: no `palette = \"themes/<name>.toml\"` line in {THEME_TOML}")
+    # Write through the symlink, so the change lands in the dotfiles repo.
+    THEME_TOML.write_text(PALETTE_LINE.sub(rf'\g<1>"themes/{name}.toml"', text, count=1))
+
+    r = subprocess.run([str(RENDER), str(THEME_TOML)], capture_output=True, text=True)
+    if r.returncode != 0:
+        THEME_TOML.write_text(text)  # back to the theme that rendered fine
+        notify(f"render failed, kept the previous theme\n{r.stderr.strip()[-300:]}", "critical")
+        sys.exit(r.stderr or r.stdout)
+
+    warning = set_vscode(all_themes[name])
+    reload_neovims()
+    label = all_themes[name].get("label", name)
+    msg = f"{label}\nReopen GTK/Qt apps, yazi, zathura and Zen to update them."
+    if warning:
+        msg += f"\n{warning}"
+    notify(msg)
+    print(f"theme-switch: {label}")
+
+
+def main() -> None:
+    all_themes = themes()
+    if not all_themes:
+        sys.exit(f"theme-switch: no themes in {THEMES}")
+    cur = current()
+    args = sys.argv[1:]
+    if args and args[0] in ("-h", "--help"):
+        print(__doc__)
+        return
+    if args and args[0] == "--list":
+        for name, meta in all_themes.items():
+            print(f"{'*' if name == cur else ' '} {name:<18} {meta.get('label', name)}")
+        return
+    name = args[0] if args else pick(all_themes, cur)
+    if name is None:
+        return
+    if name not in all_themes:
+        sys.exit(f"theme-switch: unknown theme {name!r}; see --list")
+    if name == cur:
+        return
+    switch(name, all_themes)
+
+
+if __name__ == "__main__":
+    main()

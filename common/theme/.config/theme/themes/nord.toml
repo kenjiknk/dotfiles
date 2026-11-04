@@ -1,0 +1,43 @@
+# Nord, from nordtheme (MIT, Arctic Ice Studio), shades from gbprod/nord.nvim. bg_dark, bg_alt, fg_dim and muted are derived, between nord0-4.
+# Roles as in ../theme.toml. Switch with ~/Scripts/theme-switch ($mod+t).
+
+[meta]
+name = "nord"
+label = "Nord"
+nvim_plugin = "https://github.com/gbprod/nord.nvim"
+nvim_colorscheme = "nord"
+nvim_setup = ''
+vscode_extension = "arcticicestudio.nord-visual-studio-code"
+vscode_theme = "Nord"
+tsuzuri = "nord"
+
+[palette]
+bg_dark = "#242933"
+bg_alt = "#292e39"
+bg = "#2e3440"
+bg_soft = "#3b4252"
+surface = "#434c5e"
+surface2 = "#4c566a"
+overlay = "#616e88"
+fg = "#d8dee9"
+fg_dim = "#aeb6c4"
+fg_warm = "#e5e9f0"
+muted = "#9aa3b5"
+accent = "#88c0d0"
+selection = "#434c5e"
+url = "#88c0d0"
+error = "#bf616a"
+red = "#bf616a"
+green = "#a3be8c"
+yellow = "#ebcb8b"
+blue = "#81a1c1"
+magenta = "#b48ead"
+cyan = "#88c0d0"
+red2 = "#d08770"
+green2 = "#a3be8c"
+yellow2 = "#ebcb8b"
+blue2 = "#5e81ac"
+magenta2 = "#b48ead"
+cyan2 = "#8fbcbb"
+orange = "#d08770"
+orange2 = "#d08770"
