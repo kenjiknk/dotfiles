@@ -32,7 +32,7 @@
     icon_position = left
     max_icon_size = 64
     # Same icons as GTK; recursive lookup finds Papirus' symbolic ones.
-    icon_theme = "Papirus-Dark"
+    icon_theme = "Papirus-Dark-Accent"
     enable_recursive_icon_lookup = true
 
     # Newest on top (dunst 1.11+; older ones fall back to their default).

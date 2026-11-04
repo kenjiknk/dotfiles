@@ -1,0 +1,5 @@
+# glow's own settings. Its colours come from the glamour style that
+# ~/Scripts/theme-render generates (~/.config/theme/glow.json), passed with -s
+# by the alias in ~/.config/shell/aliases: glow expands neither "~" here nor
+# GLAMOUR_STYLE when style is "auto".
+style: "auto"

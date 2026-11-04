@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""icon-accent — Papirus folders in the desktop theme's accent, without root.
+
+papirus-folders recolours folders by relinking files under /usr/share/icons,
+which needs root on every theme switch. Instead this writes a small user icon
+theme, ~/.local/share/icons/Papirus-Dark-Accent, that inherits Papirus-Dark and
+overrides only the folder and user-dir icons: Papirus' blue set, with its three
+blues (front #5294e2, back #4877b1, symbol #1d344f) replaced by the accent and
+two darker shades of it in the same proportions. Exact colour, any theme.
+
+Run by theme-render after a switch (hook on colors.sh) and by i3 at startup;
+does nothing when the accent has not changed since the last run. GTK, Qt (via
+the gtk3 platform theme) and dunst use it through gtk-icon-theme-name.
+
+    icon-accent [--force]
+"""
+import colorsys
+import os
+import re
+import shutil
+import sys
+from pathlib import Path
+
+CONFIG = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+DATA = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share"))
+COLORS = CONFIG / "theme" / "colors.sh"
+NAME = "Papirus-Dark-Accent"
+OUT = DATA / "icons" / NAME
+BASES = [Path("/usr/share/icons/Papirus-Dark"), Path("/usr/share/icons/Papirus")]
+SIZES = ["16x16", "22x22", "24x24", "32x32", "48x48", "64x64", "96x96", "128x128"]
+# folder-blue.svg, folder-blue-documents.svg, user-blue-home.svg; not bluegrey.
+PATTERN = re.compile(r"^(folder|user)-blue(-[^/]+)?\.svg$")
+# (lightness, saturation) of each blue relative to the front one, measured from
+# Papirus' own colours, so the darker shades keep the original's proportions.
+BLUES = {"5294e2": (1.0, 1.0), "4877b1": (0.808, 0.592), "1d344f": (0.351, 0.649)}
+
+
+def accent() -> str:
+    m = re.search(r"^accent='#([0-9a-fA-F]{6})'", COLORS.read_text(), re.M)
+    if not m:
+        sys.exit(f"icon-accent: no accent in {COLORS}")
+    return m.group(1).lower()
+
+
+def shade(hexcol: str, lf: float, sf: float) -> str:
+    r, g, b = (int(hexcol[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    r, g, b = colorsys.hls_to_rgb(h, max(0.0, min(1.0, l * lf)), max(0.0, min(1.0, s * sf)))
+    return "".join(f"{round(c * 255):02x}" for c in (r, g, b))
+
+
+def source_dir(size: str) -> Path | None:
+    for base in BASES:
+        d = base / size / "places"
+        if d.is_dir():
+            return d
+    return None
+
+
+def main() -> None:
+    acc = accent()
+    stamp = OUT / ".accent"
+    if "--force" not in sys.argv and stamp.exists() and stamp.read_text().strip() == acc:
+        return
+    if not any(b.is_dir() for b in BASES):
+        sys.exit("icon-accent: Papirus icon theme not installed")
+    colours = {blue: shade(acc, lf, sf) for blue, (lf, sf) in BLUES.items()}
+    colours["5294e2"] = acc
+    swap = re.compile("#(" + "|".join(colours) + ")", re.I)
+
+    tmp = OUT.with_name(NAME + ".tmp")
+    shutil.rmtree(tmp, ignore_errors=True)
+    dirs = []
+    for size in SIZES:
+        src = source_dir(size)
+        if src is None:
+            continue
+        written = 0
+        for f in src.iterdir():
+            m = PATTERN.match(f.name)
+            if not m:
+                continue
+            try:
+                svg = f.read_text()
+            except OSError:
+                continue
+            dest = tmp / size / "places" / f"{m.group(1)}{m.group(2) or ''}.svg"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_text(swap.sub(lambda c: "#" + colours[c.group(1).lower()], svg))
+            written += 1
+        if written:
+            dirs.append(size)
+
+    entries = "".join(f"\n[{s}/places]\nSize={s.split('x')[0]}\nContext=Places\nType=Fixed\n" for s in dirs)
+    (tmp / "index.theme").write_text(
+        "[Icon Theme]\n"
+        f"Name={NAME}\n"
+        "Comment=Papirus-Dark with folders in the desktop theme's accent (~/Scripts/icon-accent)\n"
+        "Inherits=Papirus-Dark,hicolor\n"
+        f"Directories={','.join(s + '/places' for s in dirs)}\n" + entries)
+    (tmp / ".accent").write_text(acc + "\n")
+
+    shutil.rmtree(OUT, ignore_errors=True)
+    tmp.rename(OUT)
+    os.utime(OUT)  # GTK rescans an icon theme whose directory mtime changed
+
+
+if __name__ == "__main__":
+    main()

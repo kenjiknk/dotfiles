@@ -24,7 +24,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **TUIs** | lazygit, lazydocker, btop, wiremix, bluetui, nmtui, spotify-player, dua |
 | **Colours** | six themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark |
 | **Fonts** | Inter (interface), JetBrains Mono Nerd Font (monospace) |
-| **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark |
+| **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark with folders in the theme's accent |
 | **Background** | the Tux in the theme's accent, with [pscircle](https://gitlab.com/mildlyparallel/pscircle)'s live process tree growing from it |
 
 ## Install
@@ -124,11 +124,20 @@ names. `Super+t` (`~/Scripts/theme-switch`) picks one in rofi; also
 
 A switch points `theme.toml` at that file and runs
 `~/Scripts/theme-render`, which rewrites the colour files for i3 and the bar,
-rofi, dunst, kitty, GTK/Qt, zathura, yazi, Zen, the lock screen, Neovim and
-Tsuzuri, and reloads i3, dunst and kitty. It also sets VS Code's theme and
-runs `:ThemeReload` in every open Neovim. GTK/Qt apps, yazi, zathura and Zen
-change when reopened. The shell prompt uses ANSI colours, so it follows
-kitty.
+rofi, dunst, kitty, GTK/Qt, zathura, yazi, Zen, Neovim, Tsuzuri, btop,
+spotify-player, lazygit, lazydocker, glow (through an alias, `glow -s`) and fzf
+(`FZF_DEFAULT_OPTS_FILE`), recolours Papirus' folders to the accent
+(`~/Scripts/icon-accent`, a user icon theme `Papirus-Dark-Accent` that needs no
+root), and reloads i3, dunst and kitty. It also sets VS Code's theme and runs
+`:ThemeReload` in every open Neovim. GTK/Qt apps, yazi, zathura, Zen and the
+TUIs change when reopened.
+
+Terminal programs without their own colour file follow the theme through
+kitty's 16 ANSI colours: the prompt, bat (`--theme=ansi`) and man pages
+(`MANPAGER` through bat), eza, fastfetch, tealdeer, nmtui, wiremix, bluetui.
+Not themed: Discord (the official client has no themes; Vesktop would),
+Spotify's own app (needs Spicetify), the lock screen (plain i3lock: black by
+design) and Flatpak apps' icons.
 
 To add a theme, copy a file in `themes/`, change its colours and `[meta]`,
 and add its Neovim plugin to `lua/plugins/theme.lua`. To change the current one, edit its

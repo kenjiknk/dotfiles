@@ -75,6 +75,31 @@ output   = "~/.config/theme/zen/userChrome.css"
 [[target]]
 template = "colors.sh"
 output   = "~/.config/theme/colors.sh"
+hook     = "~/Scripts/icon-accent"   # folders in the accent (Papirus-Dark-Accent)
+
+[[target]]
+template = "btop.theme"
+output   = "~/.config/btop/themes/desktop.theme"
+
+[[target]]
+template = "spotify-player-theme.toml"
+output   = "~/.config/spotify-player/theme.toml"
+
+[[target]]
+template = "lazygit.yml"
+output   = "~/.config/lazygit/config.yml"
+
+[[target]]
+template = "lazydocker.yml"
+output   = "~/.config/lazydocker/config.yml"
+
+[[target]]
+template = "glow.json"
+output   = "~/.config/theme/glow.json"   # named in ~/.config/glow/glow.yml
+
+[[target]]
+template = "fzf-opts"
+output   = "~/.config/theme/fzf"         # FZF_DEFAULT_OPTS_FILE in ~/.config/shell/env
 
 # After colors.sh, which the tree's colours come from.
 [[target]]

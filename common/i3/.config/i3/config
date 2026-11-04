@@ -20,7 +20,9 @@ set $menu rofi -show drun
 # libadwaita and Flatpak apps read theme, icons, fonts and dark mode from
 # gsettings through the settings portal; this copies them from gtk-3.0's
 # settings.ini, so that file stays the only place they are set.
-exec_always --no-startup-id ~/Scripts/gsettings-sync
+# icon-accent first: settings.ini names its Papirus-Dark-Accent icon theme
+# (folders in the theme's accent), which a fresh checkout does not have yet.
+exec_always --no-startup-id sh -c '~/Scripts/icon-accent; ~/Scripts/gsettings-sync'
 
 default_border pixel 2
 default_floating_border pixel 2

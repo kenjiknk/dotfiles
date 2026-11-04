@@ -1,0 +1,4 @@
+# bat's "ansi" theme paints with the terminal's 16 colours, which kitty takes
+# from the desktop theme: bat (and man pages, through MANPAGER in
+# ~/.config/shell/env) follow every theme switch with nothing to regenerate.
+--theme=ansi

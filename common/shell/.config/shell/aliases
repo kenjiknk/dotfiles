@@ -18,3 +18,10 @@ if command -v eza >/dev/null 2>&1; then
 else
     alias ls='ls --color=auto'
 fi
+
+# glow in the desktop theme: the glamour style ~/Scripts/theme-render generates.
+# Passed with -s because glow expands neither "~" in its config nor
+# GLAMOUR_STYLE when the config says "auto".
+if command -v glow >/dev/null 2>&1; then
+    alias glow='glow -s "$HOME/.config/theme/glow.json"'
+fi

@@ -34,6 +34,15 @@ export QT_QPA_PLATFORMTHEME=gtk3
 # terminal's own background behind.
 export NEWT_COLORS='root=white,default;roottext=gray,default;helpline=gray,default;window=white,black;border=gray,black;shadow=,default;title=blue,black;label=white,black;textbox=white,black;acttextbox=black,blue;button=white,black;actbutton=black,blue;compactbutton=white,black;checkbox=white,black;actcheckbox=black,blue;entry=white,black;disentry=gray,black;listbox=white,black;actlistbox=black,blue;sellistbox=blue,black;actsellistbox=black,blue;emptyscale=,black;fullscale=,blue'
 
+# fzf's colours, generated per theme (~/.config/theme/fzf); read from the file
+# by each fzf, so a theme switch needs no new shell.
+export FZF_DEFAULT_OPTS_FILE="$HOME/.config/theme/fzf"
+
+# Man pages through bat, which paints with the terminal's (theme's) 16 colours.
+# col -bx strips man's own overstrike formatting first.
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
+
 # Under X nothing sets the cursor for every client; without these it differs
 # per toolkit and comes out small.
 export XCURSOR_THEME=Adwaita
