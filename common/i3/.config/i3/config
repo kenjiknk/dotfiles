@@ -57,10 +57,13 @@ exec_always --no-startup-id ~/Scripts/keyboard-watch
 exec --no-startup-id dunst
 
 # At 300 s idle the screen fades to black over 5 s (xsecurelock's dimmer; any
-# input cancels it), then ~/Scripts/lock locks; screens off at 330 s.
+# input cancels it), then ~/Scripts/lock locks.
 # xss-lock also locks before suspend and on `loginctl lock-session`. The
 # dimmer's 2 s fade plus 3 s wait must add up to xset's 5 s cycle.
-exec_always --no-startup-id xset s 300 5 +dpms dpms 0 0 330
+# DPMS stays off: waking the DisplayLink (evdi) monitors after hours in standby
+# froze X twice (2026-10-26, 2026-11-01) with the dock screens on but black,
+# and only a hard reset got out. The lock screen is pure black instead.
+exec_always --no-startup-id xset s 300 5 -dpms
 exec --no-startup-id XSECURELOCK_DIM_TIME_MS=2000 XSECURELOCK_WAIT_TIME_MS=3000 xss-lock --notifier=/usr/lib/xsecurelock/dimmer --transfer-sleep-lock -- ~/Scripts/lock
 
 exec --no-startup-id picom
@@ -68,6 +71,10 @@ exec --no-startup-id picom
 # Password prompts for programs that ask for admin rights (polkit); without
 # an agent running they fail without a word.
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
+# Automount USB drives under /run/media/$USER (yazi does not mount anything
+# by itself). No tray icon; a notification shows up via dunst.
+exec --no-startup-id udiskie --automount --notify --no-tray
 
 # Clipboard history for $mod+c. Only the clipboard (Ctrl+C), not every mouse
 # selection. Kept under $XDG_RUNTIME_DIR, so it is gone after a reboot.
