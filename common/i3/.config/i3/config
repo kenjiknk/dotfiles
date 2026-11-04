@@ -68,6 +68,10 @@ exec --no-startup-id dunst
 # and only a hard reset got out. The lock screen is pure black instead.
 exec_always --no-startup-id xset s 300 5 -dpms
 exec --no-startup-id XSECURELOCK_DIM_TIME_MS=2000 XSECURELOCK_WAIT_TIME_MS=3000 xss-lock --notifier=/usr/lib/xsecurelock/dimmer --transfer-sleep-lock -- ~/Scripts/lock
+# Videos keep the screen awake: answers apps' (and the portal's) requests to
+# org.freedesktop.ScreenSaver, which nothing provides under i3, by turning the
+# screensaver above off while any is active.
+exec --no-startup-id ~/Scripts/inhibit-screensaver
 
 exec --no-startup-id picom
 

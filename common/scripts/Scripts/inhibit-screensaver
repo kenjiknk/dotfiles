@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""inhibit-screensaver — lets apps keep the screen awake under i3.
+
+Browsers and video players ask the session's org.freedesktop.ScreenSaver
+service not to blank the screen while media plays; xdg-desktop-portal-gtk
+forwards Flatpak apps' requests to the same name. i3 has no such service, so
+every request failed and xss-lock faded and locked the screen 5 minutes into
+a video. This owns that name on the session bus:
+
+  - Inhibit() while nothing else is inhibiting turns the X screensaver off
+    (`xset s off`), so xss-lock is never told the session went idle;
+  - when the last inhibitor calls UnInhibit() or leaves the bus (an app that
+    quits or crashes without un-inhibiting), the previous timeout and cycle,
+    read from `xset q` at that first Inhibit(), are restored.
+
+Suspend still locks: xss-lock gets that from logind, not from the
+screensaver. Started from i3; exits if another service already owns the name.
+
+    inhibit-screensaver [-v]    -v logs each request to stderr
+"""
+import re
+import subprocess
+import sys
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+NAME = "org.freedesktop.ScreenSaver"
+# Chromium uses the first path, Firefox/Zen and others the second.
+PATHS = ("/org/freedesktop/ScreenSaver", "/ScreenSaver")
+XML = """
+<node>
+  <interface name="org.freedesktop.ScreenSaver">
+    <method name="Inhibit">
+      <arg name="application_name" type="s" direction="in"/>
+      <arg name="reason_for_inhibit" type="s" direction="in"/>
+      <arg name="cookie" type="u" direction="out"/>
+    </method>
+    <method name="UnInhibit">
+      <arg name="cookie" type="u" direction="in"/>
+    </method>
+    <method name="SimulateUserActivity"/>
+    <method name="Lock"/>
+    <method name="GetActive"><arg type="b" direction="out"/></method>
+    <method name="SetActive">
+      <arg name="e" type="b" direction="in"/>
+      <arg type="b" direction="out"/>
+    </method>
+    <method name="GetActiveTime"><arg type="u" direction="out"/></method>
+    <method name="GetSessionIdleTime"><arg type="u" direction="out"/></method>
+    <signal name="ActiveChanged"><arg type="b"/></signal>
+  </interface>
+</node>
+"""
+
+VERBOSE = "-v" in sys.argv[1:]
+inhibitors: dict[int, tuple[str, str, str]] = {}  # cookie -> (sender, app, reason)
+next_cookie = 1
+saved: tuple[str, str] | None = None  # (timeout, cycle) to restore
+
+
+def log(msg: str) -> None:
+    if VERBOSE:
+        print(f"inhibit-screensaver: {msg}", file=sys.stderr, flush=True)
+
+
+def xset(*args: str) -> str:
+    try:
+        return subprocess.run(["xset", *args], capture_output=True, text=True, timeout=5).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return ""
+
+
+def update() -> None:
+    """Screensaver off while anything inhibits; back as it was when not."""
+    global saved
+    if inhibitors and saved is None:
+        m = re.search(r"timeout:\s*(\d+)\s+cycle:\s*(\d+)", xset("q"))
+        saved = (m.group(1), m.group(2)) if m else ("300", "5")
+        xset("s", "off")
+        log(f"screensaver off (was {saved[0]} {saved[1]})")
+    elif not inhibitors and saved is not None:
+        xset("s", *saved)
+        log(f"screensaver back to {saved[0]} {saved[1]}")
+        saved = None
+
+
+def on_call(conn, sender, path, iface, method, params, invocation):
+    global next_cookie
+    if method == "Inhibit":
+        app, reason = params.unpack()
+        cookie, next_cookie = next_cookie, next_cookie + 1
+        inhibitors[cookie] = (sender, app, reason)
+        log(f"inhibit #{cookie} by {app or sender}: {reason}")
+        update()
+        invocation.return_value(GLib.Variant("(u)", (cookie,)))
+    elif method == "UnInhibit":
+        (cookie,) = params.unpack()
+        if inhibitors.pop(cookie, None):
+            log(f"uninhibit #{cookie}")
+        update()
+        invocation.return_value(None)
+    elif method == "SimulateUserActivity":
+        xset("s", "reset")
+        invocation.return_value(None)
+    elif method == "Lock":
+        subprocess.Popen(["loginctl", "lock-session"])
+        invocation.return_value(None)
+    elif method in ("GetActive", "SetActive"):
+        invocation.return_value(GLib.Variant("(b)", (False,)))
+    elif method in ("GetActiveTime", "GetSessionIdleTime"):
+        invocation.return_value(GLib.Variant("(u)", (0,)))
+
+
+def on_owner_changed(conn, sender, path, iface, signal, params):
+    """Drops the requests of a client that left the bus."""
+    name, _old, new = params.unpack()
+    if new or not name.startswith(":"):
+        return
+    gone = [c for c, (s, _, _) in inhibitors.items() if s == name]
+    for c in gone:
+        del inhibitors[c]
+        log(f"#{c}: {name} left the bus")
+    if gone:
+        update()
+
+
+def on_bus(conn, _name):
+    node = Gio.DBusNodeInfo.new_for_xml(XML)
+    for path in PATHS:
+        conn.register_object(path, node.interfaces[0], on_call, None, None)
+    conn.signal_subscribe("org.freedesktop.DBus", "org.freedesktop.DBus", "NameOwnerChanged",
+                          "/org/freedesktop/DBus", None, Gio.DBusSignalFlags.NONE, on_owner_changed)
+
+
+def on_lost(_conn, _name):
+    # Someone else owns it (another desktop's service), or the bus is gone.
+    if inhibitors:
+        inhibitors.clear()
+        update()
+    log("name not available; exiting")
+    loop.quit()
+
+
+loop = GLib.MainLoop()
+Gio.bus_own_name(Gio.BusType.SESSION, NAME, Gio.BusNameOwnerFlags.DO_NOT_QUEUE,
+                 on_bus, lambda *a: log(f"owning {NAME}"), on_lost)
+try:
+    loop.run()
+except KeyboardInterrupt:
+    pass
+finally:
+    if saved is not None:
+        xset("s", *saved)

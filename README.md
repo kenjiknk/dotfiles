@@ -39,7 +39,7 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
   brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh librsvg \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
-  ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon \
+  ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
   pkgfile stow git
 yay -S xbanish tsuzuri-bin pscircle
 ```
