@@ -18,6 +18,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
 | **Shell** | zsh + oh-my-zsh + powerlevel10k, fzf, zoxide |
 | **Editor** | [neovim](https://neovim.io) with [kanagawa.nvim](https://github.com/rebelot/kanagawa.nvim) |
+| **Fetch** | [fastfetch](https://github.com/fastfetch-cli/fastfetch) — small Arch logo, Nerd Font keys, ANSI colours from kitty |
 | **Files** | [yazi](https://github.com/sxyazi/yazi) |
 | **Notes** | [tsuzuri](https://github.com/jaisuriya-11/tsuzuri) |
 | **TUIs** | lazygit, lazydocker, btop, wiremix, bluetui, nmtui, spotify-player, dua |
@@ -34,7 +35,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   xsecurelock xss-lock polkit-gnome xdg-desktop-portal-gtk kitty zsh \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
-  zathura zathura-pdf-mupdf btop lazygit lazydocker fzf fd ripgrep zoxide bat \
+  zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
   brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
@@ -101,7 +102,7 @@ Each directory is a stow package that mirrors `$HOME`.
 
 ```
 common/            any machine
-  i3/ i3blocks/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/
+  i3/ i3blocks/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
   gtk/ fontconfig/ flatpak/ xdg/
   theme/           the palette and the templates every colour file comes from
   shell/ zsh/ bash/

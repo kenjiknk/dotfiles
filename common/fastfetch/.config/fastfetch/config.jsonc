@@ -1,0 +1,62 @@
+// fastfetch — Kanagawa Dragon, quiet like the rest of the desktop.
+//
+// Colours are ANSI names on purpose: kitty maps them to the palette in
+// ~/.config/theme/theme.toml, so a palette change reaches this file for free
+// (blue = accent, bright_black = fg_dim, white = fg_warm).
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+  "logo": {
+    "type": "builtin",
+    "source": "arch_small",
+    "color": { "1": "blue", "2": "blue" },
+    "padding": { "top": 2, "left": 2, "right": 4 }
+  },
+
+  "display": {
+    "separator": "  ",
+    "color": {
+      "keys": "blue",
+      "title": "blue",
+      "output": "default"
+    },
+    "key": { "width": 4 },
+    "size": { "binaryPrefix": "iec", "ndigits": 1 },
+    "percent": { "type": 9 },      // number, coloured green/yellow/red by load
+    "bar": { "width": 10 }
+  },
+
+  "modules": [
+    "break",
+    {
+      "type": "title",
+      "format": "{user-name-colored}{#bright_black}@{#}{host-name-colored}"
+    },
+    { "type": "custom", "format": "{#bright_black}────────────────────────────" },
+
+    // System
+    { "type": "os",       "key": "\uDB82\uDCC7", "format": "{pretty-name}" },
+    { "type": "kernel",   "key": "\uF17C", "format": "{release}" },
+    { "type": "packages", "key": "\uDB80\uDFD6", "format": "{all}" },
+    { "type": "uptime",   "key": "\uDB80\uDD50" },
+    "break",
+
+    // Desktop
+    { "type": "wm",       "key": "\uF2D0", "format": "{pretty-name} {#bright_black}{protocol-name}{#}" },
+    { "type": "terminal", "key": "\uF120", "format": "{pretty-name}" },
+    { "type": "shell",    "key": "\uF489", "format": "{pretty-name}" },
+    { "type": "terminalfont", "key": "\uF031", "format": "{name} {size}" },
+    "break",
+
+    // Hardware
+    { "type": "host",    "key": "\uDB80\uDF22", "format": "{family}" },
+    { "type": "cpu",     "key": "\uF4BC", "format": "{name} {#bright_black}{cores-logical}t{#}", "temp": false },
+    { "type": "gpu",     "key": "\uDB80\uDF79", "format": "{name}", "hideType": "none" },
+    { "type": "memory",  "key": "\uDB80\uDF5B", "format": "{used} / {total} {percentage}" },
+    { "type": "disk",    "key": "\uDB80\uDECA", "folders": "/", "format": "{size-used} / {size-total} {size-percentage}" },
+    { "type": "battery", "key": "\uDB80\uDC79", "format": "{capacity} {#bright_black}{status}{#}" },
+    "break",
+
+    { "type": "colors", "symbol": "circle", "paddingLeft": 6 }
+  ]
+}
