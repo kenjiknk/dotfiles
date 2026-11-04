@@ -17,7 +17,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Lock** | i3lock on pure black (OLED) + xss-lock |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
 | **Shell** | zsh + oh-my-zsh + powerlevel10k, fzf, zoxide |
-| **Editor** | [neovim](https://neovim.io), colour scheme following the desktop theme |
+| **Editor** | [neovim](https://neovim.io) with [LazyVim](https://www.lazyvim.org), colour scheme following the desktop theme |
 | **Fetch** | [fastfetch](https://github.com/fastfetch-cli/fastfetch) — small Arch logo, Nerd Font keys, ANSI colours from kitty |
 | **Files** | [yazi](https://github.com/sxyazi/yazi) |
 | **Notes** | [tsuzuri](https://github.com/jaisuriya-11/tsuzuri) |
@@ -131,7 +131,7 @@ change when reopened. The shell prompt uses ANSI colours, so it follows
 kitty.
 
 To add a theme, copy a file in `themes/`, change its colours and `[meta]`,
-and add its Neovim plugin to `init.lua`. To change the current one, edit its
+and add its Neovim plugin to `lua/plugins/theme.lua`. To change the current one, edit its
 file and run `~/Scripts/theme-render ~/.config/theme/theme.toml`. The
 generated files are tracked, so a fresh clone needs no render step, and it
 starts on the theme last picked. Needs Python 3.11+.
@@ -147,7 +147,7 @@ code --install-extension sherloach.solarized-osaka
 code --install-extension GitHub.github-vscode-theme
 ```
 
-Neovim installs its six colour schemes on first start (`vim.pack`).
+Neovim (LazyVim) installs its plugins and six colour schemes on first start, pinned in `lazy-lock.json`.
 
 ## Notes
 
