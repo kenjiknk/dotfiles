@@ -7,8 +7,9 @@
 # a centred prompt in the palette's colours: date and time, user@host, the
 # keyboard layout (a password typed in br instead of us fails for no visible
 # reason) and a cursor that jumps on each key, so the password length never
-# shows. The prompt shifts a little each time and goes back to black after 30 s
-# without typing, so nothing stays lit in one place.
+# shows. The prompt appears centred on every monitor, shifts a little each time
+# and goes back to black after 30 s without typing, so nothing stays lit in one
+# place.
 #
 # While locked: notifications are paused, since dunst draws above other windows
 # and would show them to anyone looking, and media players are paused.
@@ -39,8 +40,14 @@ export XSECURELOCK_SHOW_KEYBOARD_LAYOUT=1
 export XSECURELOCK_PASSWORD_PROMPT=cursor
 export XSECURELOCK_AUTH_CURSOR_BLINK=0
 export XSECURELOCK_AUTH_TIMEOUT=30
-export XSECURELOCK_BURNIN_MITIGATION=100
-export XSECURELOCK_SINGLE_AUTH_WINDOW=1
+# A small random shift per lock is enough: the prompt is only lit for 30 s.
+# At 100 px it sat visibly off-centre on some locks.
+export XSECURELOCK_BURNIN_MITIGATION=24
+# One prompt per monitor, each centred on its own screen. With a single window
+# xsecurelock puts it on the monitor under the pointer, and when the pointer is
+# in a gap of the docked layout (screens at different heights) it falls back
+# to an arbitrary monitor, so the prompt showed up in the wrong place.
+export XSECURELOCK_SINGLE_AUTH_WINDOW=0
 # No "obscurer" window. It only matters if the compositor crashes, it never
 # draws anything, and picom's close animation showed its undefined content as
 # a white flash on every unlock. The lock itself is drawn on the composite
@@ -49,7 +56,8 @@ export XSECURELOCK_COMPOSITE_OBSCURER=0
 
 lock_now() {
     if command -v xsecurelock >/dev/null; then
-        xsecurelock
+        # Keep the last lock's messages for debugging (no secrets in them).
+        xsecurelock 2>"${XDG_CACHE_HOME:-$HOME/.cache}/xsecurelock.log"
     else
         i3lock --nofork --color 000000 \
             --ignore-empty-password --show-failed-attempts --show-keyboard-layout
