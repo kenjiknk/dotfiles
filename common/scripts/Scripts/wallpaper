@@ -3,7 +3,10 @@
 # from it. Adapted from arindas/dotfiles-manjaro-i3 (.local/bin/pscircle_horizontal
 # and Pictures/wallpaper.png): same tree geometry, colours from the theme.
 #
-#   wallpaper          draw once (theme-render runs this after a theme switch)
+#   wallpaper          draw once
+#   wallpaper --switch draw once, fast (~0.7 s): new colours on the last measured
+#                      geometry, no CPU sample. theme-render starts it in the
+#                      background after a theme switch.
 #   wallpaper --loop   redraw every $WALLPAPER_INTERVAL s (default 30), from i3
 #
 # Background: ~/.config/theme/wallpaper.svg (generated per theme), rendered at
@@ -116,11 +119,12 @@ fit() { # w h
     # moves the tree's edge less than in proportion, so one estimate undershoots.
     while ((tries++ < 5)); do
         # Twice the screen's height, so whatever would overflow is measured.
+        # --interval=0: no 1 s CPU sample, which only colours the dots.
         tree "$run/probe.png" "$(awk -v w="$w" -v s=$s 'BEGIN { printf "%d", w * s }')" \
             "$(awk -v h="$h" -v s=$s 'BEGIN { printf "%d", 2 * h * s }')" "$s" "$k" \
             --background-color=000000 --tree-font-color=ffffff \
             --link-color-min=ffffff --link-color-max=ffffff \
-            --dot-color-min=ffffff --dot-color-max=ffffff || break
+            --dot-color-min=ffffff --dot-color-max=ffffff --interval=0 || break
         ext=$(extent "$run/probe.png") || break
         k=$(awk -v e="$ext" -v w="$w" -v h="$h" -v s=$s -v k="$k" -v cx=$CX -v cy=$CY \
             -v m=$MARGIN -v min=$MIN_SCALE 'BEGIN {
@@ -160,6 +164,12 @@ tree_depth() {
 # the probe costs about a second of CPU, the drawing itself very little.
 cached_fit() { # w h
     local key cache=$run/fit k
+    # A theme switch changes only colours: any scale already measured will do,
+    # however old, and the loop's next draw measures again if the tree changed.
+    if [[ -n ${SWITCH:-} && -r $cache ]]; then
+        k=$(sed -n 2p "$cache")
+        [[ -n $k ]] && { echo "$k"; return; }
+    fi
     key="$1x$2 depth $(tree_depth)"
     if [[ -r $cache ]] && (($(date +%s) - $(stat -c %Y "$cache") < 300)); then
         local ckey ck
@@ -189,7 +199,11 @@ draw() {
         # shellcheck source=/dev/null
         . "$theme/colors.sh"
         k=$(cached_fit "$w" "$h")
-        if tree "$run/tree.png" "$w" "$h" 1 "${k:-1}" \
+        # On a switch, no 1 s CPU sample (dots coloured by average use since
+        # each process started); the loop's next draw samples again.
+        local sample=()
+        [[ -n ${SWITCH:-} ]] && sample=(--interval=0)
+        if tree "$run/tree.png" "$w" "$h" 1 "${k:-1}" "${sample[@]}" \
             --background-image="$run/background.png" \
             --tree-font-color="${fg#\#}" \
             --link-color-min="${magenta#\#}" --link-color-max="${red#\#}" \
@@ -201,11 +215,20 @@ draw() {
     feh --no-fehbg --bg-fill "$out"
 }
 
-if [[ ${1:-} == --loop ]]; then
-    while :; do
-        draw
-        sleep "$interval"
-    done
-else
-    draw
-fi
+# One drawing at a time: the loop and a theme switch's hook may overlap.
+locked_draw() {
+    mkdir -p "$run"
+    { flock 9; draw; } 9>"$run/draw.lock"
+}
+
+case ${1:-} in
+    --loop)
+        while :; do
+            locked_draw
+            sleep "$interval"
+        done ;;
+    --switch)
+        SWITCH=1 locked_draw ;;
+    *)
+        locked_draw ;;
+esac

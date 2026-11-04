@@ -32,6 +32,7 @@ THEME_TOML = CONFIG / "theme" / "theme.toml"
 THEMES = CONFIG / "theme" / "themes"
 RENDER = Path.home() / "Scripts" / "theme-render"
 VSCODE_SETTINGS = CONFIG / "Code" / "User" / "settings.json"
+VSCODE_EXTENSIONS = Path.home() / ".vscode" / "extensions" / "extensions.json"
 PALETTE_LINE = re.compile(r'^(palette\s*=\s*)"themes/([^"]+)\.toml"', re.M)
 
 
@@ -71,12 +72,14 @@ def set_vscode(meta: dict) -> str | None:
     if not theme or not VSCODE_SETTINGS.exists():
         return None
     if ext:
+        # VS Code's own list of installed extensions, read directly: starting
+        # `code --list-extensions` (Electron) costs ~0.4 s per switch.
         try:
-            installed = subprocess.run(["code", "--list-extensions"], capture_output=True, text=True,
-                                       timeout=20).stdout.lower().split()
+            data = json.loads(VSCODE_EXTENSIONS.read_text())
+            installed = {e["identifier"]["id"].lower() for e in data}
             if ext.lower() not in installed:
                 return f"VS Code: extension {ext} is not installed (code --install-extension {ext})"
-        except (FileNotFoundError, subprocess.TimeoutExpired):
+        except (OSError, ValueError, KeyError, TypeError):
             pass
     text = VSCODE_SETTINGS.read_text()
     line = f'"workbench.colorTheme": {json.dumps(theme)}'
