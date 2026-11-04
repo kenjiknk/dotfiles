@@ -71,7 +71,10 @@ def identity(edid):
                          serial or ("0x%08X" % number if number else "Unknown"))
 
 # Per connected output: EDID, active, position, rotation, current mode.
+# Disconnected outputs that still have a CRTC (unplugged without being turned
+# off) are ghosts: they keep the screen wide and i3 keeps workspaces on them.
 outputs = {}
+ghosts = []
 cur = None
 in_edid = False
 in_current_mode = False
@@ -80,7 +83,10 @@ for line in sys.stdin:
     if m:
         cur = None
         in_edid = in_current_mode = False
-        if m.group(2) == "connected":
+        if m.group(2) == "disconnected":
+            if re.search(r" \d+x\d+\+\d+\+\d+ ", line):
+                ghosts.append(m.group(1))
+        else:
             g = re.search(r" (\d+)x(\d+)\+(\d+)\+(\d+) \(0x[0-9a-f]+\) (\w+)", line)
             cur = {"name": m.group(1), "edid": "", "active": bool(g)}
             if g:
@@ -117,7 +123,7 @@ def mode_parts(spec):
     w, h = res.split("x")
     return int(w), int(h), float(rate.rstrip("Hz"))
 
-args = []
+args = ["--output %s --off" % name for name in ghosts]
 docked = False
 
 for ident, mode, pos, dock in desired:
