@@ -31,6 +31,12 @@ interval=${WALLPAPER_INTERVAL:-30}
 CX=7 CY=40 SECTOR=1.5707 FIRST=350 STEP=200
 MARGIN=16       # px kept free at the right and bottom edges
 MIN_SCALE=0.4   # smaller and the labels pile up; a deeper tree then overflows
+# The first ring never comes closer than this to the centre, however much the
+# fit shrinks the rest: the Tux's far corner (177,217 in wallpaper.svg) is
+# ~245 px from it, and the first ring's dots and labels must stay clear. Only
+# the rings after it shrink. Scaled with the wallpaper in draw().
+TUX_CLEAR=270
+TUX_R=$TUX_CLEAR
 
 # Width and height of the first monitor, from "0: +*eDP-1 1920/302x1200/189+0+0 eDP-1".
 screen_size() {
@@ -45,10 +51,11 @@ tree() { # out w h s k [pscircle args...]
     shift 5
     local g
     g=$(awk -v w="$w" -v h="$h" -v s="$s" -v k="$k" -v cx="$CX" -v cy="$CY" \
-        -v first="$FIRST" -v step="$STEP" 'BEGIN {
+        -v first="$FIRST" -v step="$STEP" -v tux="$TUX_R" 'BEGIN {
         font = (k < 0.75 ? 11 : 12) * s
+        f1 = first * k; if (f1 < tux) f1 = tux    # keep the first ring off the Tux
         printf "%.1f:%.1f %.1f,%.1f %.2f %.2f %.2f\n",
-            -w / 2 + cx * s, -h / 2 + cy * s, first * k * s, step * k * s, font, 4 * s, 2 * s
+            -w / 2 + cx * s, -h / 2 + cy * s, f1 * s, step * k * s, font, 4 * s, 2 * s
     }')
     local center radii font dot link
     read -r center radii font dot link <<<"$g"
@@ -105,7 +112,9 @@ PY
 # Ring scale (1 = the original's) at which the tree fits a w x h screen.
 fit() { # w h
     local w=$1 h=$2 s=0.25 k=1 tries=0 ext
-    while ((tries++ < 3)); do
+    # A few rounds: with the first ring held off the Tux, shrinking the other rings
+    # moves the tree's edge less than in proportion, so one estimate undershoots.
+    while ((tries++ < 5)); do
         # Twice the screen's height, so whatever would overflow is measured.
         tree "$run/probe.png" "$(awk -v w="$w" -v s=$s 'BEGIN { printf "%d", w * s }')" \
             "$(awk -v h="$h" -v s=$s 'BEGIN { printf "%d", 2 * h * s }')" "$s" "$k" \
@@ -170,6 +179,8 @@ draw() {
     read -r w h < <(screen_size)
     w=${w:-1920} h=${h:-1200}
     mkdir -p "$run"
+    # wallpaper.svg is 1920x1200 drawn with "slice": the Tux scales by the larger ratio.
+    TUX_R=$(awk -v w="$w" -v h="$h" -v c="$TUX_CLEAR" 'BEGIN { r = w / 1920; if (h / 1200 > r) r = h / 1200; printf "%d", c * r }')
 
     rsvg-convert -w "$w" -h "$h" "$theme/wallpaper.svg" -o "$run/background.png" || return 0
     out=$run/background.png
