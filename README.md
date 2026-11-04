@@ -14,7 +14,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Compositor** | [picom](https://github.com/yshui/picom) — dim, 4 px corners, short animations, no blur |
 | **Launcher** | [rofi](https://github.com/davatorium/rofi) + rofi-emoji, clipmenu |
 | **Notifications** | [dunst](https://dunst-project.org) (also the volume/brightness bars) |
-| **Lock** | [xsecurelock](https://github.com/google/xsecurelock) + xss-lock, with a fade before locking |
+| **Lock** | i3lock on pure black (OLED) + xss-lock |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
 | **Shell** | zsh + oh-my-zsh + powerlevel10k, fzf, zoxide |
 | **Editor** | [neovim](https://neovim.io), colour scheme following the desktop theme |
@@ -33,7 +33,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 
 ```sh
 sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
-  xsecurelock xss-lock polkit-gnome xdg-desktop-portal-gtk kitty zsh \
+  i3lock xss-lock polkit-gnome xdg-desktop-portal-gtk kitty zsh \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
@@ -155,8 +155,7 @@ Neovim installs its six colour schemes on first start (`vim.pack`).
 - Programs that save by renaming over a file (e.g. `p10k configure`,
   `flatpak override --user`) replace the stow symlink; `stow --restow` again
   afterwards.
-- The lock pauses notifications and media while the screen is locked, and falls
-  back to plain i3lock if xsecurelock is missing.
+- The lock pauses notifications and media while the screen is locked.
 - No secrets are tracked; `.gitignore` blocks keys, shell history and browser
   profiles.
 

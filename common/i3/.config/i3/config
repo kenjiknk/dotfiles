@@ -59,15 +59,13 @@ exec_always --no-startup-id ~/Scripts/keyboard-watch
 
 exec --no-startup-id dunst
 
-# At 300 s idle the screen fades to black over 5 s (xsecurelock's dimmer; any
-# input cancels it), then ~/Scripts/lock locks.
-# xss-lock also locks before suspend and on `loginctl lock-session`. The
-# dimmer's 2 s fade plus 3 s wait must add up to xset's 5 s cycle.
+# At 300 s idle ~/Scripts/lock locks (i3lock on black).
+# xss-lock also locks before suspend and on `loginctl lock-session`.
 # DPMS stays off: waking the DisplayLink (evdi) monitors after hours in standby
 # froze X twice (2026-10-26, 2026-11-01) with the dock screens on but black,
 # and only a hard reset got out. The lock screen is pure black instead.
 exec_always --no-startup-id xset s 300 5 -dpms
-exec --no-startup-id XSECURELOCK_DIM_TIME_MS=2000 XSECURELOCK_WAIT_TIME_MS=3000 xss-lock --notifier=/usr/lib/xsecurelock/dimmer --transfer-sleep-lock -- ~/Scripts/lock
+exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/Scripts/lock
 # Videos keep the screen awake: answers apps' (and the portal's) requests to
 # org.freedesktop.ScreenSaver, which nothing provides under i3, by turning the
 # screensaver above off while any is active.
