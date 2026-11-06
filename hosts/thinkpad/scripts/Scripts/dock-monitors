@@ -168,6 +168,9 @@ apply() {
 
     # One call so the screens move together. If a rate is refused, retry
     # without rates rather than lose the arrangement.
+    # Logged to the journal (`journalctl -t dock-monitors`): a failed or fatal
+    # apply used to leave no trace, and on 2026-11-06 one killed the X server.
+    logger -t dock-monitors "xrandr ${args[*]}"
     if ! xrandr "${args[@]}"; then
         local -a norate=() skip=0 a
         for a in "${args[@]}"; do
@@ -175,7 +178,8 @@ apply() {
             if [[ $a == --rate ]]; then skip=1; continue; fi
             norate+=("$a")
         done
-        xrandr "${norate[@]}" || true
+        logger -t dock-monitors "xrandr failed, retrying without rates"
+        xrandr "${norate[@]}" || logger -t dock-monitors "xrandr failed again"
     fi
 }
 
@@ -190,6 +194,12 @@ watch() {
     apply
     udevadm monitor --udev --subsystem-match=drm | while read -r _; do
         # Wait out the burst of events one hotplug fires.
+        while read -r -t 1 _; do :; done
+        # Let the DisplayLink (evdi) screens finish attaching before touching
+        # the CRTCs: the X crash of 2026-11-06 (modesetting_drv segfault in
+        # RRCrtcSet) hit a mode set sent while evdi was still notifying mode
+        # and power changes.
+        sleep 3
         while read -r -t 1 _; do :; done
         apply
     done &
