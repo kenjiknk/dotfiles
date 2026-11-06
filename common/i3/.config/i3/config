@@ -156,7 +156,7 @@ bindsym $mod+Shift+0 move container to workspace number 10
 
 # Layout
 bindsym $mod+b split h
-bindsym $mod+v split v
+bindsym $mod+Shift+v split v
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
 bindsym $mod+e layout toggle split
@@ -208,6 +208,11 @@ bindsym $mod+period exec --no-startup-id rofi -modi emoji -show emoji
 bindsym $mod+Shift+n exec --no-startup-id sh -c 'kitty -e tsuzuri -theme "$(cat ~/.config/theme/tsuzuri)" -dir ~/Documents/obsidian-vault'
 # Every keybinding, read from this file, in a searchable list.
 bindsym $mod+Shift+p exec --no-startup-id ~/Scripts/keybinds
+# Cheat sheets for yazi and Neovim/LazyVim (~/.config/cheatsheets), in a
+# floating window; the same key closes it.
+bindsym $mod+y exec --no-startup-id ~/Scripts/cheatsheet yazi
+bindsym $mod+v exec --no-startup-id ~/Scripts/cheatsheet nvim
+for_window [class="^cheatsheet-"] floating enable, resize set 62 ppt 88 ppt, move position center
 # Desktop theme: pick one in rofi; everything follows (~/Scripts/theme-switch).
 bindsym $mod+t exec --no-startup-id ~/Scripts/theme-switch
 

@@ -52,6 +52,7 @@ PROGRAMS = {
     "kitty -e yazi": "files (yazi)", "powermenu": "power menu",
     "screenshot": "screenshot", "touchpad": "toggle touchpad",
     "power-profile-menu": "power profile", "keybinds": "this keybinding list",
+    "cheatsheet yazi": "yazi cheat sheet", "cheatsheet nvim": "Neovim cheat sheet",
     "volume up": "volume +5%", "volume down": "volume -5%",
     "volume mute": "mute", "volume mic-mute": "mute microphone",
     "brightness up": "brightness +5%", "brightness down": "brightness -5%",

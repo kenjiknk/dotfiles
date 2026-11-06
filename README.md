@@ -93,6 +93,7 @@ ones:
 | `Super+Shift+e` | power menu (lock, suspend, logout, reboot, shutdown) |
 | `Super+Shift+c` | restart i3 in place |
 | `Super+t` | desktop theme |
+| `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
 Clicking a bar block opens its TUI: network → nmtui, bt → bluetui, volume →
 wiremix, cpu/mem → btop.
@@ -107,6 +108,7 @@ common/            any machine
   gtk/ fontconfig/ flatpak/ xdg/
   theme/           the themes (palettes) and the templates every colour file comes from
   shell/ zsh/ bash/
+  cheatsheets/     ~/.config/cheatsheets: yazi and Neovim sheets (Markdown)
   scripts/         ~/Scripts: lock, powermenu, volume, brightness, keybinds, ...
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
 assets/            the screenshot above
