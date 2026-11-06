@@ -89,7 +89,9 @@ exec --no-startup-id udiskie --automount --notify --no-tray
 
 # Clipboard history for $mod+c. Only the clipboard (Ctrl+C), not every mouse
 # selection. Kept under $XDG_RUNTIME_DIR, so it is gone after a reboot.
-exec --no-startup-id CM_SELECTIONS=clipboard clipmenud
+# clipmenud-watch stops it when X goes away (it would otherwise spin and flood
+# the console after a logout).
+exec --no-startup-id ~/Scripts/clipmenud-watch
 
 # Hide the pointer while typing and after 8 s idle.
 exec --no-startup-id xbanish -t 8

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# clipmenud-watch — run clipmenud for the life of the X server.
+#
+# clipmenud does not exit when X goes away: clipnotify fails at once, the loop
+# goes round again, and the console fills with "Can't open display" at ~500
+# lines/s (seen after a logout on 2026-11-06). This stops it as soon as X is gone.
+
+set -u
+
+# Only the clipboard (Ctrl+C), not every mouse selection.
+CM_SELECTIONS=clipboard clipmenud &
+cm=$!
+
+while xset q >/dev/null 2>&1 && kill -0 "$cm" 2>/dev/null; do
+    sleep 1
+done
+
+kill "$cm" 2>/dev/null
+wait "$cm" 2>/dev/null
+exit 0
