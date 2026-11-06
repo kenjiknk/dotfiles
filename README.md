@@ -1,6 +1,6 @@
 # dotfiles
 
-i3 on X11, one colour theme everywhere (six to pick from), terminal apps over GUI ones. Arch Linux
+i3 on X11, one colour theme everywhere (seven to pick from), terminal apps over GUI ones. Arch Linux
 on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 
 ![screenshot](assets/screenshot.png)
@@ -22,7 +22,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Files** | [yazi](https://github.com/sxyazi/yazi) |
 | **Notes** | [tsuzuri](https://github.com/jaisuriya-11/tsuzuri) |
 | **TUIs** | lazygit, lazydocker, btop, wiremix, bluetui, nmtui, spotify-player, dua |
-| **Colours** | six themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark |
+| **Colours** | seven themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark, OLED Minimal (pure black) |
 | **Fonts** | Inter (interface), JetBrains Mono Nerd Font (monospace) |
 | **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark with folders in the theme's accent |
 | **Background** | the theme's `bg` colour, nothing else (a 1-pixel XPM stretched by feh) |
@@ -158,7 +158,7 @@ code --install-extension sherloach.solarized-osaka
 code --install-extension GitHub.github-vscode-theme
 ```
 
-Neovim (LazyVim) installs its plugins and six colour schemes on first start, pinned in `lazy-lock.json`.
+Neovim (LazyVim) installs its plugins and the colour schemes on first start, pinned in `lazy-lock.json`.
 
 ## Notes
 

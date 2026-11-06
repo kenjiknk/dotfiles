@@ -13,7 +13,8 @@ theme.toml lists, and a [meta] with the editors' own themes. Switching:
   2. runs theme-render: i3, bar, rofi, dunst, kitty, GTK/Qt, zathura, yazi,
      Zen, lock screen, i3blocks, Neovim's theme.lua and Tsuzuri; i3, dunst and
      kitty reload at once;
-  3. sets VS Code's workbench.colorTheme, which VS Code applies live;
+  3. sets VS Code's workbench.colorTheme (and, for themes with a [vscode_colors]
+     table, workbench.colorCustomizations), which VS Code applies live;
   4. runs :ThemeReload in every running Neovim.
 
 GTK/Qt apps, yazi, zathura and Zen pick the new colours up when reopened.
@@ -93,6 +94,24 @@ def set_vscode(meta: dict) -> str | None:
     return None
 
 
+def set_vscode_colors(meta_colors: dict, palette: dict) -> None:
+    """Sets workbench.colorCustomizations to the theme's [vscode_colors] (palette
+    roles or #hex), or to {} for themes without any, so one theme's overrides
+    never leak into the next. Same one-spot edit as set_vscode."""
+    if not VSCODE_SETTINGS.exists():
+        return
+    colors = {k: palette.get(v, v) for k, v in meta_colors.items()}
+    body = json.dumps(colors, indent=8)[:-1].rstrip() + "\n    }" if colors else "{}"
+    text = VSCODE_SETTINGS.read_text()
+    key = '"workbench.colorCustomizations": ' + body
+    # The object is flat, so the first closing brace ends it.
+    new, n = re.subn(r'"workbench\.colorCustomizations"\s*:\s*\{[^{}]*\}', lambda _: key, text)
+    if n == 0 and colors:
+        new = re.sub(r"\s*\}$", f",\n    {key}\n}}\n", text.rstrip(), count=1)
+    if new != text:
+        VSCODE_SETTINGS.write_text(new)
+
+
 def reload_neovims() -> None:
     runtime = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
     for sock in glob.glob(f"{runtime}/nvim.*.0"):
@@ -117,6 +136,8 @@ def switch(name: str, all_themes: dict) -> None:
         sys.exit(r.stderr or r.stdout)
 
     warning = set_vscode(all_themes[name])
+    full = tomllib.loads((THEMES / f"{name}.toml").read_text())
+    set_vscode_colors(full.get("vscode_colors", {}), full.get("palette", {}))
     reload_neovims()
     label = all_themes[name].get("label", name)
     msg = f"{label}\nReopen GTK/Qt apps, yazi, zathura and Zen to update them."
