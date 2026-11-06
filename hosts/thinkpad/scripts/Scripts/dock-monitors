@@ -124,16 +124,24 @@ def mode_parts(spec):
     return int(w), int(h), float(rate.rstrip("Hz"))
 
 args = ["--output %s --off" % name for name in ghosts]
-docked = False
+present = [(d, seen[d[0]]) for d in desired if d[0] in seen]
+docked = any(d[3] == "dock" for d, _ in present)
+p = seen.get(panel)
 
-for ident, mode, pos, dock in desired:
-    o = seen.get(ident)
-    if o is None:
-        continue
-    if dock == "dock":
-        docked = True
+# Docked, the panel ends up off and X moves the screens so the top-left one
+# sits at 0,0: the empty room the positions above leave for the panel is
+# dropped. So both the comparison and the commands use the layout from its own
+# top-left corner. Compared in absolute terms it is never "right", and every
+# hotplug sends the same mode set again (the kind that crashed X once); a
+# command with an absolute position for one screen, among screens already
+# moved, tears the layout.
+ox = oy = 0
+if docked:
+    ox = min(int(d[2].split()[0]) for d, _ in present)
+    oy = min(int(d[2].split()[1]) for d, _ in present)
 
-    x, y = (int(v) for v in pos.split())
+for (ident, mode, pos, dock), o in present:
+    x, y = (int(v) - off for v, off in zip(pos.split(), (ox, oy)))
     mw, mh, mr = mode_parts(mode)
     right = (o["active"] and (o["x"], o["y"]) == (x, y) and o["rotate"] == "normal"
              and (o["w"], o["h"]) == (mw, mh) and abs(o.get("refresh", 0) - mr) < 1)
@@ -141,7 +149,6 @@ for ident, mode, pos, dock in desired:
         args.append("--output %s --mode %dx%d --rate %.3f --pos %dx%d --rotate normal --scale 1x1"
                     % (o["name"], mw, mh, mr, x, y))
 
-p = seen.get(panel)
 if p is not None:
     if docked and p["active"]:
         args.append("--output %s --off" % p["name"])
