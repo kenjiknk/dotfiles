@@ -167,6 +167,27 @@ Neovim (LazyVim) installs its plugins and six colour schemes on first start, pin
   `flatpak override --user`) replace the stow symlink; `stow --restow` again
   afterwards.
 - The lock pauses notifications and media while the screen is locked.
+- With the DisplayLink dock (evdi), Xorg's modesetting driver can segfault in
+  `msEnableSharedPixmapFlipping` when a screen is set up, which kills the
+  session. DisplayLink's workaround is to turn page flipping off. It lives in
+  `/etc`, so stow does not carry it; on a new install create
+  `/etc/X11/xorg.conf.d/20-displaylink.conf`:
+
+  ```
+  Section "OutputClass"
+      Identifier "amdgpu-no-pageflip"
+      MatchDriver "amdgpu"
+      Driver "modesetting"
+      Option "PageFlip" "false"
+  EndSection
+
+  Section "OutputClass"
+      Identifier "evdi-no-pageflip"
+      MatchDriver "evdi"
+      Driver "modesetting"
+      Option "PageFlip" "false"
+  EndSection
+  ```
 - No secrets are tracked; `.gitignore` blocks keys, shell history and browser
   profiles.
 
