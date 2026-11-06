@@ -25,7 +25,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Colours** | six themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark |
 | **Fonts** | Inter (interface), JetBrains Mono Nerd Font (monospace) |
 | **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark with folders in the theme's accent |
-| **Background** | the Tux in the theme's accent, with [pscircle](https://gitlab.com/mildlyparallel/pscircle)'s live process tree growing from it |
+| **Background** | the theme's `bg` colour, nothing else (a 1-pixel XPM stretched by feh) |
 
 ## Install
 
@@ -37,11 +37,11 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
-  brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh librsvg \
+  brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
   ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
   pkgfile stow git
-yay -S xbanish tsuzuri-bin pscircle
+yay -S xbanish tsuzuri-bin
 ```
 
 **2. oh-my-zsh**, cloned rather than installed (its installer overwrites
@@ -93,6 +93,7 @@ ones:
 | `Super+Shift+e` | power menu (lock, suspend, logout, reboot, shutdown) |
 | `Super+Shift+c` | restart i3 in place |
 | `Super+t` | desktop theme |
+| `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
 Clicking a bar block opens its TUI: network → nmtui, bt → bluetui, volume →
 wiremix, cpu/mem → btop.
@@ -107,6 +108,7 @@ common/            any machine
   gtk/ fontconfig/ flatpak/ xdg/
   theme/           the themes (palettes) and the templates every colour file comes from
   shell/ zsh/ bash/
+  cheatsheets/     ~/.config/cheatsheets: yazi and Neovim sheets (Markdown)
   scripts/         ~/Scripts: lock, powermenu, volume, brightness, keybinds, ...
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
 assets/            the screenshot above
@@ -165,6 +167,27 @@ Neovim (LazyVim) installs its plugins and six colour schemes on first start, pin
   `flatpak override --user`) replace the stow symlink; `stow --restow` again
   afterwards.
 - The lock pauses notifications and media while the screen is locked.
+- With the DisplayLink dock (evdi), Xorg's modesetting driver can segfault in
+  `msEnableSharedPixmapFlipping` when a screen is set up, which kills the
+  session. DisplayLink's workaround is to turn page flipping off. It lives in
+  `/etc`, so stow does not carry it; on a new install create
+  `/etc/X11/xorg.conf.d/20-displaylink.conf`:
+
+  ```
+  Section "OutputClass"
+      Identifier "amdgpu-no-pageflip"
+      MatchDriver "amdgpu"
+      Driver "modesetting"
+      Option "PageFlip" "false"
+  EndSection
+
+  Section "OutputClass"
+      Identifier "evdi-no-pageflip"
+      MatchDriver "evdi"
+      Driver "modesetting"
+      Option "PageFlip" "false"
+  EndSection
+  ```
 - No secrets are tracked; `.gitignore` blocks keys, shell history and browser
   profiles.
 
@@ -177,9 +200,7 @@ Laurenzi, MIT), [gruvbox](https://github.com/morhetz/gruvbox) (Pavel Pertsev),
 [solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim)
 (Apache-2.0) and [GitHub Primer](https://github.com/primer/primitives) (MIT).
 
-The wallpaper's Tux and its pscircle layout come from
-[arindas/dotfiles-manjaro-i3](https://github.com/arindas/dotfiles-manjaro-i3)
-(Arindam Das). Originally based on
+Originally based on
 [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles); the yazi theme
 derives from their "Symphony".
 

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# cheatsheet — toggle a floating cheat sheet: `cheatsheet yazi` ($mod+y),
+# `cheatsheet nvim` ($mod+v).
+#
+# The sheets are Markdown in ~/.config/cheatsheets/<name>.md, rendered by glow
+# in the desktop theme's colours and paged with less (`/` searches, `q` closes).
+# Pressing the key again while the sheet is open closes it.
+set -euo pipefail
+
+name=${1:?usage: cheatsheet <yazi|nvim>}
+file="${XDG_CONFIG_HOME:-$HOME/.config}/cheatsheets/$name.md"
+class="cheatsheet-$name"
+
+if [[ ${2:-} == --render ]]; then
+    # Runs inside the kitty window: fit the text to it.
+    width=$(( $(tput cols) - 2 ))
+    (( width > 110 )) && width=110
+    style="$HOME/.config/theme/glow.json"
+    [[ -f $style ]] || style=dark
+    CLICOLOR_FORCE=1 glow -s "$style" -w "$width" "$file" \
+        | less -R --mouse -+F -+X --prompt="$name cheat sheet  ·  / search  ·  q close "
+    exit
+fi
+
+[[ -f $file ]] || { notify-send "cheatsheet" "No sheet at $file"; exit 1; }
+
+if pkill -f -- "kitty --class $class " 2>/dev/null; then
+    exit 0
+fi
+exec kitty --class "$class" --title "$name cheat sheet" -e "$0" "$name" --render

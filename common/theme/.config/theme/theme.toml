@@ -25,13 +25,12 @@ palette = "themes/solarized-osaka.toml"   # rewritten by theme-switch
 
 # Outputs: paths through the deployed symlinks, so they land in the repo.
 
-# First: hooks run in target order once every file is written, and the
-# wallpaper (in the background) is the slowest to show, so it starts first.
-# Its tree's colours come from colors.sh, already written by then.
+# The wallpaper is just the theme's `bg`: a 1-pixel XPM that feh stretches over
+# the screen. First, so the hook starts early.
 [[target]]
-template = "wallpaper.svg"
-output   = "~/.config/theme/wallpaper.svg"
-hook     = "setsid -f ~/Scripts/wallpaper --switch >/dev/null 2>&1"   # background, fast mode, the switch does not wait
+template = "background.xpm"
+output   = "~/.config/theme/background.xpm"
+hook     = "feh --no-fehbg --bg-scale ~/.config/theme/background.xpm"
 
 [[target]]
 template = "i3-colors"

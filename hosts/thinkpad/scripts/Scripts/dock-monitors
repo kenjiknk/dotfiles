@@ -124,16 +124,24 @@ def mode_parts(spec):
     return int(w), int(h), float(rate.rstrip("Hz"))
 
 args = ["--output %s --off" % name for name in ghosts]
-docked = False
+present = [(d, seen[d[0]]) for d in desired if d[0] in seen]
+docked = any(d[3] == "dock" for d, _ in present)
+p = seen.get(panel)
 
-for ident, mode, pos, dock in desired:
-    o = seen.get(ident)
-    if o is None:
-        continue
-    if dock == "dock":
-        docked = True
+# Docked, the panel ends up off and X moves the screens so the top-left one
+# sits at 0,0: the empty room the positions above leave for the panel is
+# dropped. So both the comparison and the commands use the layout from its own
+# top-left corner. Compared in absolute terms it is never "right", and every
+# hotplug sends the same mode set again (the kind that crashed X once); a
+# command with an absolute position for one screen, among screens already
+# moved, tears the layout.
+ox = oy = 0
+if docked:
+    ox = min(int(d[2].split()[0]) for d, _ in present)
+    oy = min(int(d[2].split()[1]) for d, _ in present)
 
-    x, y = (int(v) for v in pos.split())
+for (ident, mode, pos, dock), o in present:
+    x, y = (int(v) - off for v, off in zip(pos.split(), (ox, oy)))
     mw, mh, mr = mode_parts(mode)
     right = (o["active"] and (o["x"], o["y"]) == (x, y) and o["rotate"] == "normal"
              and (o["w"], o["h"]) == (mw, mh) and abs(o.get("refresh", 0) - mr) < 1)
@@ -141,7 +149,6 @@ for ident, mode, pos, dock in desired:
         args.append("--output %s --mode %dx%d --rate %.3f --pos %dx%d --rotate normal --scale 1x1"
                     % (o["name"], mw, mh, mr, x, y))
 
-p = seen.get(panel)
 if p is not None:
     if docked and p["active"]:
         args.append("--output %s --off" % p["name"])
@@ -168,6 +175,9 @@ apply() {
 
     # One call so the screens move together. If a rate is refused, retry
     # without rates rather than lose the arrangement.
+    # Logged to the journal (`journalctl -t dock-monitors`): a failed or fatal
+    # apply used to leave no trace, and on 2026-11-06 one killed the X server.
+    logger -t dock-monitors "xrandr ${args[*]}"
     if ! xrandr "${args[@]}"; then
         local -a norate=() skip=0 a
         for a in "${args[@]}"; do
@@ -175,7 +185,8 @@ apply() {
             if [[ $a == --rate ]]; then skip=1; continue; fi
             norate+=("$a")
         done
-        xrandr "${norate[@]}" || true
+        logger -t dock-monitors "xrandr failed, retrying without rates"
+        xrandr "${norate[@]}" || logger -t dock-monitors "xrandr failed again"
     fi
 }
 
@@ -190,6 +201,12 @@ watch() {
     apply
     udevadm monitor --udev --subsystem-match=drm | while read -r _; do
         # Wait out the burst of events one hotplug fires.
+        while read -r -t 1 _; do :; done
+        # Let the DisplayLink (evdi) screens finish attaching before touching
+        # the CRTCs: the X crash of 2026-11-06 (modesetting_drv segfault in
+        # RRCrtcSet) hit a mode set sent while evdi was still notifying mode
+        # and power changes.
+        sleep 3
         while read -r -t 1 _; do :; done
         apply
     done &
