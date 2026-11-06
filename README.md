@@ -25,7 +25,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Colours** | six themes, switched as a whole with `Super+t`: Kanagawa Dragon, Gruvbox Dark, Nord, Ayu Dark, Solarized Osaka, GitHub Dark |
 | **Fonts** | Inter (interface), JetBrains Mono Nerd Font (monospace) |
 | **GTK / icons** | adw-gtk3 recoloured to the palette, Papirus-Dark with folders in the theme's accent |
-| **Background** | the Tux in the theme's accent, with [pscircle](https://gitlab.com/mildlyparallel/pscircle)'s live process tree growing from it |
+| **Background** | the theme's `bg` colour, nothing else (a 1-pixel XPM stretched by feh) |
 
 ## Install
 
@@ -37,11 +37,11 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
-  brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh librsvg \
+  brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
   ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
   pkgfile stow git
-yay -S xbanish tsuzuri-bin pscircle
+yay -S xbanish tsuzuri-bin
 ```
 
 **2. oh-my-zsh**, cloned rather than installed (its installer overwrites
@@ -179,9 +179,7 @@ Laurenzi, MIT), [gruvbox](https://github.com/morhetz/gruvbox) (Pavel Pertsev),
 [solarized-osaka.nvim](https://github.com/craftzdog/solarized-osaka.nvim)
 (Apache-2.0) and [GitHub Primer](https://github.com/primer/primitives) (MIT).
 
-The wallpaper's Tux and its pscircle layout come from
-[arindas/dotfiles-manjaro-i3](https://github.com/arindas/dotfiles-manjaro-i3)
-(Arindam Das). Originally based on
+Originally based on
 [vyrx-dev/dotfiles](https://github.com/vyrx-dev/dotfiles); the yazi theme
 derives from their "Symphony".
 

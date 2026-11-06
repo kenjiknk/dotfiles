@@ -50,11 +50,10 @@ focus_wrapping no
 #
 # Optional programs fail quietly when missing; the session carries on.
 
-# Wallpaper: the theme's Tux with pscircle's live process tree, redrawn every
-# 30 s (~/Scripts/wallpaper; a theme switch redraws it at once). flock keeps
-# one loop across i3 restarts. Without pscircle/feh the root window stays
-# black, which an OLED panel shows as pixels switched off.
-exec_always --no-startup-id flock -n "$XDG_RUNTIME_DIR/wallpaper.lock" ~/Scripts/wallpaper --loop
+# Wallpaper: the theme's background colour (background.xpm, written by
+# theme-render, which also sets it on a theme switch). Without feh the root
+# window stays black, which an OLED panel shows as pixels switched off.
+exec_always --no-startup-id feh --no-fehbg --bg-scale ~/.config/theme/background.xpm
 
 # Repeat rate, re-applied with the layouts to keyboards plugged in later.
 exec_always --no-startup-id ~/Scripts/keyboard-watch
