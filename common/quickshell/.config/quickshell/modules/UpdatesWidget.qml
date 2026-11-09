@@ -4,15 +4,16 @@ import Quickshell
 import Quickshell.Io
 import qs
 
-// Days since the last full upgrade, from pacman.log. Yellow after a week, red
-// after two. Hidden on machines without pacman.log. Click: the exact date.
+// Days since the last full upgrade, from pacman.log. Shows only once it is a
+// week old (yellow), red after two. Hidden on machines without pacman.log.
+// Click: the exact date.
 BarModule {
     id: root
 
     property var last: null
     readonly property int days: last ? Math.max(0, Math.floor((clock.date - last) / 86400000)) : 0
 
-    visible: last !== null
+    visible: last !== null && days >= 7
     onClicked: popup.toggle()
 
     SystemClock {
@@ -43,12 +44,12 @@ BarModule {
 
     BarText {
         text: Icons.update
-        color: root.days >= 14 ? Theme.red : root.days >= 7 ? Theme.yellow : Theme.dim
+        color: root.days >= 14 ? Theme.red : Theme.yellow
         font.pixelSize: 14
     }
     BarText {
         text: `${root.days}d`
-        color: root.days >= 14 ? Theme.red : root.days >= 7 ? Theme.yellow : Theme.fg
+        color: root.days >= 14 ? Theme.red : Theme.yellow
     }
 
     BarPopup {
