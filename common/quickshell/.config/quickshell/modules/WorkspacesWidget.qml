@@ -27,7 +27,7 @@ BarModule {
 
             Layout.preferredWidth: Math.max(22, label.implicitWidth + 12)
             Layout.preferredHeight: Theme.barHeight - 8
-            radius: 4
+            radius: 0
             color: modelData.urgent ? Theme.red
                  : modelData.focused ? Theme.accent
                  : modelData.active ? Theme.surface
@@ -56,7 +56,7 @@ BarModule {
         visible: ShellState.i3Mode !== "default"
         Layout.preferredWidth: modeLabel.implicitWidth + 12
         Layout.preferredHeight: Theme.barHeight - 8
-        radius: 4
+        radius: 0
         color: Theme.orange
 
         BarText {
