@@ -28,7 +28,9 @@ Singleton {
             } else if (type.includes("window") && data.container) {
                 if ((data.change === "focus" || data.change === "title") && data.container.focused)
                     root.focusedTitle = data.container.name || "";
-                else
+                // A background window retitling itself (a browser tab, `watch`)
+                // cannot change the focused title; only structural changes can.
+                else if (data.change !== "title" && data.change !== "urgent" && data.change !== "mark")
                     titleQuery.running = true;
             } else if (type.includes("workspace")) {
                 titleQuery.running = true;
