@@ -22,6 +22,8 @@ id_*
 *.bak
 *.tmp
 *~
+__pycache__/
+*.pyc
 
 # third-party clones, cloned by hand at install time (see the README)
 .oh-my-zsh/
