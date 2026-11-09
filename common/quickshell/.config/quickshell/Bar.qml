@@ -22,6 +22,16 @@ PanelWindow {
         return w;
     }
 
+    // Hide the windows anchored to the bar while the X connection is still
+    // whole. Otherwise, on exit or reload, tearing the bar down makes them hide
+    // themselves too late and Quickshell segfaults in QXcbWindow::hide; its
+    // crash handler then starts a second instance next to the new one.
+    Component.onDestruction: {
+        popupHost.visible = false;
+        osdWindow.visible = false;
+        toastWindow.visible = false;
+    }
+
     screen: modelData
     visible: ShellState.barsVisible
     anchors {
@@ -105,6 +115,7 @@ PanelWindow {
     // popup shows, its mask is empty and clicks go through to the windows below;
     // while one does, it takes the clicks, and one outside the panel closes it.
     PopupWindow {
+        id: popupHost
         anchor.window: bar
         anchor.rect.x: 0
         anchor.rect.y: bar.height
@@ -140,6 +151,7 @@ PanelWindow {
 
     // ---- OSD: volume / brightness (from ~/Scripts/osd), centered below the bar ----
     PopupWindow {
+        id: osdWindow
         visible: ShellState.osdVisible && bar.isFocused && bar.visible
         anchor.window: bar
         anchor.rect.x: bar.width / 2
@@ -183,6 +195,7 @@ PanelWindow {
 
     // ---- Notification toasts, top-right below the bar ----
     PopupWindow {
+        id: toastWindow
         visible: Notifs.enabled && bar.isFocused && bar.visible && Notifs.toasts.length > 0
         anchor.window: bar
         anchor.rect.x: bar.width - 8
