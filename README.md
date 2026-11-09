@@ -60,10 +60,12 @@ ln -sfn /usr/share/zsh/plugins/zsh-{autosuggestions,syntax-highlighting} \
 
 ```sh
 git clone https://github.com/kenjiknk/dotfiles ~/dotfiles
-cd ~/dotfiles/common          && stow --target="$HOME" --no-folding *
-cd ~/dotfiles/hosts/thinkpad  && stow --target="$HOME" --no-folding *   # this machine only
+~/dotfiles/install      # stows common/, then hosts/$(uname -n)/ if it exists
 chsh -s /usr/bin/zsh
 ```
+
+`install` passes extra arguments to stow: `./install -n -v` shows what would
+change without touching anything, `./install -D` removes every link.
 
 Log out and pick **i3** in the display manager.
 
@@ -100,7 +102,8 @@ wiremix, cpu/mem → btop.
 
 ## Structure
 
-Each directory is a stow package that mirrors `$HOME`.
+Each directory inside `common/` and `hosts/<hostname>/` is a stow package that
+mirrors `$HOME`; `common/` and `hosts/<hostname>/` themselves are not packages.
 
 ```
 common/            any machine
@@ -112,6 +115,7 @@ common/            any machine
   scripts/         ~/Scripts: lock, powermenu, volume, brightness, keybinds, ...
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
 assets/            the screenshot above
+install            stows both layers into $HOME
 ```
 
 `common/i3` ends with `include ~/.config/i3/local`, which comes from
@@ -162,9 +166,12 @@ Neovim (LazyVim) installs its plugins and the colour schemes on first start, pin
 
 ## Notes
 
-- Always pass `--no-folding` to stow: both layers write into `~/Scripts`.
+- Deploy with `./install`, not by hand: `common/` and `hosts/<hostname>/` hold
+  packages, and stowing either one as a package spreads `~/i3`, `~/zsh`, ...
+  across `$HOME`. It also passes `--no-folding`, which both layers need since
+  they write into the same `~/Scripts`.
 - Programs that save by renaming over a file (e.g. `p10k configure`,
-  `flatpak override --user`) replace the stow symlink; `stow --restow` again
+  `flatpak override --user`) replace the stow symlink; run `./install` again
   afterwards.
 - The lock pauses notifications and media while the screen is locked.
 - With the DisplayLink dock (evdi), Xorg's modesetting driver can segfault in

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# install — deploy the dotfiles into $HOME with GNU Stow.
+#
+# common/ and hosts/<hostname>/ are directories *of* stow packages, not
+# packages themselves: stowing "common" as one package mirrors it into
+# ~/i3, ~/zsh, ~/nvim... instead of ~/.config. This script stows each
+# package inside them, the common layer first, then this machine's.
+#
+# Safe to re-run (it restows). Extra arguments go to stow, e.g.
+#   ./install -n -v     show what would change, touch nothing
+#   ./install -D        remove every link this repo created
+
+set -euo pipefail
+
+repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+host=$(uname -n)
+
+# --restow unless the caller picked an action of their own
+action=(--restow)
+for arg in "$@"; do
+    case $arg in -D | --delete | -S | --stow | -R | --restow) action=() ;; esac
+done
+
+stow_layer() {
+    local dir=$1 pkgs=()
+    shift
+    for pkg in "$dir"/*/; do
+        pkgs+=("$(basename -- "$pkg")")
+    done
+    echo "stow: ${dir#"$repo"/} (${#pkgs[@]} packages)"
+    # no "--": stow takes package names only after its action flag
+    stow --dir="$dir" --target="$HOME" --no-folding "$@" "${action[@]}" "${pkgs[@]}"
+}
+
+command -v stow >/dev/null || { echo "install: stow is not installed" >&2; exit 1; }
+
+stow_layer "$repo/common" "$@"
+if [[ -d $repo/hosts/$host ]]; then
+    stow_layer "$repo/hosts/$host" "$@"
+else
+    echo "install: no hosts/$host, skipping the per-host layer"
+fi
