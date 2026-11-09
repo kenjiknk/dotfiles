@@ -9,7 +9,7 @@ Item {
     property alias spacing: row.spacing
     property bool hoverable: true
     readonly property alias hovered: mouse.containsMouse
-    property int padding: 8
+    property int padding: 4
 
     signal clicked(var mouse)
     signal scrolled(int step) // +1 = wheel up, -1 = wheel down

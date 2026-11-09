@@ -3,6 +3,6 @@ import QtQuick.Layouts
 
 // Space between groups of bar widgets (inside a group they sit 2 px apart).
 Item {
-    implicitWidth: 10
+    implicitWidth: 6
     Layout.preferredWidth: implicitWidth
 }
