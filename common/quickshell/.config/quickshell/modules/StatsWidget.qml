@@ -5,8 +5,9 @@ import Quickshell.Io
 import qs
 
 // CPU / memory / temperature read straight from /proc and /sys with FileView,
-// root filesystem usage from df. Click = popup with history, top processes and
-// disks; middle = btop.
+// root filesystem usage from df. On the bar: one dim icon, or the readings that
+// are out of range. Click = popup with every reading, history, top processes
+// and disks; middle = btop.
 BarModule {
     id: root
 
@@ -91,43 +92,80 @@ BarModule {
         }
     }
 
+    // All four readings, each with its warning and critical level.
+    readonly property var readings: [
+        { icon: Icons.cpu, label: "CPU", value: cpu, warn: 0.8, crit: 0.95, text: `${Math.round(cpu * 100)}%` },
+        { icon: Icons.memory, label: "Memory", value: mem, warn: 0.85, crit: 0.95, text: `${Math.round(mem * 100)}%` },
+        { icon: Icons.temp, label: "Temp", value: temp, warn: 85, crit: 95, text: `${Math.round(temp)}°`, show: tempPath !== "" },
+        { icon: Icons.disk, label: "Disk /", value: rootUse, warn: 0.9, crit: 0.97, text: `${Math.round(rootUse * 100)}%` },
+    ].filter(r => r.show !== false)
+    // On the bar only what is out of range shows, in yellow or red; when all
+    // is well the widget is a single dim icon.
+    readonly property var alerts: readings.filter(r => r.value >= r.warn)
+
+    function levelColor(r, normal) {
+        return r.value >= r.crit ? Theme.red : r.value >= r.warn ? Theme.yellow : normal;
+    }
+
     BarText {
+        visible: root.alerts.length === 0
         text: Icons.cpu
-        color: root.cpu > 0.8 ? Theme.red : Theme.blue
+        color: Theme.dim
+        font.pixelSize: 14
     }
-    BarText {
-        text: `${Math.round(root.cpu * 100)}%`
-        Layout.preferredWidth: 30
+    Repeater {
+        model: root.alerts
+
+        RowLayout {
+            required property var modelData
+            spacing: 4
+
+            BarText {
+                text: parent.modelData.icon
+                color: root.levelColor(parent.modelData, Theme.fg)
+            }
+            BarText {
+                text: parent.modelData.text
+                color: root.levelColor(parent.modelData, Theme.fg)
+            }
+        }
     }
-    BarText {
-        text: Icons.memory
-        color: root.mem > 0.85 ? Theme.red : Theme.purple
-    }
-    BarText {
-        text: `${Math.round(root.mem * 100)}%`
-        Layout.preferredWidth: 30
-    }
-    BarText {
-        visible: root.tempPath !== ""
-        text: Icons.temp
-        color: root.temp > 85 ? Theme.red : Theme.orange
-    }
-    BarText {
-        visible: root.tempPath !== ""
-        text: `${Math.round(root.temp)}°`
-    }
-    BarText {
-        text: Icons.disk
-        color: root.rootUse > 0.9 ? Theme.red : Theme.aqua
-    }
-    BarText { text: `${Math.round(root.rootUse * 100)}%` }
 
     BarPopup {
         id: popup
         anchorItem: root
         onVisibleChanged: if (visible) top.running = true
 
-        SectionLabel { text: `CPU history — ${Math.round(root.cpu * 100)}%` }
+        // Every reading, normal or not.
+        RowLayout {
+            Layout.preferredWidth: 320
+            spacing: 0
+
+            Repeater {
+                model: root.readings
+
+                ColumnLayout {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    BarText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: `${parent.modelData.icon} ${parent.modelData.text}`
+                        color: root.levelColor(parent.modelData, Theme.fg)
+                        font.bold: true
+                    }
+                    BarText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: parent.modelData.label
+                        color: Theme.muted
+                        font.pixelSize: 10
+                    }
+                }
+            }
+        }
+
+        SectionLabel { text: "CPU history" }
 
         // Sparkline built from plain Rectangles.
         Rectangle {
