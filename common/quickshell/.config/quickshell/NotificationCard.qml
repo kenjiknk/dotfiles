@@ -23,10 +23,13 @@ Rectangle {
         else notification.dismiss();
     }
 
+    // Invoking an action already closes a non-resident notification (and
+    // destroys this object), so nothing may touch it afterwards.
     function runDefault() {
         const action = Notifs.defaultAction(notification);
-        if (action) action.invoke();
-        notification.dismiss();
+        if (!action) return;
+        if (toast) Notifs.markSeen(notification.id);
+        action.invoke();
     }
 
     implicitWidth: 340
