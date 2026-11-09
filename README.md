@@ -41,8 +41,17 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   brightnessctl playerctl flameshot xclip xorg-xrandr xorg-xinput xorg-xset feh \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
   ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
-  pkgfile zram-generator stow git
+  pipewire pipewire-pulse wireplumber networkmanager bluez gnome-keyring \
+  libnotify udiskie ly pkgfile zram-generator shellcheck stow git
 yay -S xbanish tsuzuri-bin
+```
+
+ThinkPad only (`hosts/thinkpad`, `system/thinkpad`): the amdgpu Xorg driver,
+which TearFree needs, and the DisplayLink dock driver:
+
+```sh
+sudo pacman -S xf86-video-amdgpu
+yay -S displaylink
 ```
 
 **2. oh-my-zsh**, cloned rather than installed (its installer overwrites
@@ -70,7 +79,8 @@ chsh -s /usr/bin/zsh
 `install` passes extra arguments to stow: `./install -n -v` shows what would
 change without touching anything, `./install -D` removes every link.
 
-Log out and pick **i3** in the display manager.
+Enable the display manager (`sudo systemctl enable ly@tty2.service`), log out
+and pick **i3**.
 
 **4. Once per machine**, the SSH agent (gcr, part of gnome-keyring), which
 `~/.config/shell/env` points `SSH_AUTH_SOCK` at:
