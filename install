@@ -9,11 +9,46 @@
 # Safe to re-run (it restows). Extra arguments go to stow, e.g.
 #   ./install -n -v     show what would change, touch nothing
 #   ./install -D        remove every link this repo created
+#
+# System files (/etc) are a separate step, since they need root:
+#   ./install --system [-n]
+# copies system/common/ and then system/<hostname>/ into /, each file only if
+# it differs, showing the diff first; -n shows the diffs and copies nothing.
+# Copies rather than links: a root-read config must not point into a
+# user-writable home.
 
 set -euo pipefail
 
 repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 host=$(uname -n)
+
+install_system() {
+    local dry=0 layer root src dest changed=0
+    [[ ${1:-} == -n ]] && dry=1
+    for layer in common "$host"; do
+        root=$repo/system/$layer
+        [[ -d $root ]] || continue
+        while IFS= read -r -d '' src; do
+            dest=/${src#"$root"/}
+            cmp -s "$src" "$dest" && continue
+            changed=1
+            echo "system: $dest"
+            if [[ -e $dest ]]; then
+                diff -u --label "$dest" --label "${src#"$repo"/}" "$dest" "$src" || true
+            else
+                echo "  (new file)"
+            fi
+            ((dry)) || sudo install -Dm644 "$src" "$dest"
+        done < <(find "$root" -type f -print0 | sort -z)
+    done
+    ((changed)) || echo "system: everything up to date"
+}
+
+if [[ ${1:-} == --system ]]; then
+    shift
+    install_system "$@"
+    exit 0
+fi
 
 # --restow unless the caller picked an action of their own
 action=(--restow)

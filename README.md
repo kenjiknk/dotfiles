@@ -41,7 +41,7 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   brightnessctl playerctl flameshot xclip xorg-xrandr xorg-xinput xorg-xset feh \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
   ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
-  pkgfile stow git
+  pkgfile zram-generator stow git
 yay -S xbanish tsuzuri-bin
 ```
 
@@ -61,7 +61,9 @@ ln -sfn /usr/share/zsh/plugins/zsh-{autosuggestions,syntax-highlighting} \
 
 ```sh
 git clone https://github.com/kenjiknk/dotfiles ~/dotfiles
-~/dotfiles/install      # stows common/, then hosts/$(uname -n)/ if it exists
+~/dotfiles/install            # stows common/, then hosts/$(uname -n)/ if it exists
+~/dotfiles/install --system   # copies system/ into /etc (sudo; shows each diff first)
+sudo systemctl daemon-reload && sudo systemctl start systemd-zram-setup@zram0
 chsh -s /usr/bin/zsh
 ```
 
@@ -123,7 +125,9 @@ common/            any machine
   scripts/         ~/Scripts: lock, powermenu, volume, brightness, keybinds, ...
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
 assets/            the screenshot above
-install            stows both layers into $HOME
+system/common/     /etc files for any machine (zram)
+system/thinkpad/   /etc files for this laptop (Xorg: TearFree, DisplayLink)
+install            stows both layers into $HOME; --system copies system/ into /etc
 ```
 
 `common/i3` ends with `include ~/.config/i3/local`, which comes from
@@ -182,27 +186,11 @@ Neovim (LazyVim) installs its plugins and the colour schemes on first start, pin
   `flatpak override --user`) replace the stow symlink; run `./install` again
   afterwards.
 - The lock pauses notifications and media while the screen is locked.
-- With the DisplayLink dock (evdi), Xorg's modesetting driver can segfault in
-  `msEnableSharedPixmapFlipping` when a screen is set up, which kills the
-  session. DisplayLink's workaround is to turn page flipping off. It lives in
-  `/etc`, so stow does not carry it; on a new install create
-  `/etc/X11/xorg.conf.d/20-displaylink.conf`:
-
-  ```
-  Section "OutputClass"
-      Identifier "amdgpu-no-pageflip"
-      MatchDriver "amdgpu"
-      Driver "modesetting"
-      Option "PageFlip" "false"
-  EndSection
-
-  Section "OutputClass"
-      Identifier "evdi-no-pageflip"
-      MatchDriver "evdi"
-      Driver "modesetting"
-      Option "PageFlip" "false"
-  EndSection
-  ```
+- `system/` holds the few files that live in `/etc`, copied (not linked) by
+  `./install --system`: zram swap for every machine; on the ThinkPad, Xorg's
+  amdgpu driver with TearFree (`10-amdgpu.conf`) and page flipping off for the
+  DisplayLink dock (`20-displaylink.conf`), whose evdi outputs otherwise
+  segfault Xorg's modesetting driver in `msEnableSharedPixmapFlipping`.
 - No secrets are tracked; `.gitignore` blocks keys, shell history and browser
   profiles.
 
