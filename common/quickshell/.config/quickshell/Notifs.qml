@@ -33,9 +33,10 @@ Singleton {
     }
 
     // The app's own timeout when it sets one, otherwise 10 s (as dunst had).
+    // Quickshell passes expireTimeout through in milliseconds; -1 = not set.
     function timeoutMs(n) {
-        const t = n.expireTimeout > 0 ? n.expireTimeout * 1000 : 10000;
-        return Math.max(2000, Math.min(30000, t));
+        const t = n.expireTimeout > 0 ? n.expireTimeout : 10000;
+        return Math.max(1000, Math.min(30000, t));
     }
 
     function defaultAction(n) {
