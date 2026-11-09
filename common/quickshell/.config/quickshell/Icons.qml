@@ -26,6 +26,7 @@ Singleton {
     readonly property string bellOff: "\u{F009B}"
     readonly property string close: "\u{F0156}"
     readonly property string check: "\u{F012C}"
+    readonly property string chevronDown: "\u{F0140}"
     readonly property string chevronLeft: "\u{F0141}"
     readonly property string chevronRight: "\u{F0142}"
     readonly property string leaf: "\u{F032A}"
