@@ -38,6 +38,10 @@ output   = "~/.config/i3/colors"
 hook     = "i3-msg -q reload"
 
 [[target]]
+template = "quickshell-theme.qml"
+output   = "~/.config/quickshell/Theme.qml"
+
+[[target]]
 template = "rofi-colors.rasi"
 output   = "~/.config/rofi/colors.rasi"
 
