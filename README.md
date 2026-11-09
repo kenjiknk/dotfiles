@@ -10,10 +10,10 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | | |
 |---|---|
 | **WM** | [i3](https://i3wm.org) + [autotiling](https://github.com/nwg-piotr/autotiling) |
-| **Bar** | i3bar + [i3blocks](https://github.com/vivien/i3blocks) |
+| **Bar** | [Quickshell](https://quickshell.org) (QML): one bar per screen with popups, plus the volume/brightness OSD |
 | **Compositor** | [picom](https://github.com/yshui/picom) — dim, 4 px corners, short animations, no blur |
 | **Launcher** | [rofi](https://github.com/davatorium/rofi) + rofi-emoji, clipmenu |
-| **Notifications** | [dunst](https://dunst-project.org) (also the volume/brightness bars) |
+| **Notifications** | [dunst](https://dunst-project.org) |
 | **Lock** | i3lock on pure black (OLED) + xss-lock |
 | **Screenshot** | [Flameshot](https://flameshot.org), coloured by the theme |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
@@ -33,7 +33,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 **1. Packages** (Arch):
 
 ```sh
-sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
+sudo pacman -S i3-wm quickshell autotiling picom rofi rofi-emoji clipmenu dunst \
   i3lock xss-lock polkit-gnome xdg-desktop-portal-gtk kitty zsh \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
@@ -117,8 +117,11 @@ ones:
 | `Super+t` | desktop theme |
 | `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
-Clicking a bar block opens its TUI: network → nmtui, bt → bluetui, volume →
-wiremix, cpu/mem → btop.
+Bar widgets open a popup on click (calendar, player, Wi-Fi and Bluetooth
+lists, mixer, battery and power profile, session menu); scroll changes
+workspace, volume, brightness or track. Middle-click opens the TUI: network →
+nmtui, bluetooth → bluetui, volume → wiremix, cpu/mem → btop. The bar also
+answers `qs ipc call ...` (`qs ipc show` lists the targets).
 
 ## Structure
 
@@ -127,7 +130,7 @@ mirrors `$HOME`; `common/` and `hosts/<hostname>/` themselves are not packages.
 
 ```
 common/            any machine
-  i3/ i3blocks/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
+  i3/ quickshell/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
   gtk/ fontconfig/ flatpak/ xdg/
   theme/           the themes (palettes) and the templates every colour file comes from
   shell/ zsh/ bash/
