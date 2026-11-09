@@ -43,6 +43,11 @@ export FZF_DEFAULT_OPTS_FILE="$HOME/.config/theme/fzf"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export MANROFFOPT="-c"
 
+# ssh-agent from gcr (gcr-ssh-agent.socket, enabled once per machine; see the
+# README). Exported here so git, VS Code and everything i3 starts find it, not
+# only interactive shells. A forwarded agent (ssh -A) is left alone.
+[ -n "${SSH_AUTH_SOCK:-}" ] || export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/gcr/ssh"
+
 # Under X nothing sets the cursor for every client; without these it differs
 # per toolkit and comes out small.
 export XCURSOR_THEME=Adwaita

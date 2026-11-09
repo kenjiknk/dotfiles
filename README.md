@@ -70,7 +70,14 @@ change without touching anything, `./install -D` removes every link.
 
 Log out and pick **i3** in the display manager.
 
-**4. Optional, once per machine:** `~/Scripts/zen-chrome` themes Zen Browser;
+**4. Once per machine**, the SSH agent (gcr, part of gnome-keyring), which
+`~/.config/shell/env` points `SSH_AUTH_SOCK` at:
+
+```sh
+systemctl --user enable --now gcr-ssh-agent.socket
+```
+
+**5. Optional, once per machine:** `~/Scripts/zen-chrome` themes Zen Browser;
 `flatpak install flathub org.gtk.Gtk3theme.adw-gtk3-dark` themes Flatpak apps.
 
 ## Keybindings
