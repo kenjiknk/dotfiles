@@ -36,7 +36,7 @@ time_left() {
 }
 
 if [[ ${BLOCK_BUTTON:-} == 1 ]] && command -v notify-send >/dev/null; then
-    watts=?
+    watts='?'
     if [[ -r $bat/power_now ]]; then
         watts=$(( $(<"$bat/power_now") / 1000000 ))
     elif [[ -n $rate && -r $bat/voltage_now ]]; then

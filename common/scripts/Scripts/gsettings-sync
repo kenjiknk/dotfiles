@@ -36,5 +36,6 @@ fi
 # assignments, and only this one value is wanted here.
 colors=${XDG_CONFIG_HOME:-$HOME/.config}/theme/colors.sh
 if [[ -r $colors ]]; then
+    # shellcheck source=/dev/null
     put accent-color "$(. "$colors" && printf '%s' "${gnome_accent:-}")"
 fi

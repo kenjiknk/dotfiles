@@ -43,9 +43,9 @@ case "${1:-}" in
         apply "${pairs[@]:1}" "${pairs[0]}"
         ;;
     reapply)
-        layouts=$(query layout)
-        [[ -n $layouts ]] || exit 0
-        setxkbmap -layout "$layouts" -variant "$(query variant)"
+        layout=$(query layout)
+        [[ -n $layout ]] || exit 0
+        setxkbmap -layout "$layout" -variant "$(query variant)"
         ;;
     current)
         layout=$(query layout)
