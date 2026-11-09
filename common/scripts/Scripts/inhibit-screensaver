@@ -8,7 +8,10 @@ every request failed and xss-lock faded and locked the screen 5 minutes into
 a video. This owns that name on the session bus:
 
   - Inhibit() while nothing else is inhibiting turns the X screensaver off
-    (`xset s off`), so xss-lock is never told the session went idle;
+    (`xset s off`), so xss-lock is never told the session went idle, and
+    resets X's idle timer every minute (`xset s reset`), so DPMS does not turn
+    the screen off either. Turning DPMS itself off would need its state saved
+    and restored, which the ThinkPad's dock-monitors also switches;
   - when the last inhibitor calls UnInhibit() or leaves the bus (an app that
     quits or crashes without un-inhibiting), the previous timeout and cycle,
     read from `xset q` at that first Inhibit(), are restored.
@@ -59,6 +62,8 @@ VERBOSE = "-v" in sys.argv[1:]
 inhibitors: dict[int, tuple[str, str, str]] = {}  # cookie -> (sender, app, reason)
 next_cookie = 1
 saved: tuple[str, str] | None = None  # (timeout, cycle) to restore
+heartbeat: int | None = None          # GLib source resetting the idle timer
+HEARTBEAT_S = 60                      # well under DPMS's 600 s
 
 
 def log(msg: str) -> None:
@@ -73,15 +78,24 @@ def xset(*args: str) -> str:
         return ""
 
 
+def poke() -> bool:
+    xset("s", "reset")
+    return True  # keep the GLib timeout running
+
+
 def update() -> None:
     """Screensaver off while anything inhibits; back as it was when not."""
-    global saved
+    global saved, heartbeat
     if inhibitors and saved is None:
         m = re.search(r"timeout:\s*(\d+)\s+cycle:\s*(\d+)", xset("q"))
         saved = (m.group(1), m.group(2)) if m else ("300", "5")
         xset("s", "off")
+        heartbeat = GLib.timeout_add_seconds(HEARTBEAT_S, poke)
         log(f"screensaver off (was {saved[0]} {saved[1]})")
     elif not inhibitors and saved is not None:
+        if heartbeat is not None:
+            GLib.source_remove(heartbeat)
+            heartbeat = None
         xset("s", *saved)
         log(f"screensaver back to {saved[0]} {saved[1]}")
         saved = None

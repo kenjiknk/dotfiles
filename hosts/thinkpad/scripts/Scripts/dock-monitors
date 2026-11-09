@@ -160,7 +160,31 @@ for a in args:
 ' "$panel" "${screens[@]}"
 }
 
+# DPMS only while no DisplayLink (evdi) screen is connected: waking those from
+# hours of standby froze X twice (2026-10-26, 2026-11-01), the dock screens on
+# but black and only a hard reset getting out. The panel alone sleeps fine.
+# Read from sysfs, so it holds before X has attached the evdi outputs.
+sync_dpms() {
+    local card driver status want=+dpms now
+    for card in /sys/class/drm/card[0-9]*; do
+        [[ -e $card/device/driver ]] || continue
+        driver=$(basename -- "$(readlink -f -- "$card/device/driver")")
+        [[ $driver == evdi ]] || continue
+        for status in "$card"/card*-*/status; do
+            if [[ -r $status && $(<"$status") == connected ]]; then
+                want=-dpms
+            fi
+        done
+    done
+    now=$(xset q) || return 0
+    if [[ $now == *"DPMS is Enabled"* ]]; then now=+dpms; else now=-dpms; fi
+    [[ $now != "$want" ]] || return 0
+    logger -t dock-monitors "xset $want"
+    xset "$want"
+}
+
 apply() {
+    sync_dpms
     attach_providers
 
     local -a args=()
@@ -212,8 +236,10 @@ watch() {
     done &
 
     # Live only as long as the X server does, or a leftover watcher would hold
-    # the lock in the next session.
+    # the lock in the next session. Each pass also re-checks DPMS, which i3's
+    # own `xset +dpms` at login can race with the first apply above.
     while xrandr --current >/dev/null 2>&1; do
+        sync_dpms
         sleep 10
     done
 }

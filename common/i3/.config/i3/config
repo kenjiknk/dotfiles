@@ -64,12 +64,13 @@ exec_always --no-startup-id flock -n "$XDG_RUNTIME_DIR/power-profile-watch.lock"
 
 exec --no-startup-id dunst
 
-# At 300 s idle ~/Scripts/lock locks (i3lock on black).
-# xss-lock also locks before suspend and on `loginctl lock-session`.
-# DPMS stays off: waking the DisplayLink (evdi) monitors after hours in standby
-# froze X twice (2026-10-26, 2026-11-01) with the dock screens on but black,
-# and only a hard reset got out. The lock screen is pure black instead.
-exec_always --no-startup-id xset s 300 5 -dpms
+# At 300 s idle ~/Scripts/lock locks (i3lock on black); at 600 s DPMS turns the
+# screens off. xss-lock also locks before suspend and on `loginctl lock-session`.
+# DPMS is switched on once, at login: on a restart it keeps whatever state the
+# host set (the ThinkPad's dock-monitors turns it off while DisplayLink screens
+# are connected, since waking those from standby froze X).
+exec_always --no-startup-id xset s 300 5 dpms 600 600 600
+exec --no-startup-id xset +dpms
 exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/Scripts/lock
 # Videos keep the screen awake: answers apps' (and the portal's) requests to
 # org.freedesktop.ScreenSaver, which nothing provides under i3, by turning the
