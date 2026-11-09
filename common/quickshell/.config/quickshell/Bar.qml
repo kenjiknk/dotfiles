@@ -77,18 +77,26 @@ PanelWindow {
             anchors.rightMargin: 4
             spacing: 2
 
+            // Groups, with a wider gap between them than inside them: media |
+            // system | connections | input/audio | power | tray. A gap shows
+            // only when the group before it does.
             MediaWidget {
                 id: media
                 maxTextWidth: Math.min(200, bar.sideRoom - bar.othersWidth(rightRow, media) - 40)
             }
+            GroupGap { visible: media.visible }
             StatsWidget {}
-            NetworkWidget {}
-            BluetoothWidget {}
+            GroupGap {}
+            NetworkWidget { id: net }
+            BluetoothWidget { id: bt }
+            GroupGap { visible: net.visible || bt.visible }
             KeyboardWidget {}
             VolumeWidget {}
-            BatteryWidget {}
-            NotifWidget {}
-            TrayWidget {}
+            GroupGap {}
+            BatteryWidget { id: battery }
+            NotifWidget { id: notifs }
+            GroupGap { visible: (battery.visible || notifs.visible) && tray.visible }
+            TrayWidget { id: tray }
         }
     }
 
