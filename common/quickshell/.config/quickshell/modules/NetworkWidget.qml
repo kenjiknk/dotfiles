@@ -95,7 +95,7 @@ BarModule {
                     if (modelData.connected) modelData.disconnect();
                     else if (modelData.known || modelData.security === WifiSecurityType.Open) modelData.connect();
                     else {
-                        popup.visible = false;
+                        popup.close();
                         Quickshell.execDetached(["kitty", "-e", "nmtui", "connect", modelData.name]);
                     }
                 }

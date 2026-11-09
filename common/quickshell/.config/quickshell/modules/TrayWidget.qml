@@ -54,6 +54,7 @@ BarModule {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
                 onClicked: m => {
                     const it = item.modelData;
+                    if (ShellState.activePopup) ShellState.activePopup.close();
                     if (m.button === Qt.MiddleButton) it.secondaryActivate();
                     else if ((m.button === Qt.RightButton || it.onlyMenu) && it.hasMenu) menu.open();
                     else it.activate();

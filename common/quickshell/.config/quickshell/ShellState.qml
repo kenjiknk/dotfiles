@@ -10,6 +10,8 @@ Singleton {
     id: root
 
     property bool barsVisible: true
+    // the BarPopup that is open, if any (opening another closes it)
+    property var activePopup: null
 
     // ---- i3: focused window title and binding mode ----
     property string focusedTitle: ""

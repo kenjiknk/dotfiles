@@ -46,7 +46,7 @@ BarModule {
                         popup.armed = modelData.id;
                         return;
                     }
-                    popup.visible = false;
+                    popup.close();
                     Quickshell.execDetached(modelData.cmd);
                 }
             }
