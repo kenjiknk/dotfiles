@@ -117,11 +117,13 @@ ones:
 | `Super+t` | desktop theme |
 | `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
-Bar widgets open a popup on click (calendar, player, Wi-Fi and Bluetooth
-lists, mixer, battery and power profile); scroll changes
-workspace, volume, brightness or track. Middle-click opens the TUI: network →
-nmtui, bluetooth → bluetui, volume → wiremix, cpu/mem → btop. The bar also
-answers `qs ipc call ...` (`qs ipc show` lists the targets).
+The bar keeps to icons and shows numbers only where they matter: volume,
+battery, and system readings (CPU, memory, temperature, disk) only once one is
+out of range. Widgets open a popup on click with the details (calendar,
+player, system, Wi-Fi and Bluetooth lists, mixer, battery and power profile);
+scroll changes workspace, volume or track. Middle-click opens the TUI:
+network → nmtui, bluetooth → bluetui, volume → wiremix, system → btop. The bar
+also answers `qs ipc call ...` (`qs ipc show` lists the targets).
 
 ## Structure
 
