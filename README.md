@@ -50,9 +50,14 @@ ThinkPad only (`hosts/thinkpad`, `system/thinkpad`): the amdgpu Xorg driver,
 which TearFree needs, and the DisplayLink dock driver:
 
 ```sh
-sudo pacman -S xf86-video-amdgpu
+sudo pacman -S xf86-video-amdgpu fprintd
 yay -S displaylink
 ```
+
+The fingerprint reader (Goodix `27c6:659a`, driver goodixmoc) unlocks sudo,
+polkit dialogs and the lock screen (Enter on an empty field, then the finger);
+`system/thinkpad/etc/pam.d/` holds those PAM files. Enrol once with
+`fprintd-enroll`. Login stays password-only: it is what unlocks the keyring.
 
 **2. oh-my-zsh**, cloned rather than installed (its installer overwrites
 `~/.zshrc`), with the zsh plugins linked from pacman:
@@ -136,7 +141,7 @@ common/            any machine
 hosts/thinkpad/    this laptop only: keyboard layout, touchpad, TrackPoint, dock
 assets/            the screenshot above
 system/common/     /etc files for any machine (zram)
-system/thinkpad/   /etc files for this laptop (Xorg: TearFree, DisplayLink)
+system/thinkpad/   /etc files for this laptop (Xorg: TearFree, DisplayLink; PAM: fingerprint)
 install            stows both layers into $HOME; --system copies system/ into /etc
 .githooks/         pre-commit: shellcheck, Python syntax, i3 -C (enabled by install)
 ```

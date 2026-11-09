@@ -1,0 +1,9 @@
+#%PAM-1.0
+# i3lock asks PAM only after Enter, with what was typed. A typed password
+# unlocks at once (pam_unix); Enter on an empty field falls through to the
+# fingerprint reader (fprintd, 10 s). Anything else ends in system# "-auth": skipped, not fatal, without pam_fprintd.so.
+-auth, which
+# keeps faillock counting the failures.
+auth       sufficient   pam_unix.so     try_first_pass likeauth nullok
+-auth       sufficient   pam_fprintd.so  max-tries=2 timeout=10
+auth       include      system-auth
