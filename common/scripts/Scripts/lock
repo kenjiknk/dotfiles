@@ -14,11 +14,8 @@
 
 set -u
 
-opts=(--color=000000 --show-failed-attempts --show-keyboard-layout)
-# Enter on an empty field is ignored, except where fprintd is installed: there
-# it hands over to the fingerprint reader (pam_fprintd in /etc/pam.d/i3lock,
-# from system/<host>/ in the dotfiles).
-command -v fprintd-verify >/dev/null || opts+=(--ignore-empty-password)
+opts=(--color=000000 --ignore-empty-password --show-failed-attempts
+    --show-keyboard-layout)
 
 # Before locking: hold notifications back and pause music. Each step is
 # skipped quietly when its tool is missing.

@@ -1,9 +1,0 @@
-#%PAM-1.0
-# Overrides /usr/lib/pam.d/polkit-1: the polkit-gnome dialog asks for a finger
-# first (10 s, two tries), then the password, as sudo does.
-# "-auth": skipped, not fatal, without pam_fprintd.so.
--auth       sufficient   pam_fprintd.so  max-tries=2 timeout=10
-auth       include      system-auth
-account    include      system-auth
-password   include      system-auth
-session    include      system-auth
