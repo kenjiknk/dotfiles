@@ -6,7 +6,7 @@
 //   qs ipc call bar toggle|open|close
 //   qs ipc call osd flash <volume|mic|brightness|keyboard> <percent> <label>
 //                                  (~/Scripts/osd; percent < 0 = label only)
-//   qs ipc call notifs dnd|clear|lock|unlock                          (~/Scripts/lock)
+//   qs ipc call notifs dnd|clear|lock|unlock|status                   (~/Scripts/lock)
 //
 // It is also the notification daemon (Notifs.qml): toasts below the bar and a
 // history behind the bell.
@@ -42,5 +42,8 @@ ShellRoot {
         function clear(): void { Notifs.clearAll(); }
         function lock(): void { Notifs.locked = true; }
         function unlock(): void { Notifs.locked = false; }
+        function status(): string {
+            return JSON.stringify({ dnd: Notifs.dnd, locked: Notifs.locked, history: Notifs.list.length, toasts: Notifs.toasts.length });
+        }
     }
 }
