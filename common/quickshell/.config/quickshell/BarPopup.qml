@@ -15,7 +15,7 @@ QtObject {
     property int padding: 12
     property bool open: false
     // true from the start of the fade-in to the end of the fade-out
-    readonly property alias visible: panel.visible
+    readonly property bool visible: panel.opacity > 0
     property real centerX: 0
 
     // The bar's popup layer, found up the widget's parent chain.
@@ -43,7 +43,9 @@ QtObject {
         id: panel
 
         parent: popup.layer
-        visible: opacity > 0
+        // Hidden by opacity only: a visible: false item is not laid out, so the
+        // panel would open at the size its content had last time, then jump.
+        enabled: opacity > 0
         x: parent ? Math.max(6, Math.min(parent.width - width - 6, popup.centerX - width / 2)) : 0
         y: popup.open ? 6 : -6
         opacity: popup.open ? 1 : 0

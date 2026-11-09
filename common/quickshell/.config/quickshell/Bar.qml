@@ -116,7 +116,7 @@ PanelWindow {
             // any panel still on screen, fading out included
             readonly property bool busy: {
                 for (let i = 0; i < children.length; i++)
-                    if (children[i] !== catcher && children[i].visible) return true;
+                    if (children[i] !== catcher && children[i].opacity > 0) return true;
                 return false;
             }
 
