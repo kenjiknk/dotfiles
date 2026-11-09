@@ -27,7 +27,7 @@ exec_always --no-startup-id sh -c '~/Scripts/icon-accent; ~/Scripts/gsettings-sy
 default_border pixel 2
 default_floating_border pixel 2
 
-# Window colours and the bar, generated from ~/.config/theme/theme.toml.
+# Window colours, generated from ~/.config/theme/theme.toml.
 include ~/.config/i3/colors
 
 # 4 px scale: 8 between windows. Corners (4 px) come from picom.
@@ -221,8 +221,13 @@ for_window [class="^cheatsheet-"] floating enable, resize set 62 ppt 88 ppt, mov
 bindsym $mod+t exec --no-startup-id ~/Scripts/theme-switch
 
 ### Bar
-#
-# Defined in ~/.config/i3/colors (included above), next to its colours.
+
+# Quickshell (~/.config/quickshell): one bar per screen with its popups, and
+# the volume/brightness OSD. exec_always restarts it along with i3, as i3bar
+# was; `qs kill` is quiet when none runs.
+exec_always --no-startup-id sh -c 'qs kill >/dev/null 2>&1; exec qs -d'
+# Its app launcher (the grid icon on the bar) is an ordinary window.
+for_window [title="^qs-launcher$"] floating enable, move position center
 
 # From hosts/<hostname>/i3/; a missing file is fine.
 include ~/.config/i3/local
