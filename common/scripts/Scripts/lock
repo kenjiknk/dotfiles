@@ -23,8 +23,11 @@ opts=(--color=000000 --ignore-empty-password --show-failed-attempts
 command -v qs >/dev/null && qs ipc call notifs lock >/dev/null 2>&1
 command -v playerctl >/dev/null && playerctl --all-players pause 2>/dev/null
 
-# After unlocking (or if this script is killed): notifications back.
+# After unlocking (or if this script is killed): notifications back, unless
+# another lock is still up (a second run while locked must not lift the hold
+# for the first one).
 resume() {
+    pgrep -xu "$EUID" i3lock >/dev/null && return
     command -v qs >/dev/null && qs ipc call notifs unlock >/dev/null 2>&1
 }
 trap resume EXIT
