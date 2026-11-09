@@ -6,10 +6,12 @@ import Quickshell.Services.Notifications
 
 // One notification: icon/image, summary, app, body, action buttons, close.
 //
-// As a toast it hides after its timeout (paused while hovered) and stays in
-// the history. Clicks follow the old dunst setup: left = close (the toast),
-// middle = the default action, right = close every toast.
-// In the history list: left = the default action, × or right = remove.
+// As a toast it hides after its timeout (Notifs runs it; paused while
+// hovered) and stays in the history. Clicks follow the old dunst setup:
+// left = close (the toast), middle = the default action, right = close every
+// toast.
+// In the history list: left = the default action (if the app has one),
+// × or right = remove.
 Rectangle {
     id: root
 
@@ -34,10 +36,14 @@ Rectangle {
     border.width: 1
     border.color: notification.urgency === NotificationUrgency.Critical ? Theme.red : Theme.surface
 
-    Timer {
-        running: root.toast && !mouse.containsMouse
-        interval: Notifs.timeoutMs(root.notification)
-        onTriggered: Notifs.markSeen(root.notification.id)
+    // The timeout itself lives in Notifs (one timer per notification); a toast
+    // only tells it when the pointer rests on it.
+    Binding {
+        when: root.toast && mouse.containsMouse
+        target: Notifs
+        property: "hoveredId"
+        value: root.notification.id
+        restoreMode: Binding.RestoreValue
     }
 
     MouseArea {

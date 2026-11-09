@@ -255,7 +255,8 @@ PanelWindow {
             spacing: 6
 
             Repeater {
-                model: Notifs.toasts.slice(-4)
+                // ScriptModel keeps the existing cards when the queue changes.
+                model: ScriptModel { values: Notifs.toasts.slice(-Notifs.maxToasts) }
 
                 NotificationCard {
                     required property var modelData
