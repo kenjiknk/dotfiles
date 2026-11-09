@@ -111,7 +111,8 @@ BarModule {
         visible: root.alerts.length === 0
         text: Icons.cpu
         color: Theme.dim
-        font.pixelSize: 14
+        // This glyph is drawn small within its box; 18 px matches the other icons.
+        font.pixelSize: 18
     }
     Repeater {
         model: root.alerts
@@ -123,6 +124,7 @@ BarModule {
             BarText {
                 text: parent.modelData.icon
                 color: root.levelColor(parent.modelData, Theme.fg)
+                font.pixelSize: 16
             }
             BarText {
                 text: parent.modelData.text
