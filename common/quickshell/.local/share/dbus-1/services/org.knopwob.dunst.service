@@ -1,0 +1,7 @@
+# Quickshell is the notification daemon (~/.config/quickshell/Notifs.qml).
+# This shadows dunst's system file of the same name, so a notification sent
+# before the bar is up cannot D-Bus-activate dunst, which would then keep
+# org.freedesktop.Notifications from Quickshell for the whole session.
+[D-BUS Service]
+Name=org.freedesktop.Notifications
+Exec=/bin/false

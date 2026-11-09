@@ -200,7 +200,7 @@ PanelWindow {
     // ---- Notification toasts, top-right below the bar ----
     PopupWindow {
         id: toastWindow
-        visible: Notifs.enabled && bar.isFocused && bar.visible && Notifs.toasts.length > 0
+        visible: bar.isFocused && bar.visible && Notifs.toasts.length > 0
         anchor.window: bar
         anchor.rect.x: bar.width - 8
         anchor.rect.y: bar.height + 8

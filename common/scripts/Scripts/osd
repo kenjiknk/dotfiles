@@ -1,28 +1,16 @@
 #!/usr/bin/env bash
-# osd <name> <percent> [icon] [text] — a short on-screen bar for volume, mic and
-# brightness. Used by ~/Scripts/volume and ~/Scripts/brightness.
-#
-# Quickshell draws it below the bar (`qs ipc call osd flash`, which picks its
-# own glyph from <name>). When Quickshell is not running it falls back to a
-# dunst notification that replaces the previous one of the same name (rule
-# [osd] in dunstrc: short timeout, kept out of the history); [icon] is only
-# used there. Quiet without either.
+# osd <name> <percent> [icon] [text] — a short on-screen indicator, drawn by
+# Quickshell below the bar (`qs ipc call osd flash`), which picks its own glyph
+# from <name>: volume, mic, brightness or keyboard. A negative <percent> shows
+# [text] alone, without the bar. Used by ~/Scripts/volume, ~/Scripts/brightness
+# and ~/Scripts/kbd-layout. [icon] is unused, kept so callers need not change.
+# Quiet when Quickshell is not running.
 
 set -euo pipefail
 
 name=$1
 value=$2
-icon=${3:-}
 text=${4:-"$value%"}
 
-if command -v qs >/dev/null && qs ipc call osd flash "$name" "$value" "$text" >/dev/null 2>&1; then
-    exit 0
-fi
-
-command -v notify-send >/dev/null || exit 0
-
-notify-send -a osd -u low \
-    -h "string:x-dunst-stack-tag:osd-$name" \
-    -h "int:value:$value" \
-    ${icon:+-i "$icon"} \
-    "$text"
+command -v qs >/dev/null || exit 0
+qs ipc call osd flash "$name" "$value" "$text" >/dev/null 2>&1 || true

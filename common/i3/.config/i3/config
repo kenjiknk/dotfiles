@@ -58,8 +58,6 @@ exec_always --no-startup-id feh --no-fehbg --bg-scale ~/.config/theme/background
 # Repeat rate, re-applied with the layouts to keyboards plugged in later.
 exec_always --no-startup-id ~/Scripts/keyboard-watch
 
-exec --no-startup-id dunst
-
 # At 300 s idle ~/Scripts/lock locks (i3lock on black); at 600 s DPMS turns the
 # screens off. xss-lock also locks before suspend and on `loginctl lock-session`.
 # DPMS is switched on once, at login: on a restart it keeps whatever state the
@@ -80,7 +78,7 @@ exec --no-startup-id picom
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # Automount USB drives under /run/media/$USER (yazi does not mount anything
-# by itself). No tray icon; a notification shows up via dunst.
+# by itself). No tray icon; it sends a notification instead.
 exec --no-startup-id udiskie --automount --notify --no-tray
 
 # Clipboard history for $mod+c. Only the clipboard (Ctrl+C), not every mouse

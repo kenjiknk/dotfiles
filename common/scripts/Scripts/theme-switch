@@ -10,9 +10,9 @@ theme.toml lists, and a [meta] with the editors' own themes. Switching:
 
   1. points theme.toml's `palette =` line at it (tracked in the dotfiles repo,
      so a fresh checkout starts on the theme last picked);
-  2. runs theme-render: i3, bar, rofi, dunst, kitty, GTK/Qt, zathura, yazi,
-     Zen, lock screen, Quickshell, Neovim's theme.lua and Tsuzuri; i3, dunst and
-     kitty reload at once;
+  2. runs theme-render: i3, Quickshell (bar and notifications), rofi, kitty,
+     GTK/Qt, zathura, yazi, Zen, lock screen, Neovim's theme.lua and Tsuzuri;
+     i3 and kitty reload at once, Quickshell by itself;
   3. sets VS Code's workbench.colorTheme (and, for themes with a [vscode_colors]
      table, workbench.colorCustomizations), which VS Code applies live;
   4. runs :ThemeReload in every running Neovim.

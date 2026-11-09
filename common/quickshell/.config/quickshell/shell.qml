@@ -6,9 +6,10 @@
 //   qs ipc call bar toggle|open|close
 //   qs ipc call osd flash <volume|mic|brightness|keyboard> <percent> <label>
 //                                  (~/Scripts/osd; percent < 0 = label only)
+//   qs ipc call notifs dnd|clear|lock|unlock                          (~/Scripts/lock)
 //
-// Notifications stay with dunst. The Quickshell daemon is here but off: to try
-// it, `pkill dunst; pkill -x qs; QS_NOTIFS=1 qs -d`.
+// It is also the notification daemon (Notifs.qml): toasts below the bar and a
+// history behind the bell.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -39,5 +40,7 @@ ShellRoot {
 
         function dnd(): void { Notifs.dnd = !Notifs.dnd; }
         function clear(): void { Notifs.clearAll(); }
+        function lock(): void { Notifs.locked = true; }
+        function unlock(): void { Notifs.locked = false; }
     }
 }

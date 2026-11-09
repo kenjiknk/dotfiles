@@ -4,13 +4,28 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Notifications
 
-// One notification: icon/image, summary, body, action buttons.
-// As a toast it hides itself after the timeout; click dismisses.
+// One notification: icon/image, summary, app, body, action buttons, close.
+//
+// As a toast it hides after its timeout (paused while hovered) and stays in
+// the history. Clicks follow the old dunst setup: left = close (the toast),
+// middle = the default action, right = close every toast.
+// In the history list: left = the default action, × or right = remove.
 Rectangle {
     id: root
 
     required property var notification
     property bool toast: false
+
+    function close() {
+        if (toast) Notifs.markSeen(notification.id);
+        else notification.dismiss();
+    }
+
+    function runDefault() {
+        const action = Notifs.defaultAction(notification);
+        if (action) action.invoke();
+        notification.dismiss();
+    }
 
     implicitWidth: 340
     implicitHeight: layout.implicitHeight + 20
@@ -20,16 +35,26 @@ Rectangle {
     border.color: notification.urgency === NotificationUrgency.Critical ? Theme.red : Theme.surface
 
     Timer {
-        running: root.toast && Notifs.timeoutMs(root.notification) > 0 && !hover.containsMouse
+        running: root.toast && !mouse.containsMouse
         interval: Notifs.timeoutMs(root.notification)
         onTriggered: Notifs.markSeen(root.notification.id)
     }
 
     MouseArea {
-        id: hover
+        id: mouse
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: root.notification.dismiss()
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+        onClicked: m => {
+            if (root.toast) {
+                if (m.button === Qt.MiddleButton) root.runDefault();
+                else if (m.button === Qt.RightButton) Notifs.markAllSeen();
+                else root.close();
+            } else {
+                if (m.button === Qt.RightButton) root.close();
+                else root.runDefault();
+            }
+        }
     }
 
     RowLayout {
@@ -53,17 +78,32 @@ Rectangle {
 
             RowLayout {
                 Layout.fillWidth: true
+                spacing: 6
 
                 BarText {
                     Layout.fillWidth: true
                     text: root.notification.summary
                     font.bold: true
+                    color: root.notification.urgency === NotificationUrgency.Critical ? Theme.red : Theme.fg
                     elide: Text.ElideRight
                 }
                 BarText {
                     text: root.notification.appName
                     color: Theme.muted
                     font.pixelSize: 10
+                }
+                // ×: hide the toast, or remove it from the history.
+                BarText {
+                    text: Icons.close
+                    color: closeArea.containsMouse ? Theme.fg : Theme.muted
+
+                    MouseArea {
+                        id: closeArea
+                        anchors.fill: parent
+                        anchors.margins: -4
+                        hoverEnabled: true
+                        onClicked: root.close()
+                    }
                 }
             }
 
@@ -79,13 +119,15 @@ Rectangle {
                 onLinkActivated: link => Qt.openUrlExternally(link)
             }
 
+            // Named actions; "default" is the click itself, not a button.
             RowLayout {
-                visible: root.notification.actions.length > 0
+                readonly property var buttons: root.notification.actions.filter(a => a.identifier !== "default" && a.text !== "")
+                visible: buttons.length > 0
                 Layout.topMargin: 4
                 spacing: 4
 
                 Repeater {
-                    model: root.notification.actions
+                    model: parent.buttons
 
                     MenuRow {
                         required property var modelData

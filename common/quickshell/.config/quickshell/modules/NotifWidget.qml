@@ -3,11 +3,11 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs
 
-// Notification history (only when Notifs.enabled). Right-click = do not disturb.
+// Notification history: a bell with the count; click for the list (newest
+// first), right-click toggles do not disturb.
 BarModule {
     id: root
 
-    visible: Notifs.enabled
     onClicked: m => {
         if (m.button === Qt.RightButton) Notifs.dnd = !Notifs.dnd;
         else popup.toggle();

@@ -10,7 +10,7 @@
 # shows what a theme change did.
 #
 # Roles every theme defines:
-#   bg_dark  ANSI black          bg_alt   panels: bar, rofi, dunst, GTK views
+#   bg_dark  ANSI black          bg_alt   panels: bar, rofi, notifications, GTK views
 #   bg       windows             bg_soft  raised: GTK cards, i3 inactive titles
 #   surface  focused i3 title    surface2 subtle borders
 #   overlay  decoration only, below 3:1, never text
@@ -44,11 +44,6 @@ output   = "~/.config/quickshell/Theme.qml"
 [[target]]
 template = "rofi-colors.rasi"
 output   = "~/.config/rofi/colors.rasi"
-
-[[target]]
-template = "dunstrc"
-output   = "~/.config/dunst/dunstrc"
-hook     = "dunstctl reload"
 
 [[target]]
 template = "kitty-colors.conf"

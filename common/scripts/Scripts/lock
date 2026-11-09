@@ -7,9 +7,9 @@
 # ring indicator while typing, failed attempts counted and the keyboard layout
 # shown (a password typed in br instead of us fails for no visible reason).
 #
-# While locked: notifications are paused, since dunst draws above other windows
-# and would show them to anyone looking, and media players are paused.
-# Notifications come back on unlock (unless they were paused before); music
+# While locked: notification toasts are held back, since they draw above other
+# windows and would show them to anyone looking (they still land in the bar's
+# history), and media players are paused. Toasts come back on unlock; music
 # stays paused.
 
 set -u
@@ -17,20 +17,15 @@ set -u
 opts=(--color=000000 --ignore-empty-password --show-failed-attempts
     --show-keyboard-layout)
 
-# Before locking: hold notifications back and pause music. Each step is
-# skipped quietly when its tool is missing.
-was_paused=false
-if command -v dunstctl >/dev/null; then
-    [[ $(dunstctl is-paused 2>/dev/null) == true ]] && was_paused=true
-    dunstctl set-paused true 2>/dev/null
-fi
+# Before locking: hold notifications back (Quickshell) and pause music. Each
+# step is skipped quietly when its tool is missing. Do not disturb, if on,
+# is a separate switch and stays as it was.
+command -v qs >/dev/null && qs ipc call notifs lock >/dev/null 2>&1
 command -v playerctl >/dev/null && playerctl --all-players pause 2>/dev/null
 
 # After unlocking (or if this script is killed): notifications back.
 resume() {
-    if [[ $was_paused == false ]] && command -v dunstctl >/dev/null; then
-        dunstctl set-paused false 2>/dev/null
-    fi
+    command -v qs >/dev/null && qs ipc call notifs unlock >/dev/null 2>&1
 }
 trap resume EXIT
 
