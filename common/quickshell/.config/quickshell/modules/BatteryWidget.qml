@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import Quickshell.Services.UPower
 import qs
 
-// UPower battery + power-profiles-daemon (icon on the bar unless balanced,
-// switcher in the popup).
+// UPower battery: percentage and time left (time to full while charging), plus
+// power-profiles-daemon (icon on the bar unless balanced, switcher in the popup).
 BarModule {
     id: root
 
@@ -32,6 +32,18 @@ BarModule {
     BarText {
         text: `${Math.round(root.pct * 100)}%`
         color: !root.charging && root.pct < 0.15 ? Theme.red : Theme.fg
+    }
+    // Time left on battery; while charging, time until full. UPower reports 0
+    // while it is still estimating, and on AC with the charge threshold reached.
+    BarText {
+        readonly property real seconds: !root.dev ? 0
+            : root.dev.state === UPowerDeviceState.Discharging ? root.dev.timeToEmpty
+            : root.dev.state === UPowerDeviceState.Charging ? root.dev.timeToFull
+            : 0
+        visible: seconds > 0
+        text: root.duration(seconds)
+        color: root.dev && root.dev.state === UPowerDeviceState.Charging ? Theme.dim
+             : !root.charging && root.pct < 0.15 ? Theme.red : Theme.fg
     }
     // Power profile, only when it is not the default one.
     BarText {
