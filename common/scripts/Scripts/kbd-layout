@@ -11,7 +11,8 @@
 
 set -euo pipefail
 
-refresh_bar() { pkill -RTMIN+10 -x i3blocks 2>/dev/null || true; }
+# Tell the bar (Quickshell) to read the layout again; quiet when it is not running.
+refresh_bar() { qs ipc call keyboard refresh >/dev/null 2>&1 || true; }
 
 query() { setxkbmap -query | sed -n "s/^$1: *//p"; }
 
