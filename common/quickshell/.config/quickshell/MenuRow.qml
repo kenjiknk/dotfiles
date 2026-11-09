@@ -11,6 +11,8 @@ Rectangle {
     property color textColor: Theme.fg
     property string detail: ""
     property bool active: false
+    property int maxTextWidth: 240
+    property int maxDetailWidth: 160
 
     signal clicked(var mouse)
 
@@ -34,17 +36,22 @@ Rectangle {
             font.pixelSize: 14
             Layout.preferredWidth: 16
         }
+        // Long labels (a browser tab as a media player, an SSID) are cut with
+        // "…" instead of stretching the whole popup to their full length.
         BarText {
             text: root.text
             color: root.textColor
             elide: Text.ElideRight
             Layout.fillWidth: true
+            Layout.maximumWidth: root.maxTextWidth
         }
         BarText {
             visible: root.detail !== ""
             text: root.detail
             color: Theme.dim
             font.pixelSize: 11
+            elide: Text.ElideRight
+            Layout.maximumWidth: root.maxDetailWidth
         }
     }
 
