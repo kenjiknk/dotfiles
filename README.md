@@ -118,7 +118,7 @@ ones:
 | `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
 Bar widgets open a popup on click (calendar, player, Wi-Fi and Bluetooth
-lists, mixer, battery and power profile, session menu); scroll changes
+lists, mixer, battery and power profile); scroll changes
 workspace, volume, brightness or track. Middle-click opens the TUI: network →
 nmtui, bluetooth → bluetui, volume → wiremix, cpu/mem → btop. The bar also
 answers `qs ipc call ...` (`qs ipc show` lists the targets).
