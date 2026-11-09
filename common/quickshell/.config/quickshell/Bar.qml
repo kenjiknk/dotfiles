@@ -88,7 +88,7 @@ PanelWindow {
             spacing: 2
 
             // Groups, with a wider gap between them than inside them: media |
-            // system | connections | input/audio | power | tray. A gap shows
+            // system | connections | audio | power and notifications | tray. A gap shows
             // only when the group before it does.
             MediaWidget {
                 id: media
@@ -100,7 +100,6 @@ PanelWindow {
             NetworkWidget { id: net }
             BluetoothWidget { id: bt }
             GroupGap { visible: net.visible || bt.visible }
-            KeyboardWidget {}
             VolumeWidget {}
             GroupGap {}
             BatteryWidget { id: battery }
@@ -180,14 +179,19 @@ PanelWindow {
                     font.pixelSize: 18
                 }
                 ThemedSlider {
+                    visible: ShellState.osdValue >= 0
                     value: ShellState.osdValue
                     interactive: false
                     fill: Theme.yellow
                 }
+                // With no bar (keyboard layout) the label takes the room.
                 BarText {
                     text: ShellState.osdLabel
-                    Layout.preferredWidth: 44
-                    horizontalAlignment: Text.AlignRight
+                    Layout.fillWidth: ShellState.osdValue < 0
+                    Layout.preferredWidth: ShellState.osdValue < 0 ? -1 : 44
+                    horizontalAlignment: ShellState.osdValue < 0 ? Text.AlignHCenter : Text.AlignRight
+                    font.pixelSize: ShellState.osdValue < 0 ? 15 : Theme.fontSize
+                    font.bold: ShellState.osdValue < 0
                 }
             }
         }

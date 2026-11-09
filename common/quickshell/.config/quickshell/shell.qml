@@ -4,8 +4,8 @@
 //
 // IPC (`qs ipc show` lists it all):
 //   qs ipc call bar toggle|open|close
-//   qs ipc call osd flash <volume|mic|brightness> <percent> <label>   (~/Scripts/osd)
-//   qs ipc call keyboard refresh                                       (~/Scripts/kbd-layout)
+//   qs ipc call osd flash <volume|mic|brightness|keyboard> <percent> <label>
+//                                  (~/Scripts/osd; percent < 0 = label only)
 //
 // Notifications stay with dunst. The Quickshell daemon is here but off: to try
 // it, `pkill dunst; pkill -x qs; QS_NOTIFS=1 qs -d`.
@@ -32,12 +32,6 @@ ShellRoot {
         target: "osd"
 
         function flash(kind: string, percent: int, label: string): void { ShellState.flashOsd(kind, percent, label); }
-    }
-
-    IpcHandler {
-        target: "keyboard"
-
-        function refresh(): void { ShellState.refreshLayout(); }
     }
 
     IpcHandler {

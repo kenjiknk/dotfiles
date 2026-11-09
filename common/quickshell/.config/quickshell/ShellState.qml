@@ -5,7 +5,7 @@ import Quickshell.I3
 import Quickshell.Io
 
 // Global state shared by every bar: IPC-controlled toggles, the focused
-// window title (i3 IPC events), the on-screen display and the keyboard layout.
+// window title (i3 IPC events) and the on-screen display.
 Singleton {
     id: root
 
@@ -67,13 +67,15 @@ Singleton {
     property real osdValue: 0
     property string osdLabel: ""
 
-    // kind: volume | mic | brightness (anything else shows no icon)
+    // kind: volume | mic | brightness | keyboard (anything else: no icon).
+    // A negative percent shows the label alone, without the bar.
     function flashOsd(kind, percent, label) {
-        const v = Math.max(0, percent) / 100;
+        const v = percent < 0 ? -1 : percent / 100;
         const off = label === "Muted";
         osdIcon = kind === "volume" ? Icons.volume(v, off)
             : kind === "mic" ? (off ? Icons.micOff : Icons.mic)
             : kind === "brightness" ? Icons.brightness(v)
+            : kind === "keyboard" ? Icons.keyboard
             : "";
         osdValue = v;
         osdLabel = label || `${percent}`;
@@ -85,17 +87,5 @@ Singleton {
         id: osdTimer
         interval: 1500
         onTriggered: root.osdVisible = false
-    }
-
-    // ---- Keyboard layout (~/Scripts/kbd-layout calls `ipc call keyboard refresh`) ----
-    property string kbdLayout: ""
-
-    function refreshLayout() { kbdQuery.running = true; }
-
-    Process {
-        id: kbdQuery
-        command: [Quickshell.env("HOME") + "/Scripts/kbd-layout", "current"]
-        running: true
-        stdout: StdioCollector { onStreamFinished: root.kbdLayout = text.trim() }
     }
 }
