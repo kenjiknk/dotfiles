@@ -14,6 +14,10 @@ fi
 
 export ZSH="$HOME/.oh-my-zsh"
 
+# completion dump in the cache, not as ~/.zcompdump-* (omz reads this name)
+ZSH_COMPDUMP="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-${HOST}-${ZSH_VERSION}"
+mkdir -p "${ZSH_COMPDUMP:h}"
+
 ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # zsh-syntax-highlighting MUST be last in the list
