@@ -6,7 +6,8 @@ import qs
 
 // NetworkManager through Quickshell.Networking. Popup lists Wi-Fi networks
 // (scanning only while open); saved ones connect directly, new ones open nmtui.
-// Middle-click: nmtui.
+// The bar shows only the icon (signal strength); the network name is in the
+// popup. Middle-click: nmtui.
 BarModule {
     id: root
 
@@ -32,11 +33,6 @@ BarModule {
             : Icons.wifiOff
         color: root.wired || root.activeWifi ? Theme.aqua : Theme.red
         font.pixelSize: 14
-    }
-    BarText {
-        text: root.wired ? root.wired.name : root.activeWifi ? root.activeWifi.name : "offline"
-        elide: Text.ElideRight
-        Layout.maximumWidth: 110
     }
 
     // Keep the Wi-Fi scanner on only while the popup is open.

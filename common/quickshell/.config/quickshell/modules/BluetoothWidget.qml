@@ -4,7 +4,9 @@ import Quickshell
 import Quickshell.Bluetooth
 import qs
 
-// BlueZ over D-Bus. Click = popup, middle = bluetui, right = power toggle.
+// BlueZ over D-Bus. The bar shows only the icon, which changes while a device
+// is connected; names are in the popup. Click = popup, middle = bluetui,
+// right = power toggle.
 BarModule {
     id: root
 
@@ -30,12 +32,6 @@ BarModule {
             : root.connected.length > 0 ? Icons.bluetoothOn : Icons.bluetooth
         color: root.adapter && root.adapter.enabled ? Theme.blue : Theme.muted
         font.pixelSize: 14
-    }
-    BarText {
-        visible: root.connected.length > 0
-        text: root.connected.length > 0 ? root.connected[0].name + root.batteryText(root.connected[0]) : ""
-        elide: Text.ElideRight
-        Layout.maximumWidth: 120
     }
 
     BarPopup {
