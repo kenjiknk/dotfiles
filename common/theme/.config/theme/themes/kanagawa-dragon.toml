@@ -4,6 +4,7 @@
 [meta]
 name = "kanagawa-dragon"
 label = "Kanagawa Dragon"
+gnome_accent = "slate"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/rebelot/kanagawa.nvim"
 nvim_colorscheme = "kanagawa-dragon"
 nvim_setup = ''

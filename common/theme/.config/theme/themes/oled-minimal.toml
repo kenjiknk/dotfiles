@@ -5,6 +5,7 @@
 [meta]
 name = "oled-minimal"
 label = "OLED Minimal"
+gnome_accent = "blue"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/projekt0n/github-nvim-theme"
 nvim_colorscheme = "github_dark_default"
 nvim_setup = 'require("github-theme").setup({ palettes = { github_dark_default = { canvas = { default = "#000000", inset = "#000000", overlay = "#0a0a0a", subtle = "#0a0a0a" } } }, specs = { github_dark_default = { bg0 = "#000000", bg1 = "#000000", bg2 = "#0a0a0a", bg3 = "#141414" } } })'

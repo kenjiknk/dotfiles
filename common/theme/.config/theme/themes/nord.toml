@@ -4,6 +4,7 @@
 [meta]
 name = "nord"
 label = "Nord"
+gnome_accent = "teal"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/gbprod/nord.nvim"
 nvim_colorscheme = "nord"
 nvim_setup = ''

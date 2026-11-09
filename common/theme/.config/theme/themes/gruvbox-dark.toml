@@ -4,6 +4,7 @@
 [meta]
 name = "gruvbox-dark"
 label = "Gruvbox Dark"
+gnome_accent = "yellow"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/ellisonleao/gruvbox.nvim"
 nvim_colorscheme = "gruvbox"
 nvim_setup = ''

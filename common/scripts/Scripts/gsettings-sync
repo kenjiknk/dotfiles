@@ -2,8 +2,10 @@
 # gsettings-sync — copies theme, icons, font, cursor and dark mode from
 # ~/.config/gtk-3.0/settings.ini to gsettings. libadwaita and Flatpak apps read
 # those through the settings portal, not from settings.ini; this keeps the
-# .ini the one place they are set. Run by i3 on every restart. Quiet without
-# gsettings or the file.
+# .ini the one place they are set. The accent colour comes from the theme
+# instead (gnome_accent in ~/.config/theme/colors.sh). Run by i3 on every
+# restart and by theme-render after a switch. Quiet without gsettings or the
+# files.
 
 set -euo pipefail
 
@@ -28,4 +30,11 @@ if [[ $(get gtk-application-prefer-dark-theme) == 1 ]]; then
     put color-scheme prefer-dark
 else
     put color-scheme default
+fi
+
+# Sourced in a subshell: colors.sh is generated POSIX sh holding plain
+# assignments, and only this one value is wanted here.
+colors=${XDG_CONFIG_HOME:-$HOME/.config}/theme/colors.sh
+if [[ -r $colors ]]; then
+    put accent-color "$(. "$colors" && printf '%s' "${gnome_accent:-}")"
 fi

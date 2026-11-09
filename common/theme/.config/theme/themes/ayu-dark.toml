@@ -4,6 +4,7 @@
 [meta]
 name = "ayu-dark"
 label = "Ayu Dark"
+gnome_accent = "yellow"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/Shatur/neovim-ayu"
 nvim_colorscheme = "ayu-dark"
 nvim_setup = ''

@@ -4,6 +4,7 @@
 [meta]
 name = "solarized-osaka"
 label = "Solarized Osaka"
+gnome_accent = "blue"   # nearest of GNOME's named accents, for libadwaita apps
 nvim_plugin = "https://github.com/craftzdog/solarized-osaka.nvim"
 nvim_colorscheme = "solarized-osaka"
 nvim_setup = 'require("solarized-osaka").setup({ transparent = false })'

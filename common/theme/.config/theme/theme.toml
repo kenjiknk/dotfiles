@@ -82,7 +82,8 @@ output   = "~/.config/theme/zen/userChrome.css"
 [[target]]
 template = "colors.sh"
 output   = "~/.config/theme/colors.sh"
-hook     = "~/Scripts/icon-accent"   # folders in the accent (Papirus-Dark-Accent)
+# folders in the accent (Papirus-Dark-Accent), then the accent to gsettings
+hook     = "~/Scripts/icon-accent; ~/Scripts/gsettings-sync"
 
 [[target]]
 template = "btop.theme"

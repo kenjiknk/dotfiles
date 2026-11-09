@@ -13,3 +13,5 @@ red='{{error}}'
 yellow='{{yellow}}'
 magenta='{{magenta}}'
 green2='{{green2}}'
+# GNOME has no free accent colour, only names; read by ~/Scripts/gsettings-sync
+gnome_accent='{{meta.gnome_accent}}'
