@@ -43,7 +43,7 @@ case "${1:-}" in
         new=${pairs[1]}
         label=${new%%:*}; label=${label^^}
         [[ -n ${new#*:} ]] && label+=" · ${new#*:}"
-        ~/Scripts/osd keyboard -1 input-keyboard-symbolic "$label"
+        ~/Scripts/osd keyboard -1 "$label"
         ;;
     reapply)
         layout=$(query layout)

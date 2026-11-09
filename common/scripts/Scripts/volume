@@ -19,14 +19,14 @@ muted() { [[ $(pactl "$1" "$2") == *yes ]]; }
 
 if [[ $1 == mic-mute ]]; then
     if muted get-source-mute @DEFAULT_SOURCE@; then
-        ~/Scripts/osd mic 0 microphone-sensitivity-muted-symbolic "Muted"
+        ~/Scripts/osd mic 0 "Muted"
     else
         v=$(percent get-source-volume @DEFAULT_SOURCE@)
-        ~/Scripts/osd mic "$v" microphone-sensitivity-high-symbolic "$v%"
+        ~/Scripts/osd mic "$v" "$v%"
     fi
 elif muted get-sink-mute @DEFAULT_SINK@; then
-    ~/Scripts/osd volume 0 audio-volume-muted-symbolic "Muted"
+    ~/Scripts/osd volume 0 "Muted"
 else
     v=$(percent get-sink-volume @DEFAULT_SINK@)
-    ~/Scripts/osd volume "$v" audio-volume-high-symbolic "$v%"
+    ~/Scripts/osd volume "$v" "$v%"
 fi

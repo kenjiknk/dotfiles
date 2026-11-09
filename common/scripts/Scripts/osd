@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
-# osd <name> <percent> [icon] [text] — a short on-screen indicator, drawn by
+# osd <name> <percent> [text] — a short on-screen indicator, drawn by
 # Quickshell below the bar (`qs ipc call osd flash`), which picks its own glyph
-# from <name>: volume, mic, brightness or keyboard. A negative <percent> shows
-# [text] alone, without the bar. Used by ~/Scripts/volume, ~/Scripts/brightness
-# and ~/Scripts/kbd-layout. [icon] is unused, kept so callers need not change.
-# Quiet when Quickshell is not running.
+# from <name>: volume, mic, brightness or keyboard. [text] defaults to
+# "<percent>%"; a negative <percent> shows [text] alone, without the bar. Used
+# by ~/Scripts/volume, ~/Scripts/brightness and ~/Scripts/kbd-layout. Quiet
+# when Quickshell is not running.
 
 set -euo pipefail
 
 name=$1
 value=$2
-text=${4:-"$value%"}
+text=${3:-"$value%"}
 
 command -v qs >/dev/null || exit 0
 qs ipc call osd flash "$name" "$value" "$text" >/dev/null 2>&1 || true

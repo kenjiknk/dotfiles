@@ -12,4 +12,4 @@ esac
 # -m: "device,class,current,percent%,max"
 percent=$(brightnessctl -m | cut -d, -f4)
 percent=${percent%\%}
-~/Scripts/osd brightness "$percent" display-brightness-symbolic "$percent%"
+~/Scripts/osd brightness "$percent" "$percent%"
