@@ -2,7 +2,8 @@
 # Keyboard layouts with nothing but setxkbmap.
 #
 #   kbd-layout set br:thinkpad us:intl   set the layouts, first one active
-#   kbd-layout next                      rotate the list: the second becomes first
+#   kbd-layout next                      rotate the list: the second becomes first,
+#                                        and show it on screen ($mod+Shift+i)
 #   kbd-layout reapply                   set the current layouts again
 #   kbd-layout current                   print the active layout
 #
@@ -10,9 +11,6 @@
 # first, so `setxkbmap -query` is all it takes to read it back.
 
 set -euo pipefail
-
-# Tell the bar (Quickshell) to read the layout again; quiet when it is not running.
-refresh_bar() { qs ipc call keyboard refresh >/dev/null 2>&1 || true; }
 
 query() { setxkbmap -query | sed -n "s/^$1: *//p"; }
 
@@ -24,7 +22,6 @@ apply() {
     done
     local IFS=,
     setxkbmap -layout "${layouts[*]}" -variant "${variants[*]}"
-    refresh_bar
 }
 
 case "${1:-}" in
@@ -42,6 +39,11 @@ case "${1:-}" in
             pairs+=("${layouts[i]}:${variants[i]:-}")
         done
         apply "${pairs[@]:1}" "${pairs[0]}"
+        # e.g. "US · intl"; just "BR" when there is no variant
+        new=${pairs[1]}
+        label=${new%%:*}; label=${label^^}
+        [[ -n ${new#*:} ]] && label+=" · ${new#*:}"
+        ~/Scripts/osd keyboard -1 input-keyboard-symbolic "$label"
         ;;
     reapply)
         layout=$(query layout)
