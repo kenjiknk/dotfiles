@@ -10,10 +10,10 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | | |
 |---|---|
 | **WM** | [i3](https://i3wm.org) + [autotiling](https://github.com/nwg-piotr/autotiling) |
-| **Bar** | [Quickshell](https://quickshell.org) (QML): one bar per screen with popups, plus the volume/brightness OSD |
+| **Bar** | [Quickshell](https://quickshell.org) (QML): one bar per screen with popups, plus the volume/brightness/keyboard-layout OSD |
 | **Compositor** | [picom](https://github.com/yshui/picom) — dim, 4 px corners, short animations, no blur |
 | **Launcher** | [rofi](https://github.com/davatorium/rofi) + rofi-emoji, clipmenu |
-| **Notifications** | [dunst](https://dunst-project.org) |
+| **Notifications** | Quickshell: toasts below the bar, history behind the bell |
 | **Lock** | i3lock on pure black (OLED) + xss-lock |
 | **Screenshot** | [Flameshot](https://flameshot.org), coloured by the theme |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
@@ -33,7 +33,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 **1. Packages** (Arch):
 
 ```sh
-sudo pacman -S i3-wm quickshell autotiling picom rofi rofi-emoji clipmenu dunst \
+sudo pacman -S i3-wm quickshell autotiling picom rofi rofi-emoji clipmenu \
   i3lock xss-lock polkit-gnome xdg-desktop-portal-gtk kitty zsh \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
@@ -115,13 +115,16 @@ ones:
 | `Super+Shift+e` | power menu (lock, suspend, logout, reboot, shutdown) |
 | `Super+Shift+c` | restart i3 in place |
 | `Super+t` | desktop theme |
+| `Super+Shift+i` | next keyboard layout (br / us intl), shown on screen |
 | `Super+y` / `Super+v` | yazi / Neovim cheat sheet (same key closes) |
 
 The bar keeps to icons and shows numbers only where they matter: volume,
 battery, and system readings (CPU, memory, temperature, disk) only once one is
 out of range. Widgets open a popup on click with the details (calendar,
-player, system, Wi-Fi and Bluetooth lists, mixer, battery and power profile);
-scroll changes workspace, volume or track. Middle-click opens the TUI:
+player, system, Wi-Fi and Bluetooth lists, mixer, battery and power profile,
+notification history, background apps in the tray drawer);
+scroll changes workspace, volume or track. Right-click on the bell toggles do
+not disturb. Middle-click opens the TUI:
 network → nmtui, bluetooth → bluetui, volume → wiremix, system → btop. The bar
 also answers `qs ipc call ...` (`qs ipc show` lists the targets).
 
@@ -132,7 +135,7 @@ mirrors `$HOME`; `common/` and `hosts/<hostname>/` themselves are not packages.
 
 ```
 common/            any machine
-  i3/ quickshell/ picom/ dunst/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
+  i3/ quickshell/ picom/ rofi/ kitty/ nvim/ yazi/ zathura/ fastfetch/
   gtk/ fontconfig/ flatpak/ xdg/
   theme/           the themes (palettes) and the templates every colour file comes from
   shell/ zsh/ bash/
@@ -158,11 +161,11 @@ names. `Super+t` (`~/Scripts/theme-switch`) picks one in rofi; also
 
 A switch points `theme.toml` at that file and runs
 `~/Scripts/theme-render`, which rewrites the colour files for i3 and the bar,
-rofi, dunst, kitty, GTK/Qt, zathura, yazi, Zen, Neovim, Tsuzuri, btop,
+rofi, kitty, GTK/Qt, zathura, yazi, Zen, Neovim, Tsuzuri, btop,
 spotify-player, lazygit, lazydocker, glow (through an alias, `glow -s`) and fzf
 (`FZF_DEFAULT_OPTS_FILE`), recolours Papirus' folders to the accent
 (`~/Scripts/icon-accent`, a user icon theme `Papirus-Dark-Accent` that needs no
-root), and reloads i3, dunst and kitty. It also sets VS Code's theme and runs
+root), and reloads i3 and kitty (Quickshell reloads by itself). It also sets VS Code's theme and runs
 `:ThemeReload` in every open Neovim. GTK/Qt apps, yazi, zathura, Zen and the
 TUIs change when reopened.
 
