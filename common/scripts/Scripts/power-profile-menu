@@ -21,6 +21,4 @@ profile=${choice##* }
 
 powerprofilesctl set "$profile"
 
-pkill -RTMIN+9 -x i3blocks 2>/dev/null || true
-
 command -v notify-send >/dev/null && notify-send -a "power" "Power profile" "$profile"

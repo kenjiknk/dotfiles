@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # volume up|down|mute|mic-mute — pactl (PulseAudio or PipeWire), then an
-# on-screen bar (~/Scripts/osd) and an immediate refresh of the bar's volume
-# block.
+# on-screen bar (~/Scripts/osd). The bar follows PipeWire by itself.
 
 set -euo pipefail
 
@@ -13,8 +12,6 @@ case "${1:-}" in
     mic-mute) pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
     *)        printf 'usage: %s up|down|mute|mic-mute\n' "${0##*/}" >&2; exit 1 ;;
 esac
-
-pkill -RTMIN+11 -x i3blocks 2>/dev/null || true
 
 # "Volume: front-left: 58680 /  90% / -2.88 dB, ..." -> 90; "Mute: yes"
 percent() { pactl "$1" "$2" | grep -oE '[0-9]+%' | head -n 1 | tr -d %; }

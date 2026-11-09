@@ -58,10 +58,6 @@ exec_always --no-startup-id feh --no-fehbg --bg-scale ~/.config/theme/background
 # Repeat rate, re-applied with the layouts to keyboards plugged in later.
 exec_always --no-startup-id ~/Scripts/keyboard-watch
 
-# The bar's power-profile block follows every profile change at once, not
-# only the menu's (Fn+L/M/H, the charger, powerprofilesctl).
-exec_always --no-startup-id flock -n "$XDG_RUNTIME_DIR/power-profile-watch.lock" ~/Scripts/power-profile-watch
-
 exec --no-startup-id dunst
 
 # At 300 s idle ~/Scripts/lock locks (i3lock on black); at 600 s DPMS turns the
