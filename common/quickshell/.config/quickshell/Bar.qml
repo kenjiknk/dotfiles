@@ -22,14 +22,18 @@ PanelWindow {
         return w;
     }
 
-    // Hide the windows anchored to the bar while the X connection is still
-    // whole. Otherwise, on exit or reload, tearing the bar down makes them hide
-    // themselves too late and Quickshell segfaults in QXcbWindow::hide; its
-    // crash handler then starts a second instance next to the new one.
-    Component.onDestruction: {
-        popupHost.visible = false;
-        osdWindow.visible = false;
-        toastWindow.visible = false;
+    // On exit, hide the windows anchored to the bar before Quickshell starts
+    // tearing down. Left visible, they hide themselves once the X screen is
+    // gone and Quickshell segfaults in QXcbWindow::hide; its crash handler then
+    // starts a second instance next to the new one. Component.onDestruction is
+    // already too late for this.
+    Connections {
+        target: Qt.application
+        function onAboutToQuit() {
+            popupHost.visible = false;
+            osdWindow.visible = false;
+            toastWindow.visible = false;
+        }
     }
 
     screen: modelData
