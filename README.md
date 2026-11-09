@@ -15,6 +15,7 @@ on a ThinkPad; `common/` should run on any distro with i3 4.22+.
 | **Launcher** | [rofi](https://github.com/davatorium/rofi) + rofi-emoji, clipmenu |
 | **Notifications** | [dunst](https://dunst-project.org) (also the volume/brightness bars) |
 | **Lock** | i3lock on pure black (OLED) + xss-lock |
+| **Screenshot** | [Flameshot](https://flameshot.org), coloured by the theme |
 | **Terminal** | [kitty](https://sw.kovidgoyal.net/kitty) |
 | **Shell** | zsh + oh-my-zsh + powerlevel10k, fzf, zoxide |
 | **Editor** | [neovim](https://neovim.io) with [LazyVim](https://www.lazyvim.org), colour scheme following the desktop theme |
@@ -37,7 +38,7 @@ sudo pacman -S i3-wm i3blocks autotiling picom rofi rofi-emoji clipmenu dunst \
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions neovim yazi \
   zathura zathura-pdf-mupdf fastfetch btop lazygit lazydocker fzf fd ripgrep zoxide bat \
   eza jq glow tealdeer dua-cli duf wiremix bluetui spotify-player \
-  brightnessctl playerctl maim xclip xorg-xrandr xorg-xinput xorg-xset feh \
+  brightnessctl playerctl flameshot xclip xorg-xrandr xorg-xinput xorg-xset feh \
   xorg-setxkbmap adw-gtk-theme papirus-icon-theme inter-font \
   ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji power-profiles-daemon rtkit \
   pkgfile stow git
@@ -91,7 +92,7 @@ ones:
 | `Super+Shift+n` | notes (tsuzuri) |
 | `Super+c` | clipboard history |
 | `Super+.` | emoji |
-| `Super+Shift+s` | screenshot |
+| `Super+Shift+s` / `Print` | screenshot (Flameshot: drag, annotate, `Enter` copies, `Ctrl+s` saves) |
 | `Super+Shift+e` | power menu (lock, suspend, logout, reboot, shutdown) |
 | `Super+Shift+c` | restart i3 in place |
 | `Super+t` | desktop theme |

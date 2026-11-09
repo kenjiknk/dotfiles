@@ -108,3 +108,8 @@ output   = "~/.config/theme/glow.json"   # named in ~/.config/glow/glow.yml
 template = "fzf-opts"
 output   = "~/.config/theme/fzf"         # FZF_DEFAULT_OPTS_FILE in ~/.config/shell/env
 
+# Flameshot rewrites its own config, so this one is a plain file in ~/.config,
+# not a stow link into the repository (see the template).
+[[target]]
+template = "flameshot.ini"
+output   = "~/.config/flameshot/flameshot.ini"

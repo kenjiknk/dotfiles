@@ -198,7 +198,9 @@ bindsym XF86MonBrightnessUp exec --no-startup-id ~/Scripts/brightness up
 bindsym XF86TouchpadToggle exec --no-startup-id ~/Scripts/touchpad
 
 # Utilities
-bindsym $mod+Shift+s exec --no-startup-id ~/Scripts/screenshot
+# Screenshot: Flameshot, drag a region, annotate, Enter copies, Ctrl+S saves.
+bindsym $mod+Shift+s exec --no-startup-id flameshot gui
+bindsym Print exec --no-startup-id flameshot gui
 bindsym $mod+Shift+t exec --no-startup-id ~/Scripts/touchpad
 bindsym $mod+Shift+b exec --no-startup-id ~/Scripts/power-profile-menu
 # Clipboard history (clipmenu) and emoji picker (rofi-emoji), both in rofi.
