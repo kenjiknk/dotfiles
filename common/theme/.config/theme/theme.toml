@@ -21,7 +21,7 @@
 
 [meta]
 templates_dir = "templates"
-palette = "themes/kanagawa-dragon.toml"   # rewritten by theme-switch
+palette = "themes/gruvbox-dark.toml"   # rewritten by theme-switch
 
 # Outputs: paths through the deployed symlinks, so they land in the repo.
 
