@@ -152,20 +152,27 @@ PanelWindow {
         }
     }
 
-    // ---- OSD: volume / brightness (from ~/Scripts/osd), centered below the bar ----
+    // ---- OSD (from ~/Scripts/osd), centered below the bar ----
+    // Volume/brightness: icon, level bar and value. Keyboard layout (no level):
+    // a small pill, e.g. "󰌌 US intl", with the variant dimmed.
     PopupWindow {
         id: osdWindow
+
+        readonly property bool labelOnly: ShellState.osdValue < 0
+        readonly property var labelParts: ShellState.osdLabel.split(" · ")
+
         visible: ShellState.osdVisible && bar.isFocused && bar.visible
         anchor.window: bar
         anchor.rect.x: bar.width / 2
-        anchor.rect.y: bar.height + 12
+        anchor.rect.y: bar.height + (labelOnly ? 8 : 12)
         anchor.edges: Edges.Bottom
         anchor.gravity: Edges.Bottom
-        implicitWidth: 280
-        implicitHeight: 48
+        implicitWidth: labelOnly ? pill.implicitWidth : 280
+        implicitHeight: labelOnly ? pill.implicitHeight : 48
         color: "transparent"
 
         Rectangle {
+            visible: !osdWindow.labelOnly
             anchors.fill: parent
             radius: Theme.radius
             color: Theme.bg
@@ -183,19 +190,47 @@ PanelWindow {
                     font.pixelSize: 18
                 }
                 ThemedSlider {
-                    visible: ShellState.osdValue >= 0
                     value: ShellState.osdValue
                     interactive: false
                     fill: Theme.yellow
                 }
-                // With no bar (keyboard layout) the label takes the room.
                 BarText {
                     text: ShellState.osdLabel
-                    Layout.fillWidth: ShellState.osdValue < 0
-                    Layout.preferredWidth: ShellState.osdValue < 0 ? -1 : 44
-                    horizontalAlignment: ShellState.osdValue < 0 ? Text.AlignHCenter : Text.AlignRight
-                    font.pixelSize: ShellState.osdValue < 0 ? 15 : Theme.fontSize
-                    font.bold: ShellState.osdValue < 0
+                    Layout.preferredWidth: 44
+                    horizontalAlignment: Text.AlignRight
+                }
+            }
+        }
+
+        Rectangle {
+            id: pill
+
+            visible: osdWindow.labelOnly
+            implicitWidth: pillRow.implicitWidth + 24
+            implicitHeight: 28
+            radius: height / 2
+            color: Theme.bg
+            border.color: Theme.surface
+            border.width: 1
+
+            RowLayout {
+                id: pillRow
+                anchors.centerIn: parent
+                spacing: 6
+
+                BarText {
+                    text: ShellState.osdIcon
+                    color: Theme.accent
+                    font.pixelSize: 14
+                }
+                BarText {
+                    text: osdWindow.labelParts[0]
+                    font.weight: Font.DemiBold
+                }
+                BarText {
+                    visible: osdWindow.labelParts.length > 1
+                    text: osdWindow.labelParts.slice(1).join(" ")
+                    color: Theme.dim
                 }
             }
         }
