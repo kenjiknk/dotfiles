@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# pre-commit — checks what is being committed, so the repo stays clean:
+#   shell scripts  shellcheck (warnings and errors)
+#   Python scripts parse (syntax only; no __pycache__ left behind)
+#   i3 config      i3 -C on the deployed config, which reads the repo's files
+# Enabled by ./install (git config core.hooksPath .githooks). Skip once with
+# `git commit --no-verify` when a check is wrong rather than the code.
+
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+mapfile -t staged < <(git diff --cached --name-only --diff-filter=ACMR)
+((${#staged[@]})) || exit 0
+
+shell=() python=() i3=0
+for f in "${staged[@]}"; do
+    [[ -f $f ]] || continue
+    case $f in */.config/i3/*) i3=1 ;; esac
+    IFS= read -r first <"$f" || true
+    case $first in
+        '#!'*python*) python+=("$f") ;;
+        '#!'*bash* | '#!'*/sh | '#!'*' sh') shell+=("$f") ;;
+    esac
+done
+
+fail=0
+
+if ((${#shell[@]})); then
+    if command -v shellcheck >/dev/null; then
+        shellcheck -x -S warning "${shell[@]}" || fail=1
+    else
+        echo "pre-commit: shellcheck not installed, shell scripts not checked" >&2
+    fi
+fi
+
+for f in "${python[@]}"; do
+    python3 -c 'import ast, sys; ast.parse(open(sys.argv[1]).read(), sys.argv[1])' "$f" || fail=1
+done
+
+if ((i3)) && command -v i3 >/dev/null && [[ -e $HOME/.config/i3/config ]]; then
+    i3 -C -c "$HOME/.config/i3/config" || fail=1
+fi
+
+if ((fail)); then
+    echo "pre-commit: fix the above, or commit with --no-verify" >&2
+    exit 1
+fi

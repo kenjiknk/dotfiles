@@ -138,6 +138,7 @@ assets/            the screenshot above
 system/common/     /etc files for any machine (zram)
 system/thinkpad/   /etc files for this laptop (Xorg: TearFree, DisplayLink)
 install            stows both layers into $HOME; --system copies system/ into /etc
+.githooks/         pre-commit: shellcheck, Python syntax, i3 -C (enabled by install)
 ```
 
 `common/i3` ends with `include ~/.config/i3/local`, which comes from

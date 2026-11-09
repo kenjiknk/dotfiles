@@ -69,6 +69,9 @@ stow_layer() {
 
 command -v stow >/dev/null || { echo "install: stow is not installed" >&2; exit 1; }
 
+# The repo's own checks (shellcheck, i3 -C) before every commit.
+git -C "$repo" config core.hooksPath .githooks
+
 stow_layer "$repo/common" "$@"
 if [[ -d $repo/hosts/$host ]]; then
     stow_layer "$repo/hosts/$host" "$@"
