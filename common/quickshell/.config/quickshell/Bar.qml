@@ -86,7 +86,6 @@ PanelWindow {
             BluetoothWidget {}
             KeyboardWidget {}
             VolumeWidget {}
-            BrightnessWidget {}
             BatteryWidget {}
             NotifWidget {}
             TrayWidget {}
