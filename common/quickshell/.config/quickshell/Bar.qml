@@ -40,7 +40,6 @@ PanelWindow {
         anchors.leftMargin: 4
         spacing: 2
 
-        LauncherWidget {}
         WorkspacesWidget { output: bar.modelData.name }
         TitleWidget {
             id: title

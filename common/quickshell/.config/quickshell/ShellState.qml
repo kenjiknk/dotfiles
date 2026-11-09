@@ -10,7 +10,6 @@ Singleton {
     id: root
 
     property bool barsVisible: true
-    property bool launcherOpen: false
 
     // ---- i3: focused window title and binding mode ----
     property string focusedTitle: ""

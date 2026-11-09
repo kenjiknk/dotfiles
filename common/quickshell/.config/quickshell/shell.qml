@@ -1,10 +1,9 @@
 //@ pragma UseQApplication
-// Quickshell desktop shell for i3/X11: one bar per screen with popups, the
-// volume/brightness OSD and an app launcher. Started by i3 (`qs -n -d`).
+// Quickshell desktop shell for i3/X11: one bar per screen with popups, and the
+// volume/brightness OSD. Started by i3 (~/.config/i3/config).
 //
 // IPC (`qs ipc show` lists it all):
 //   qs ipc call bar toggle|open|close
-//   qs ipc call launcher toggle
 //   qs ipc call osd flash <volume|mic|brightness> <percent> <label>   (~/Scripts/osd)
 //   qs ipc call keyboard refresh                                       (~/Scripts/kbd-layout)
 //
@@ -21,20 +20,12 @@ ShellRoot {
         Bar {}
     }
 
-    Launcher {}
-
     IpcHandler {
         target: "bar"
 
         function toggle(): void { ShellState.barsVisible = !ShellState.barsVisible; }
         function open(): void { ShellState.barsVisible = true; }
         function close(): void { ShellState.barsVisible = false; }
-    }
-
-    IpcHandler {
-        target: "launcher"
-
-        function toggle(): void { ShellState.launcherOpen = !ShellState.launcherOpen; }
     }
 
     IpcHandler {
